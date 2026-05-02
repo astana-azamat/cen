@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
@@ -25,57 +26,506 @@ const C={
   green:"#4ade80",greenDark:"#052e16",amber:"#fbbf24",red:"#f87171",
   text:"#e8e6ff",muted:"#6b6a85",dim:"#3d3c55"
 };
+
 const TASKS=[
-  {id:"meditation",label:"Медитация",duration:20,icon:"◎",tag:"CEN ↑ напрямую",color:C.accent,why:"Каждый раз когда замечаете отвлечение и возвращаетесь — dlPFC делает повторение. За 20 минут их 30–50. Это силовая тренировка префронтальной коры."},
-  {id:"writing",label:"Запись от руки",duration:5,icon:"✦",tag:"dlPFC активация",color:"#a78bfa",why:"Письмо от руки требует удержания мысли в рабочей памяти и линейного развёртывания. Прямая нагрузка на CEN — в отличие от печати, которая автоматична."},
-  {id:"deep_work",label:"Глубокая работа",duration:50,icon:"▣",tag:"Главная тренировка",color:"#60a5fa",why:"Одна задача, телефон в другой комнате. Сам факт телефона рядом снижает ресурс CEN на 10–20%. Каждый момент когда хотите отвлечься и не отвлекаетесь — повторение."},
-  {id:"walk",label:"Прогулка без телефона",duration:20,icon:"◈",tag:"DMN↔CEN синхронизация",color:C.green,why:"Во время ходьбы без стимуляции DMN и CEN синхронизируются естественно. Это не отдых — это интеграция. Именно поэтому лучшие идеи приходят на прогулке."},
-  {id:"sleep",label:"Фиксированный отбой",duration:0,icon:"◐",tag:"Базовое условие",color:C.amber,why:"Одна ночь недосыпа снижает производительность prefrontal cortex на 20–30%. Никакие практики это не компенсируют. CEN восстанавливается только во сне."},
+{id:“meditation”,label:“Медитация”,duration:20,icon:“◎”,tag:“CEN ↑ напрямую”,color:C.accent,
+why:“Каждый раз когда замечаете отвлечение и возвращаетесь — dlPFC делает повторение. За 20 минут их 30–50. Это силовая тренировка префронтальной коры.”},
+{id:“writing”,label:“Запись от руки”,duration:5,icon:“✦”,tag:“dlPFC активация”,color:”#a78bfa”,
+why:“Письмо от руки требует удержания мысли в рабочей памяти и линейного развёртывания. Прямая нагрузка на CEN — в отличие от печати, которая автоматична.”},
+{id:“deep_work”,label:“Глубокая работа”,duration:50,icon:“▣”,tag:“Главная тренировка”,color:”#60a5fa”,
+why:“Одна задача, телефон в другой комнате. Сам факт телефона рядом снижает ресурс CEN на 10–20%. Каждый момент когда хотите отвлечься и не отвлекаетесь — повторение.”},
+{id:“walk”,label:“Прогулка без телефона”,duration:20,icon:“◈”,tag:“DMN↔CEN синхронизация”,color:C.green,
+why:“Во время ходьбы без стимуляции DMN и CEN синхронизируются естественно. Это не отдых — это интеграция. Именно поэтому лучшие идеи приходят на прогулке.”},
+{id:“sleep”,label:“Фиксированный отбой”,duration:0,icon:“◐”,tag:“Базовое условие”,color:C.amber,
+why:“Одна ночь недосыпа снижает производительность prefrontal cortex на 20–30%. Никакие практики это не компенсируют. CEN восстанавливается только во сне.”},
 ];
+
 const CARDS=[
-  {title:"Что такое CEN",sub:"Исполнительная сеть",icon:"◈",color:C.accent,body:"CEN — CEO мозга. Две зоны: дорсолатеральная префронтальная кора (dlPFC) и задняя теменная кора. Отвечает за рабочую память, планирование, решения, подавление импульсов. Самая энергозатратная сеть."},
-  {title:"Три сети мозга",sub:"Как взаимодействуют",icon:"◎",color:"#a78bfa",body:"DMN — внутренний рассказчик, активна в покое и при сериалах. CEN — директор, активна при усилии. SN — модератор между ними, решает кому «слово». В медитации тренируется связка SN↔CEN."},
-  {title:"Медитация: механизм",sub:"Нейронаука практики",icon:"◉",color:C.green,body:"4 фазы: (1) фокус — CEN активна; (2) пришла мысль — DMN захватывает; (3) заметили мысль — это SN сработала; (4) вернули внимание — CEN снова. Шаг 3→4 и есть повторение. Реакция: заметить → назвать → не оценивать → вернуться."},
-  {title:"Планирование тренирует CEN",sub:"Даже сериал и пицца",icon:"▣",color:C.amber,body:"CEN тренирует структура, не содержание. Запланировал сериал — CEN активна. Остановился по плану — подавление импульса = прямая тренировка dlPFC. Сериал по плану лучше для CEN, чем бесплановая «полезная» активность."},
-  {title:"Мысли в медитации",sub:"Откуда и как реагировать",icon:"✦",color:C.red,body:"«Надо позвонить» — это DMN. Момент когда заметили мысль — это SN. Бороться нельзя: усиливает мысль. Правильно: заметить → назвать тип («планирование») → не оценивать → вернуться."},
-  {title:"Микро-задачи и CEN",sub:"1 минута уборки",icon:"◉",color:"#a78bfa",body:"CEN тренирует количество завершённых циклов: решил → сделал → завершил. 1 минута уборки = 1 цикл. Для истощённой CEN много маленьких циклов эффективнее одного большого."},
-  {title:"Новое место — третий режим",sub:"Не стресс и не медитация",icon:"◈",color:"#60a5fa",body:"В новом ресторане SN активна в режиме исследования, не угрозы. Дофамин сигнализирует о новизне. В безопасном контексте амигдала успокаивается — остаётся чистое любопытство. Все три сети сотрудничают."},
-  {title:"Почему соцсети разрушают CEN",sub:"Механизм истощения",icon:"⚡",color:C.red,body:"Соцсети требуют поверхностного переключения, не глубокого внимания. CEN активируется без нагрузки — как стоять с гантелями не поднимая. Каждое переключение — микро-выброс дофамина, снижающий порог стимуляции."},
+{title:“Что такое CEN”,sub:“Исполнительная сеть”,icon:“◈”,color:C.accent,
+body:“CEN — CEO мозга. Две зоны: дорсолатеральная префронтальная кора (dlPFC) и задняя теменная кора. Отвечает за рабочую память, планирование, решения, подавление импульсов. Самая энергозатратная сеть.”},
+{title:“Три сети мозга”,sub:“Как взаимодействуют”,icon:“◎”,color:”#a78bfa”,
+body:“DMN — внутренний рассказчик, активна в покое и при сериалах. CEN — директор, активна при усилии. SN — модератор между ними, решает кому «слово». В медитации тренируется связка SN↔CEN.”},
+{title:“Медитация: механизм”,sub:“Нейронаука практики”,icon:“◉”,color:C.green,
+body:“4 фазы: (1) фокус — CEN активна; (2) пришла мысль — DMN захватывает; (3) заметили мысль — это SN сработала; (4) вернули внимание — CEN снова. Шаг 3→4 и есть повторение. Реакция: заметить → назвать → не оценивать → вернуться.”},
+{title:“Планирование тренирует CEN”,sub:“Даже сериал и пицца”,icon:“▣”,color:C.amber,
+body:“CEN тренирует структура, не содержание. Запланировал сериал — CEN активна. Остановился по плану — подавление импульса = прямая тренировка dlPFC. Сериал по плану лучше для CEN, чем бесплановая «полезная» активность.”},
+{title:“Мысли в медитации”,sub:“Откуда и как реагировать”,icon:“✦”,color:C.red,
+body:”«Надо позвонить» — это DMN. Момент когда заметили мысль — это SN. Бороться нельзя: усиливает мысль. Правильно: заметить → назвать тип («планирование») → не оценивать → вернуться.”},
+{title:“Микро-задачи и CEN”,sub:“1 минута уборки”,icon:“◉”,color:”#a78bfa”,
+body:“CEN тренирует количество завершённых циклов: решил → сделал → завершил. 1 минута уборки = 1 цикл. Для истощённой CEN много маленьких циклов эффективнее одного большого. Но не заменяют длинные блоки — там другая адаптация.”},
+{title:“Новое место — третий режим”,sub:“Не стресс и не медитация”,icon:“◈”,color:”#60a5fa”,
+body:“В новом ресторане SN активна в режиме исследования, не угрозы. Дофамин сигнализирует о новизне. В безопасном контексте амигдала успокаивается — остаётся чистое любопытство. Все три сети сотрудничают.”},
+{title:“Почему соцсети разрушают CEN”,sub:“Механизм истощения”,icon:“⚡”,color:C.red,
+body:“Соцсети требуют поверхностного переключения, не глубокого внимания. CEN активируется без нагрузки — как стоять с гантелями не поднимая. Каждое переключение — микро-выброс дофамина, снижающий порог стимуляции.”},
 ];
+
 const EQ=[
-  {id:"focus",label:"Легко ли удерживать фокус?",inv:false},
-  {id:"phone",label:"Тянулся к телефону бессознательно?",inv:true},
-  {id:"clarity",label:"Ясность мышления сейчас?",inv:false},
+{id:“focus”,label:“Легко ли удерживать фокус?”,inv:false},
+{id:“phone”,label:“Тянулся к телефону бессознательно?”,inv:true},
+{id:“clarity”,label:“Ясность мышления сейчас?”,inv:false},
 ];
-let state={tab:"morning",checked:{},history:[],checkin:null,openTask:null,openCard:null,timerSec:{},timerOn:{},timerDone:{},scores:{},loading:true};
-const today=()=>new Date().toISOString().split("T")[0];
-function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch{}}
-function load(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch{return null}}
+
+// State
+let state={
+tab:“morning”,
+checked:{},
+history:[],
+checkin:null,
+openTask:null,
+openCard:null,
+timerSec:{},
+timerOn:{},
+timerDone:{},
+scores:{},
+loading:true
+};
+
+const today=()=>new Date().toISOString().split(“T”)[0];
+
+function save(key,val){try{localStorage.setItem(key,JSON.stringify(val))}catch{}}
+function load(key){try{const v=localStorage.getItem(key);return v?JSON.parse(v):null}catch{return null}}
+
 function initState(){
-  const ch=load("cen:checked:"+today()),hi=load("cen:history"),ci=load("cen:checkin:"+today());
-  if(ch)state.checked=ch;if(hi)state.history=hi;if(ci)state.checkin=ci;
-  TASKS.forEach(t=>{if(t.duration>0){state.timerSec[t.id]=t.duration*60;state.timerOn[t.id]=false;state.timerDone[t.id]=false;}});
-  state.loading=false;render();
+const ch=load(“cen:checked:”+today());
+const hi=load(“cen:history”);
+const ci=load(“cen:checkin:”+today());
+if(ch)state.checked=ch;
+if(hi)state.history=hi;
+if(ci)state.checkin=ci;
+// init timers
+TASKS.forEach(t=>{
+if(t.duration>0){
+state.timerSec[t.id]=t.duration*60;
+state.timerOn[t.id]=false;
+state.timerDone[t.id]=false;
 }
+});
+state.loading=false;
+render();
+}
+
 let timerInterval=null;
-function tickTimers(){let changed=false;TASKS.forEach(t=>{if(t.duration>0&&state.timerOn[t.id]){if(state.timerSec[t.id]>0){state.timerSec[t.id]--;changed=true;}else{state.timerOn[t.id]=false;state.timerDone[t.id]=true;changed=true;}}});if(changed)render();}
-function startGlobalTimer(){if(timerInterval)clearInterval(timerInterval);timerInterval=setInterval(tickTimers,1000);}
-function h(tag,attrs,children){const el=document.createElement(tag);if(attrs)Object.entries(attrs).forEach(([k,v])=>{if(k==="style"&&typeof v==="object")Object.assign(el.style,v);else if(k.startsWith("on"))el.addEventListener(k.slice(2).toLowerCase(),v);else if(k==="className")el.className=v;else el.setAttribute(k,v);});if(children){(Array.isArray(children)?children:[children]).forEach(c=>{if(c==null||c===false)return;el.appendChild(typeof c==="string"?document.createTextNode(c):c);});}return el;}
-function div(style,children){return h("div",{style},children);}
-function span(style,text){return h("span",{style},text);}
-function btn(style,text,onClick){return h("button",{style,onClick},text);}
-function fmtTime(sec){return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0");}
-function ring(taskId,color){const prog=1-state.timerSec[taskId]/(TASKS.find(t=>t.id===taskId).duration*60);const done=state.timerDone[taskId];const on=state.timerOn[taskId];const r=36,circ=2*Math.PI*r;const svg=document.createElementNS("http://www.w3.org/2000/svg","svg");svg.setAttribute("width","88");svg.setAttribute("height","88");svg.style.transform="rotate(-90deg)";svg.style.position="absolute";const bg=document.createElementNS("http://www.w3.org/2000/svg","circle");bg.setAttribute("cx","44");bg.setAttribute("cy","44");bg.setAttribute("r","36");bg.setAttribute("fill","none");bg.setAttribute("stroke",C.border);bg.setAttribute("stroke-width","4");const fg=document.createElementNS("http://www.w3.org/2000/svg","circle");fg.setAttribute("cx","44");fg.setAttribute("cy","44");fg.setAttribute("r","36");fg.setAttribute("fill","none");fg.setAttribute("stroke",done?C.green:color);fg.setAttribute("stroke-width","4");fg.setAttribute("stroke-dasharray",circ);fg.setAttribute("stroke-dashoffset",circ*(1-prog));fg.setAttribute("stroke-linecap","round");fg.style.transition="stroke-dashoffset 0.5s";svg.appendChild(bg);svg.appendChild(fg);const wrap=div({position:"relative",width:"88px",height:"88px"},[svg,div({position:"absolute",inset:"0",display:"flex",alignItems:"center",justifyContent:"center"},[span({fontSize:"13px",fontWeight:"700",color:done?C.green:C.text,fontFamily:"monospace"},done?"✓":fmtTime(state.timerSec[taskId]))])]);const b=btn({background:done?C.greenDark:on?"#1c1c28":C.accentGlow,border:`1px solid ${done?C.green:on?C.border:C.accent}`,color:done?C.green:on?C.muted:C.accent,borderRadius:"8px",padding:"6px 18px",fontSize:"12px",fontWeight:"600"},done?"Сброс":on?"Пауза":"Старт",()=>{if(done){state.timerSec[taskId]=TASKS.find(t=>t.id===taskId).duration*60;state.timerOn[taskId]=false;state.timerDone[taskId]=false;}else{state.timerOn[taskId]=!state.timerOn[taskId];}render();});return div({display:"flex",flexDirection:"column",alignItems:"center",gap:"8px"},[wrap,b]);}
-function taskCard(task){const checked=!!state.checked[task.id];const open=state.openTask===task.id;const card=div({background:checked?"rgba(74,222,128,0.04)":C.surface,border:`1px solid ${checked?"rgba(74,222,128,0.25)":C.border}`,borderRadius:"16px",marginBottom:"10px",overflow:"hidden"});const row=div({display:"flex",alignItems:"center",padding:"14px 16px",cursor:"pointer",gap:"12px"},[div({width:"36px",height:"36px",borderRadius:"10px",flexShrink:"0",background:checked?C.greenDark:`${task.color}15`,border:`1px solid ${checked?"rgba(74,222,128,0.3)":`${task.color}40`}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"16px",color:checked?C.green:task.color},task.icon),div({flex:"1"},[div({fontSize:"14px",fontWeight:"600",color:checked?C.muted:C.text,textDecoration:checked?"line-through":"none"},task.label),div({fontSize:"11px",color:task.color,marginTop:"2px",opacity:"0.8"},task.tag)]),div({display:"flex",alignItems:"center",gap:"10px"},[task.duration>0?span({fontSize:"11px",color:C.muted},task.duration+"м"):"",h("div",{style:{width:"22px",height:"22px",borderRadius:"6px",border:`2px solid ${checked?C.green:C.border}`,background:checked?C.green:"transparent",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",color:"#000",fontSize:"12px",fontWeight:"800"},onClick:(e)=>{e.stopPropagation();state.checked[task.id]=!state.checked[task.id];save("cen:checked:"+today(),state.checked);render();}},checked?"✓":"")])]);row.addEventListener("click",()=>{state.openTask=open?null:task.id;render();});card.appendChild(row);if(open){const detail=div({borderTop:`1px solid ${C.border}`,padding:"14px 16px"},[div({fontSize:"12px",color:C.muted,lineHeight:"1.75",background:C.accentGlow,borderRadius:"10px",padding:"10px 12px",borderLeft:`3px solid ${task.color}`,marginBottom:task.duration>0?"14px":"0"},task.why)]);if(task.duration>0)detail.appendChild(ring(task.id,task.color));card.appendChild(detail);}return card;}
-function learnCard(card,i){const open=state.openCard===i;const el=div({background:C.surface,border:`1px solid ${open?card.color+"40":C.border}`,borderRadius:"14px",padding:"14px 16px",cursor:"pointer",marginBottom:"10px"},[div({display:"flex",alignItems:"center",gap:"10px",marginBottom:open?"10px":"0"},[div({width:"32px",height:"32px",borderRadius:"8px",flexShrink:"0",background:`${card.color}15`,border:`1px solid ${card.color}40`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"14px",color:card.color},card.icon),div({flex:"1"},[div({fontSize:"13px",fontWeight:"600",color:C.text},card.title),div({fontSize:"11px",color:C.muted},card.sub)]),span({color:C.dim,fontSize:"10px"},open?"▲":"▼")]),open?div({fontSize:"12px",color:C.muted,lineHeight:"1.75"},card.body):""]);el.addEventListener("click",()=>{state.openCard=open?null:i;render();});return el;}
-function scoreChart(){const hist=state.history;if(!hist||!hist.length){return div({textAlign:"center",color:C.muted,fontSize:"12px",padding:"20px 0"},"Данные появятся после первого вечернего чекина");}const last7=hist.slice(-7);const score=d=>Math.round((d.focus+(6-d.phone)+d.clarity)/3);const avg=(last7.reduce((a,d)=>a+score(d),0)/last7.length).toFixed(1);const trend=last7.length>=2?score(last7[last7.length-1])-score(last7[0]):0;const dayName=d=>["Вс","Пн","Вт","Ср","Чт","Пт","Сб"][new Date(d.date).getDay()];const bars=div({display:"flex",alignItems:"flex-end",gap:"6px",height:"72px",marginBottom:"6px"},last7.map(d=>{const s=score(d),ht=Math.max(6,(s/5)*60)+"px";return div({flex:"1",display:"flex",flexDirection:"column",alignItems:"center",gap:"3px"},[span({fontSize:"9px",color:C.accent,fontWeight:"700"},String(s)),div({width:"100%",height:ht,borderRadius:"5px",background:`linear-gradient(to top,${C.accent},${C.accentSoft})`})]);}));const labels=div({display:"flex",gap:"6px",marginBottom:"12px"},last7.map(d=>div({flex:"1",textAlign:"center",fontSize:"9px",color:C.muted},dayName(d))));const stats=div({display:"flex",gap:"8px"},[div({flex:"1",background:C.accentGlow,border:`1px solid ${C.accentSoft}`,borderRadius:"10px",padding:"8px",textAlign:"center"},[div({fontSize:"20px",fontWeight:"700",color:C.accent},avg),div({fontSize:"10px",color:C.muted},"средний CEN")]),div({flex:"1",background:trend>=0?"rgba(74,222,128,0.08)":"rgba(248,113,113,0.08)",border:`1px solid ${trend>=0?"rgba(74,222,128,0.2)":"rgba(248,113,113,0.2)"}`,borderRadius:"10px",padding:"8px",textAlign:"center"},[div({fontSize:"20px",fontWeight:"700",color:trend>=0?C.green:C.red},(trend>0?"+":"")+trend),div({fontSize:"10px",color:C.muted},"динамика")])]);return div({},[bars,labels,stats]);}
-function renderMorning(){const days=state.history.length;return div({className:"fade-in"},[div({background:C.accentGlow,border:`1px solid ${C.accentSoft}`,borderRadius:"16px",padding:"16px",marginBottom:"16px"},[div({fontSize:"10px",color:C.accent,letterSpacing:"1px",textTransform:"uppercase",marginBottom:"6px"},"Нейронаука дня"),div({fontSize:"13px",color:C.text,lineHeight:"1.75"},"CEN тренирует структура, не содержание. Запланировал сериал и остановился вовремя — это лучше для dlPFC, чем бесплановая «полезная» активность.")]),div({background:C.surface,border:`1px solid ${C.border}`,borderRadius:"16px",padding:"16px",marginBottom:"16px"},[div({fontSize:"11px",color:C.muted,marginBottom:"12px",textTransform:"uppercase",letterSpacing:"1px"},"Три сети мозга"),...[{name:"DMN",desc:"Внутренний рассказчик",color:"#a78bfa",note:"Сериалы, мечты, мысли в медитации"},{name:"SN",desc:"Модератор-переключатель",color:C.amber,note:"Замечает важное, решает кому «слово»"},{name:"CEN",desc:"Директор",color:C.accent,note:"Работа, планирование, медитация"}].map(n=>div({display:"flex",alignItems:"flex-start",gap:"10px",marginBottom:"10px"},[div({width:"36px",height:"36px",borderRadius:"8px",flexShrink:"0",background:`${n.color}15`,border:`1px solid ${n.color}30`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"10px",fontWeight:"800",color:n.color},n.name),div({},[div({fontSize:"12px",fontWeight:"600",color:C.text},n.desc),div({fontSize:"11px",color:C.muted,lineHeight:"1.5"},n.note)])]))]),div({fontSize:"11px",color:C.muted,marginBottom:"10px",textTransform:"uppercase",letterSpacing:"1px"},"План дня"),...TASKS.map(task=>{const ch=!!state.checked[task.id];return div({display:"flex",alignItems:"center",gap:"12px",background:ch?"rgba(74,222,128,0.04)":C.surface,border:`1px solid ${ch?"rgba(74,222,128,0.2)":C.border}`,borderRadius:"12px",padding:"11px 14px",marginBottom:"8px"},[span({fontSize:"16px",color:ch?C.green:task.color},task.icon),div({flex:"1"},[div({fontSize:"13px",fontWeight:"600",color:ch?C.muted:C.text,textDecoration:ch?"line-through":"none"},task.label),div({fontSize:"10px",color:C.muted},task.duration>0?task.duration+" мин":"По расписанию")]),div({fontSize:"9px",color:task.color,background:`${task.color}15`,borderRadius:"6px",padding:"3px 7px",fontWeight:"600"},task.tag)]);}),div({background:C.surface,border:`1px solid ${C.border}`,borderRadius:"16px",padding:"16px",marginTop:"8px"},[div({fontSize:"11px",color:C.muted,marginBottom:"12px",textTransform:"uppercase",letterSpacing:"1px"},"Дорожная карта"),...[{period:"1–2 нед",desc:"Убираем разрушителей. Раздражение нормально.",color:C.red,active:days<14},{period:"3–6 нед",desc:"Прямая тренировка dlPFC. Медитация и глубокая работа.",color:C.amber,active:days>=14&&days<42},{period:"7–12 нед",desc:"CEN как базовое состояние. Структурные изменения мозга.",color:C.green,active:days>=42}].map(item=>div({display:"flex",gap:"10px",alignItems:"flex-start",marginBottom:"10px",opacity:item.active?"1":"0.45"},[div({fontSize:"9px",fontWeight:"700",color:item.color,background:`${item.color}15`,borderRadius:"6px",padding:"3px 7px",whiteSpace:"nowrap",marginTop:"1px",flexShrink:"0"},item.period),div({fontSize:"12px",color:item.active?C.text:C.muted,lineHeight:"1.6"},(item.active?"← сейчас · ":"")+item.desc)]))])]);}
-function renderChecklist(){return div({className:"fade-in"},[div({fontSize:"12px",color:C.muted,marginBottom:"14px",lineHeight:"1.6"},"Нажмите на задачу — объяснение и таймер. Галочка — отметить. Данные сохраняются."),...TASKS.map(taskCard),div({marginTop:"8px",background:`${C.amber}10`,border:`1px solid ${C.amber}30`,borderRadius:"14px",padding:"14px"},[div({fontSize:"10px",color:C.amber,fontWeight:"700",textTransform:"uppercase",letterSpacing:"1px",marginBottom:"6px"},"Принцип планирования"),div({fontSize:"12px",color:C.muted,lineHeight:"1.7"},"CEN тренирует структура, не содержание. Запланировал сериал → остановился вовремя = полный цикл CEN.")])]);}
-function renderLearn(){return div({className:"fade-in"},[div({fontSize:"12px",color:C.muted,marginBottom:"14px",lineHeight:"1.6"},"Понимание механизма — это мотивация. Нажмите для раскрытия."),...CARDS.map((card,i)=>learnCard(card,i))]);}
-function renderEvening(){if(state.checkin){return div({className:"fade-in"},[div({textAlign:"center",padding:"24px 0 20px"},[div({fontSize:"36px",marginBottom:"10px"},"◎"),div({fontSize:"18px",fontWeight:"700",color:C.text,marginBottom:"6px"},"День сохранён"),div({fontSize:"13px",color:C.muted},"CEN получила нагрузку. Хороший сон закрепит.")]),div({display:"flex",gap:"8px",marginBottom:"16px"},EQ.map(q=>{const v=state.checkin[q.id],disp=q.inv?6-v:v;return div({flex:"1",background:C.surface,border:`1px solid ${C.border}`,borderRadius:"12px",padding:"10px 8px",textAlign:"center"},[div({fontSize:"22px",fontWeight:"700",color:C.accent},String(disp)),div({fontSize:"9px",color:C.muted,lineHeight:"1.4"},q.id==="focus"?"фокус":q.id==="phone"?"без тел.":"ясность")]);})),div({background:C.surface,border:`1px solid ${C.border}`,borderRadius:"16px",padding:"16px",marginBottom:"12px"},[div({fontSize:"11px",color:C.muted,marginBottom:"12px",textTransform:"uppercase",letterSpacing:"1px"},"График CEN · "+state.history.length+" дн."),scoreChart()]),btn({width:"100%",background:"transparent",border:`1px solid ${C.border}`,color:C.muted,borderRadius:"10px",padding:"9px",fontSize:"12px"},"Изменить ответы",()=>{state.checkin=null;render();})]);}const ready=EQ.every(q=>state.scores[q.id]!==undefined);return div({className:"fade-in"},[div({background:C.accentGlow,border:`1px solid ${C.accentSoft}`,borderRadius:"16px",padding:"14px",marginBottom:"16px",fontSize:"13px",color:C.text,lineHeight:"1.7"},"Вечерний чекин — не самооценка. Это данные для понимания корреляций."),...EQ.map(q=>div({marginBottom:"18px"},[div({fontSize:"13px",color:C.text,marginBottom:"8px"},q.label),div({display:"flex",gap:"8px"},[1,2,3,4,5].map(n=>btn({width:"44px",height:"44px",borderRadius:"10px",border:`1px solid ${state.scores[q.id]===n?C.accent:C.border}`,background:state.scores[q.id]===n?C.accentGlow:C.surface,color:state.scores[q.id]===n?C.accent:C.muted,fontSize:"14px",fontWeight:"700"},String(n),()=>{state.scores={...state.scores,[q.id]:n};render();})))])),ready?btn({width:"100%",padding:"13px",borderRadius:"12px",background:C.accentGlow,border:`1px solid ${C.accent}`,color:C.accent,fontSize:"14px",fontWeight:"600"},"Сохранить день",()=>{const entry={date:today(),...state.scores};state.history=[...state.history.filter(h=>h.date!==today()),entry];state.checkin=state.scores;save("cen:history",state.history);save("cen:checkin:"+today(),state.scores);render();}):"",state.history.length>0?div({marginTop:"20px",background:C.surface,border:`1px solid ${C.border}`,borderRadius:"16px",padding:"16px"},[div({fontSize:"11px",color:C.muted,marginBottom:"12px",textTransform:"uppercase",letterSpacing:"1px"},"История · "+state.history.length+" дн."),scoreChart()]):=""]);}
-function render(){const app=document.getElementById("app");const days=state.history.length;const phase=days<14?{n:1,label:"Стабилизация",color:C.red}:days<42?{n:2,label:"Строим",color:C.amber}:{n:3,label:"Закрепление",color:C.green};const done=Object.values(state.checked).filter(Boolean).length;const hour=new Date().getHours();const hi=hour<12?"Доброе утро":hour<18?"Добрый день":"Добрый вечер";const TABS=[{id:"morning",label:"Утро",icon:"◎"},{id:"checklist",label:"День",icon:"▣"},{id:"learn",label:"Знания",icon:"✦"},{id:"evening",label:"Вечер",icon:"◐"}];const header=div({padding:"24px 20px 0",background:C.bg,position:"sticky",top:"0",zIndex:"10"},[div({display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:"16px"},[div({},[div({fontSize:"10px",color:C.muted,letterSpacing:"2px",textTransform:"uppercase",marginBottom:"2px"},"CEN Trainer"),div({fontSize:"20px",fontWeight:"700",color:C.text},hi)]),div({background:`${phase.color}15`,border:`1px solid ${phase.color}40`,borderRadius:"10px",padding:"6px 10px",textAlign:"center"},[div({fontSize:"9px",color:phase.color,fontWeight:"700",textTransform:"uppercase",letterSpacing:"1px"},"Фаза "+phase.n),div({fontSize:"11px",color:C.text,fontWeight:"600"},phase.label),div({fontSize:"9px",color:C.muted},days+" дн.")])]),div({marginBottom:"16px"},[div({display:"flex",justifyContent:"space-between",marginBottom:"5px"},[span({fontSize:"11px",color:C.muted},"Прогресс дня"),span({fontSize:"11px",color:C.accent,fontWeight:"600"},done+"/"+TASKS.length)]),div({height:"4px",background:C.border,borderRadius:"4px",overflow:"hidden"},[div({height:"100%",borderRadius:"4px",background:`linear-gradient(to right,${C.accent},#a78bfa)`,width:((done/TASKS.length)*100)+"%",transition:"width 0.5s"})])]),div({display:"flex",gap:"4px",background:C.surface,borderRadius:"14px",padding:"4px",marginBottom:"20px"},TABS.map(t=>btn({flex:"1",padding:"8px 4px",borderRadius:"10px",border:"none",background:state.tab===t.id?C.accentGlow:"transparent",color:state.tab===t.id?C.accent:C.muted,fontSize:"10px",fontWeight:"600",borderBottom:state.tab===t.id?`2px solid ${C.accent}`:"2px solid transparent"},h("span",{},[h("div",{style:{fontSize:"14px",marginBottom:"2px"}},t.icon),t.label]),()=>{state.tab=t.id;render();})))]);const inner=state.tab==="morning"?renderMorning():state.tab==="checklist"?renderChecklist():state.tab==="learn"?renderLearn():renderEvening();const content=div({flex:"1",padding:"0 20px 80px",overflowY:"auto"},inner);while(app.firstChild)app.removeChild(app.firstChild);app.appendChild(header);app.appendChild(content);}
+function tickTimers(){
+let changed=false;
+TASKS.forEach(t=>{
+if(t.duration>0&&state.timerOn[t.id]){
+if(state.timerSec[t.id]>0){state.timerSec[t.id]–;changed=true;}
+else{state.timerOn[t.id]=false;state.timerDone[t.id]=true;changed=true;}
+}
+});
+if(changed)render();
+}
+
+function startGlobalTimer(){
+if(timerInterval)clearInterval(timerInterval);
+timerInterval=setInterval(tickTimers,1000);
+}
+
+function h(tag,attrs,children){
+const el=document.createElement(tag);
+if(attrs)Object.entries(attrs).forEach(([k,v])=>{
+if(k===“style”&&typeof v===“object”)Object.assign(el.style,v);
+else if(k.startsWith(“on”))el.addEventListener(k.slice(2).toLowerCase(),v);
+else if(k===“className”)el.className=v;
+else el.setAttribute(k,v);
+});
+if(children){
+(Array.isArray(children)?children:[children]).forEach(c=>{
+if(c==null||c===false)return;
+el.appendChild(typeof c===“string”?document.createTextNode(c):c);
+});
+}
+return el;
+}
+
+function div(style,children){return h(“div”,{style},children);}
+function span(style,text){return h(“span”,{style},text);}
+function btn(style,text,onClick){return h(“button”,{style,onClick},text);}
+
+function fmtTime(sec){
+return String(Math.floor(sec/60)).padStart(2,“0”)+”:”+String(sec%60).padStart(2,“0”);
+}
+
+function ring(taskId,color){
+const prog=1-state.timerSec[taskId]/(TASKS.find(t=>t.id===taskId).duration*60);
+const done=state.timerDone[taskId];
+const on=state.timerOn[taskId];
+const r=36,circ=2*Math.PI*r;
+const svg=document.createElementNS(“http://www.w3.org/2000/svg”,“svg”);
+svg.setAttribute(“width”,“88”);svg.setAttribute(“height”,“88”);
+svg.style.transform=“rotate(-90deg)”;svg.style.position=“absolute”;
+const bg=document.createElementNS(“http://www.w3.org/2000/svg”,“circle”);
+bg.setAttribute(“cx”,“44”);bg.setAttribute(“cy”,“44”);bg.setAttribute(“r”,“36”);
+bg.setAttribute(“fill”,“none”);bg.setAttribute(“stroke”,C.border);bg.setAttribute(“stroke-width”,“4”);
+const fg=document.createElementNS(“http://www.w3.org/2000/svg”,“circle”);
+fg.setAttribute(“cx”,“44”);fg.setAttribute(“cy”,“44”);fg.setAttribute(“r”,“36”);
+fg.setAttribute(“fill”,“none”);fg.setAttribute(“stroke”,done?C.green:color);
+fg.setAttribute(“stroke-width”,“4”);fg.setAttribute(“stroke-dasharray”,circ);
+fg.setAttribute(“stroke-dashoffset”,circ*(1-prog));fg.setAttribute(“stroke-linecap”,“round”);
+fg.style.transition=“stroke-dashoffset 0.5s”;
+svg.appendChild(bg);svg.appendChild(fg);
+const wrap=div({position:“relative”,width:“88px”,height:“88px”},[
+svg,
+div({position:“absolute”,inset:“0”,display:“flex”,alignItems:“center”,justifyContent:“center”},[
+span({fontSize:“13px”,fontWeight:“700”,color:done?C.green:C.text,fontFamily:“monospace”},
+done?“✓”:fmtTime(state.timerSec[taskId]))
+])
+]);
+const b=btn({
+background:done?C.greenDark:on?”#1c1c28”:C.accentGlow,
+border:`1px solid ${done?C.green:on?C.border:C.accent}`,
+color:done?C.green:on?C.muted:C.accent,
+borderRadius:“8px”,padding:“6px 18px”,fontSize:“12px”,fontWeight:“600”
+},done?“Сброс”:on?“Пауза”:“Старт”,()=>{
+if(done){
+state.timerSec[taskId]=TASKS.find(t=>t.id===taskId).duration*60;
+state.timerOn[taskId]=false;state.timerDone[taskId]=false;
+} else {
+state.timerOn[taskId]=!state.timerOn[taskId];
+}
+render();
+});
+return div({display:“flex”,flexDirection:“column”,alignItems:“center”,gap:“8px”},[wrap,b]);
+}
+
+function taskCard(task){
+const checked=!!state.checked[task.id];
+const open=state.openTask===task.id;
+const card=div({
+background:checked?“rgba(74,222,128,0.04)”:C.surface,
+border:`1px solid ${checked?"rgba(74,222,128,0.25)":C.border}`,
+borderRadius:“16px”,marginBottom:“10px”,overflow:“hidden”
+});
+const row=div({display:“flex”,alignItems:“center”,padding:“14px 16px”,cursor:“pointer”,gap:“12px”},[
+div({width:“36px”,height:“36px”,borderRadius:“10px”,flexShrink:“0”,
+background:checked?C.greenDark:`${task.color}15`,
+border:`1px solid ${checked?"rgba(74,222,128,0.3)":`${task.color}40`}`,
+display:“flex”,alignItems:“center”,justifyContent:“center”,
+fontSize:“16px”,color:checked?C.green:task.color},task.icon),
+div({flex:“1”},[
+div({fontSize:“14px”,fontWeight:“600”,color:checked?C.muted:C.text,
+textDecoration:checked?“line-through”:“none”},task.label),
+div({fontSize:“11px”,color:task.color,marginTop:“2px”,opacity:“0.8”},task.tag)
+]),
+div({display:“flex”,alignItems:“center”,gap:“10px”},[
+task.duration>0?span({fontSize:“11px”,color:C.muted},task.duration+“м”):””,
+h(“div”,{style:{
+width:“22px”,height:“22px”,borderRadius:“6px”,
+border:`2px solid ${checked?C.green:C.border}`,
+background:checked?C.green:“transparent”,
+display:“flex”,alignItems:“center”,justifyContent:“center”,
+cursor:“pointer”,color:”#000”,fontSize:“12px”,fontWeight:“800”
+},onClick:(e)=>{e.stopPropagation();state.checked[task.id]=!state.checked[task.id];save(“cen:checked:”+today(),state.checked);render();}},
+checked?“✓”:””)
+])
+]);
+row.addEventListener(“click”,()=>{state.openTask=open?null:task.id;render();});
+card.appendChild(row);
+if(open){
+const detail=div({borderTop:`1px solid ${C.border}`,padding:“14px 16px”},[
+div({fontSize:“12px”,color:C.muted,lineHeight:“1.75”,
+background:C.accentGlow,borderRadius:“10px”,padding:“10px 12px”,
+borderLeft:`3px solid ${task.color}`,
+marginBottom:task.duration>0?“14px”:“0”},task.why)
+]);
+if(task.duration>0)detail.appendChild(ring(task.id,task.color));
+card.appendChild(detail);
+}
+return card;
+}
+
+function learnCard(card,i){
+const open=state.openCard===i;
+const el=div({
+background:C.surface,
+border:`1px solid ${open?card.color+"40":C.border}`,
+borderRadius:“14px”,padding:“14px 16px”,cursor:“pointer”,marginBottom:“10px”
+},[
+div({display:“flex”,alignItems:“center”,gap:“10px”,marginBottom:open?“10px”:“0”},[
+div({width:“32px”,height:“32px”,borderRadius:“8px”,flexShrink:“0”,
+background:`${card.color}15`,border:`1px solid ${card.color}40`,
+display:“flex”,alignItems:“center”,justifyContent:“center”,
+fontSize:“14px”,color:card.color},card.icon),
+div({flex:“1”},[
+div({fontSize:“13px”,fontWeight:“600”,color:C.text},card.title),
+div({fontSize:“11px”,color:C.muted},card.sub)
+]),
+span({color:C.dim,fontSize:“10px”},open?“▲”:“▼”)
+]),
+open?div({fontSize:“12px”,color:C.muted,lineHeight:“1.75”},card.body):””
+]);
+el.addEventListener(“click”,()=>{state.openCard=open?null:i;render();});
+return el;
+}
+
+function scoreChart(){
+const hist=state.history;
+if(!hist||!hist.length){
+return div({textAlign:“center”,color:C.muted,fontSize:“12px”,padding:“20px 0”},
+“Данные появятся после первого вечернего чекина”);
+}
+const last7=hist.slice(-7);
+const score=d=>Math.round((d.focus+(6-d.phone)+d.clarity)/3);
+const avg=(last7.reduce((a,d)=>a+score(d),0)/last7.length).toFixed(1);
+const trend=last7.length>=2?score(last7[last7.length-1])-score(last7[0]):0;
+const dayName=d=>[“Вс”,“Пн”,“Вт”,“Ср”,“Чт”,“Пт”,“Сб”][new Date(d.date).getDay()];
+const bars=div({display:“flex”,alignItems:“flex-end”,gap:“6px”,height:“72px”,marginBottom:“6px”},
+last7.map(d=>{
+const s=score(d),ht=Math.max(6,(s/5)*60)+“px”;
+return div({flex:“1”,display:“flex”,flexDirection:“column”,alignItems:“center”,gap:“3px”},[
+span({fontSize:“9px”,color:C.accent,fontWeight:“700”},String(s)),
+div({width:“100%”,height:ht,borderRadius:“5px”,
+background:`linear-gradient(to top,${C.accent},${C.accentSoft})`})
+]);
+})
+);
+const labels=div({display:“flex”,gap:“6px”,marginBottom:“12px”},
+last7.map(d=>div({flex:“1”,textAlign:“center”,fontSize:“9px”,color:C.muted},dayName(d)))
+);
+const stats=div({display:“flex”,gap:“8px”},[
+div({flex:“1”,background:C.accentGlow,border:`1px solid ${C.accentSoft}`,
+borderRadius:“10px”,padding:“8px”,textAlign:“center”},[
+div({fontSize:“20px”,fontWeight:“700”,color:C.accent},avg),
+div({fontSize:“10px”,color:C.muted},“средний CEN”)
+]),
+div({flex:“1”,
+background:trend>=0?“rgba(74,222,128,0.08)”:“rgba(248,113,113,0.08)”,
+border:`1px solid ${trend>=0?"rgba(74,222,128,0.2)":"rgba(248,113,113,0.2)"}`,
+borderRadius:“10px”,padding:“8px”,textAlign:“center”},[
+div({fontSize:“20px”,fontWeight:“700”,color:trend>=0?C.green:C.red},(trend>0?”+”:””)+trend),
+div({fontSize:“10px”,color:C.muted},“динамика”)
+])
+]);
+return div({},[bars,labels,stats]);
+}
+
+function renderMorning(){
+const days=state.history.length;
+const phase=days<14?{n:1,label:“Стабилизация”,color:C.red}
+:days<42?{n:2,label:“Строим”,color:C.amber}
+:{n:3,label:“Закрепление”,color:C.green};
+return div({className:“fade-in”},[
+div({background:C.accentGlow,border:`1px solid ${C.accentSoft}`,
+borderRadius:“16px”,padding:“16px”,marginBottom:“16px”},[
+div({fontSize:“10px”,color:C.accent,letterSpacing:“1px”,textTransform:“uppercase”,marginBottom:“6px”},“Нейронаука дня”),
+div({fontSize:“13px”,color:C.text,lineHeight:“1.75”},
+“CEN тренирует структура, не содержание. Запланировал сериал и остановился вовремя — это лучше для dlPFC, чем бесплановая «полезная» активность.”)
+]),
+div({background:C.surface,border:`1px solid ${C.border}`,borderRadius:“16px”,padding:“16px”,marginBottom:“16px”},[
+div({fontSize:“11px”,color:C.muted,marginBottom:“12px”,textTransform:“uppercase”,letterSpacing:“1px”},“Три сети мозга”),
+…[
+{name:“DMN”,desc:“Внутренний рассказчик”,color:”#a78bfa”,note:“Сериалы, мечты, мысли в медитации”},
+{name:“SN”,desc:“Модератор-переключатель”,color:C.amber,note:“Замечает важное, решает кому «слово»”},
+{name:“CEN”,desc:“Директор”,color:C.accent,note:“Работа, планирование, медитация”},
+].map(n=>div({display:“flex”,alignItems:“flex-start”,gap:“10px”,marginBottom:“10px”},[
+div({width:“36px”,height:“36px”,borderRadius:“8px”,flexShrink:“0”,
+background:`${n.color}15`,border:`1px solid ${n.color}30`,
+display:“flex”,alignItems:“center”,justifyContent:“center”,
+fontSize:“10px”,fontWeight:“800”,color:n.color},n.name),
+div({},[
+div({fontSize:“12px”,fontWeight:“600”,color:C.text},n.desc),
+div({fontSize:“11px”,color:C.muted,lineHeight:“1.5”},n.note)
+])
+]))
+]),
+div({fontSize:“11px”,color:C.muted,marginBottom:“10px”,textTransform:“uppercase”,letterSpacing:“1px”},“План дня”),
+…TASKS.map(task=>{
+const ch=!!state.checked[task.id];
+return div({
+display:“flex”,alignItems:“center”,gap:“12px”,
+background:ch?“rgba(74,222,128,0.04)”:C.surface,
+border:`1px solid ${ch?"rgba(74,222,128,0.2)":C.border}`,
+borderRadius:“12px”,padding:“11px 14px”,marginBottom:“8px”
+},[
+span({fontSize:“16px”,color:ch?C.green:task.color},task.icon),
+div({flex:“1”},[
+div({fontSize:“13px”,fontWeight:“600”,color:ch?C.muted:C.text,
+textDecoration:ch?“line-through”:“none”},task.label),
+div({fontSize:“10px”,color:C.muted},task.duration>0?task.duration+” мин”:“По расписанию”)
+]),
+div({fontSize:“9px”,color:task.color,background:`${task.color}15`,
+borderRadius:“6px”,padding:“3px 7px”,fontWeight:“600”},task.tag)
+]);
+}),
+div({background:C.surface,border:`1px solid ${C.border}`,borderRadius:“16px”,padding:“16px”,marginTop:“8px”},[
+div({fontSize:“11px”,color:C.muted,marginBottom:“12px”,textTransform:“uppercase”,letterSpacing:“1px”},“Дорожная карта”),
+…[
+{period:“1–2 нед”,desc:“Убираем разрушителей. Раздражение нормально.”,color:C.red,active:days<14},
+{period:“3–6 нед”,desc:“Прямая тренировка dlPFC. Медитация и глубокая работа.”,color:C.amber,active:days>=14&&days<42},
+{period:“7–12 нед”,desc:“CEN как базовое состояние. Структурные изменения мозга.”,color:C.green,active:days>=42},
+].map(item=>div({display:“flex”,gap:“10px”,alignItems:“flex-start”,marginBottom:“10px”,opacity:item.active?“1”:“0.45”},[
+div({fontSize:“9px”,fontWeight:“700”,color:item.color,background:`${item.color}15`,
+borderRadius:“6px”,padding:“3px 7px”,whiteSpace:“nowrap”,marginTop:“1px”,flexShrink:“0”},item.period),
+div({fontSize:“12px”,color:item.active?C.text:C.muted,lineHeight:“1.6”},
+(item.active?“← сейчас · “:””)+item.desc)
+]))
+])
+]);
+}
+
+function renderChecklist(){
+return div({className:“fade-in”},[
+div({fontSize:“12px”,color:C.muted,marginBottom:“14px”,lineHeight:“1.6”},
+“Нажмите на задачу — объяснение и таймер. Галочка — отметить. Данные сохраняются.”),
+…TASKS.map(taskCard),
+div({marginTop:“8px”,background:`${C.amber}10`,border:`1px solid ${C.amber}30`,borderRadius:“14px”,padding:“14px”},[
+div({fontSize:“10px”,color:C.amber,fontWeight:“700”,textTransform:“uppercase”,letterSpacing:“1px”,marginBottom:“6px”},
+“Принцип планирования”),
+div({fontSize:“12px”,color:C.muted,lineHeight:“1.7”},
+“CEN тренирует структура, не содержание. Запланировал сериал → остановился вовремя = полный цикл CEN. Лучше, чем залипнуть без плана в «полезное».”)
+])
+]);
+}
+
+function renderLearn(){
+return div({className:“fade-in”},[
+div({fontSize:“12px”,color:C.muted,marginBottom:“14px”,lineHeight:“1.6”},
+“Понимание механизма — это мотивация. Нажмите для раскрытия.”),
+…CARDS.map((card,i)=>learnCard(card,i))
+]);
+}
+
+function renderEvening(){
+if(state.checkin){
+return div({className:“fade-in”},[
+div({textAlign:“center”,padding:“24px 0 20px”},[
+div({fontSize:“36px”,marginBottom:“10px”},“◎”),
+div({fontSize:“18px”,fontWeight:“700”,color:C.text,marginBottom:“6px”},“День сохранён”),
+div({fontSize:“13px”,color:C.muted},“CEN получила нагрузку. Хороший сон закрепит.”)
+]),
+div({display:“flex”,gap:“8px”,marginBottom:“16px”},
+EQ.map(q=>{
+const v=state.checkin[q.id],disp=q.inv?6-v:v;
+return div({flex:“1”,background:C.surface,border:`1px solid ${C.border}`,
+borderRadius:“12px”,padding:“10px 8px”,textAlign:“center”},[
+div({fontSize:“22px”,fontWeight:“700”,color:C.accent},String(disp)),
+div({fontSize:“9px”,color:C.muted,lineHeight:“1.4”},
+q.id===“focus”?“фокус”:q.id===“phone”?“без тел.”:“ясность”)
+]);
+})
+),
+div({background:C.surface,border:`1px solid ${C.border}`,borderRadius:“16px”,padding:“16px”,marginBottom:“12px”},[
+div({fontSize:“11px”,color:C.muted,marginBottom:“12px”,textTransform:“uppercase”,letterSpacing:“1px”},
+“График CEN · “+state.history.length+” дн.”),
+scoreChart()
+]),
+btn({width:“100%”,background:“transparent”,border:`1px solid ${C.border}`,
+color:C.muted,borderRadius:“10px”,padding:“9px”,fontSize:“12px”},
+“Изменить ответы”,()=>{state.checkin=null;render();})
+]);
+}
+
+const ready=EQ.every(q=>state.scores[q.id]!==undefined);
+return div({className:“fade-in”},[
+div({background:C.accentGlow,border:`1px solid ${C.accentSoft}`,
+borderRadius:“16px”,padding:“14px”,marginBottom:“16px”,fontSize:“13px”,color:C.text,lineHeight:“1.7”},
+“Вечерний чекин — не самооценка. Это данные: мозг ищет корреляции между практиками и состоянием CEN.”),
+…EQ.map(q=>div({marginBottom:“18px”},[
+div({fontSize:“13px”,color:C.text,marginBottom:“8px”},q.label),
+div({display:“flex”,gap:“8px”},
+[1,2,3,4,5].map(n=>btn({
+width:“44px”,height:“44px”,borderRadius:“10px”,
+border:`1px solid ${state.scores[q.id]===n?C.accent:C.border}`,
+background:state.scores[q.id]===n?C.accentGlow:C.surface,
+color:state.scores[q.id]===n?C.accent:C.muted,
+fontSize:“14px”,fontWeight:“700”
+},String(n),()=>{state.scores={…state.scores,[q.id]:n};render();}))
+)
+])),
+ready?btn({
+width:“100%”,padding:“13px”,borderRadius:“12px”,
+background:C.accentGlow,border:`1px solid ${C.accent}`,
+color:C.accent,fontSize:“14px”,fontWeight:“600”
+},“Сохранить день”,()=>{
+const entry={date:today(),…state.scores};
+state.history=[…state.history.filter(h=>h.date!==today()),entry];
+state.checkin=state.scores;
+save(“cen:history”,state.history);
+save(“cen:checkin:”+today(),state.scores);
+render();
+}):””,
+state.history.length>0?div({marginTop:“20px”,background:C.surface,border:`1px solid ${C.border}`,
+borderRadius:“16px”,padding:“16px”},[
+div({fontSize:“11px”,color:C.muted,marginBottom:“12px”,textTransform:“uppercase”,letterSpacing:“1px”},
+“История · “+state.history.length+” дн.”),
+scoreChart()
+]):””
+]);
+}
+
+function render(){
+const app=document.getElementById(“app”);
+const days=state.history.length;
+const phase=days<14?{n:1,label:“Стабилизация”,color:C.red}
+:days<42?{n:2,label:“Строим”,color:C.amber}
+:{n:3,label:“Закрепление”,color:C.green};
+const done=Object.values(state.checked).filter(Boolean).length;
+const hour=new Date().getHours();
+const hi=hour<12?“Доброе утро”:hour<18?“Добрый день”:“Добрый вечер”;
+const TABS=[
+{id:“morning”,label:“Утро”,icon:“◎”},
+{id:“checklist”,label:“День”,icon:“▣”},
+{id:“learn”,label:“Знания”,icon:“✦”},
+{id:“evening”,label:“Вечер”,icon:“◐”},
+];
+
+const header=div({padding:“24px 20px 0”,background:C.bg,position:“sticky”,top:“0”,zIndex:“10”},[
+div({display:“flex”,alignItems:“center”,justifyContent:“space-between”,marginBottom:“16px”},[
+div({},[
+div({fontSize:“10px”,color:C.muted,letterSpacing:“2px”,textTransform:“uppercase”,marginBottom:“2px”},“CEN Trainer”),
+div({fontSize:“20px”,fontWeight:“700”,color:C.text},hi)
+]),
+div({background:`${phase.color}15`,border:`1px solid ${phase.color}40`,
+borderRadius:“10px”,padding:“6px 10px”,textAlign:“center”},[
+div({fontSize:“9px”,color:phase.color,fontWeight:“700”,textTransform:“uppercase”,letterSpacing:“1px”},“Фаза “+phase.n),
+div({fontSize:“11px”,color:C.text,fontWeight:“600”},phase.label),
+div({fontSize:“9px”,color:C.muted},days+” дн.”)
+])
+]),
+div({marginBottom:“16px”},[
+div({display:“flex”,justifyContent:“space-between”,marginBottom:“5px”},[
+span({fontSize:“11px”,color:C.muted},“Прогресс дня”),
+span({fontSize:“11px”,color:C.accent,fontWeight:“600”},done+”/”+TASKS.length)
+]),
+div({height:“4px”,background:C.border,borderRadius:“4px”,overflow:“hidden”},[
+div({height:“100%”,borderRadius:“4px”,
+background:`linear-gradient(to right,${C.accent},#a78bfa)`,
+width:((done/TASKS.length)*100)+”%”,transition:“width 0.5s”})
+])
+]),
+div({display:“flex”,gap:“4px”,background:C.surface,borderRadius:“14px”,padding:“4px”,marginBottom:“20px”},
+TABS.map(t=>btn({
+flex:“1”,padding:“8px 4px”,borderRadius:“10px”,border:“none”,
+background:state.tab===t.id?C.accentGlow:“transparent”,
+color:state.tab===t.id?C.accent:C.muted,
+fontSize:“10px”,fontWeight:“600”,
+borderBottom:state.tab===t.id?`2px solid ${C.accent}`:“2px solid transparent”
+},h(“span”,{},[
+h(“div”,{style:{fontSize:“14px”,marginBottom:“2px”}},t.icon),
+t.label
+]),()=>{state.tab=t.id;render();}))
+)
+]);
+
+let content;
+if(state.loading){
+content=div({display:“flex”,alignItems:“center”,justifyContent:“center”,flex:“1”,color:C.muted,fontSize:“13px”},“Загрузка…”);
+} else {
+const inner=state.tab===“morning”?renderMorning()
+:state.tab===“checklist”?renderChecklist()
+:state.tab===“learn”?renderLearn()
+:renderEvening();
+content=div({flex:“1”,padding:“0 20px 80px”,overflowY:“auto”},inner);
+}
+
+while(app.firstChild)app.removeChild(app.firstChild);
+app.appendChild(header);
+app.appendChild(content);
+}
+
 startGlobalTimer();
 initState();
 </script>
+
 </body>
 </html>
