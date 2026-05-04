@@ -128,8 +128,23 @@ if(html!==undefined)e.innerHTML=html;
 return e;
 }
 
+function getActiveDays(){
+var dates={};
+for(var i=0;i<localStorage.length;i++){
+var k=localStorage.key(i);
+if(!k)continue;
+if(k.indexOf("cen:checked:")===0){
+try{var d=JSON.parse(localStorage.getItem(k));
+if(d&&Object.values(d).some(function(v){return v;}))dates[k.substring(12)]=true;
+}catch(e){}
+}
+if(k.indexOf("cen:checkin:")===0)dates[k.substring(12)]=true;
+}
+return Object.keys(dates).length;
+}
+
 function renderHeader(){
-var days=state.history.length;
+var days=Math.max(getActiveDays(),state.history.length);
 var phase=days<14?{n:1,label:"Стабилизация",color:"#f87171"}:days<42?{n:2,label:"Строим",color:"#fbbf24"}:{n:3,label:"Закрепление",color:"#4ade80"};
 var done=Object.values(state.checked).filter(Boolean).length;
 var h=new Date().getHours();
