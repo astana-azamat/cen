@@ -49,6 +49,8 @@ button{font-family:inherit;cursor:pointer;border:none}
 var TASKS=[
   {id:"calibration",label:"Калибровка",dur:3,icon:"⚡",tag:"Гашение DMN",color:"#f97316",
    why:"Поставил чайник — пока кипит, 1 минута отжиманий и 1 минута приседаний. Резкая физическая нагрузка активирует SN и гасит утреннюю DMN. К моменту когда чайник готов — CEN уже работает."},
+  {id:"cleaning",label:"Уборка",dur:20,icon:"🧹",tag:"Микро-циклы CEN",color:"#34d399",
+   why:"Каждое завершённое действие — цикл CEN. 20 минут уборки это десятки микро-циклов: взял, положил, протёр, готово. Для истощённой CEN это мягкая но эффективная тренировка."},
   {id:"meditation",label:"Медитация",dur:20,icon:"◎",tag:"CEN напрямую",color:"#7c6aff",
    why:"Каждый раз когда замечаете отвлечение и возвращаетесь -- dlPFC делает повторение. За 20 минут их 30--50. Силовая тренировка префронтальной коры."},
   {id:"writing",label:"Запись от руки",dur:5,icon:"✦",tag:"dlPFC активация",color:"#a78bfa",
@@ -128,8 +130,23 @@ if(html!==undefined)e.innerHTML=html;
 return e;
 }
 
+function getActiveDays(){
+var dates={};
+for(var i=0;i<localStorage.length;i++){
+var k=localStorage.key(i);
+if(!k)continue;
+if(k.indexOf("cen:checked:")===0){
+try{var d=JSON.parse(localStorage.getItem(k));
+if(d&&Object.values(d).some(function(v){return v;}))dates[k.substring(12)]=true;
+}catch(e){}
+}
+if(k.indexOf("cen:checkin:")===0)dates[k.substring(12)]=true;
+}
+return Object.keys(dates).length;
+}
+
 function renderHeader(){
-var days=state.history.length;
+var days=Math.max(getActiveDays(),state.history.length);
 var phase=days<14?{n:1,label:"Стабилизация",color:"#f87171"}:days<42?{n:2,label:"Строим",color:"#fbbf24"}:{n:3,label:"Закрепление",color:"#4ade80"};
 var done=Object.values(state.checked).filter(Boolean).length;
 var h=new Date().getHours();
