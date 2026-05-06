@@ -49,18 +49,94 @@ button{font-family:inherit;cursor:pointer;border:none}
 var TASKS=[
   {id:"calibration",label:"Калибровка",dur:3,icon:"⚡",tag:"Гашение DMN",color:"#f97316",
    why:"Поставил чайник — пока кипит, 1 минута отжиманий и 1 минута приседаний. Резкая физическая нагрузка активирует SN и гасит утреннюю DMN. К моменту когда чайник готов — CEN уже работает."},
-  {id:"cleaning",label:"Уборка",dur:20,icon:"🧹",tag:"Микро-циклы CEN",color:"#34d399",
-   why:"Каждое завершённое действие — цикл CEN. 20 минут уборки это десятки микро-циклов: взял, положил, протёр, готово. Для истощённой CEN это мягкая но эффективная тренировка."},
+  {id:"lying",label:"Лежите без телефона",dur:3,icon:"☾",tag:"Мягкий запуск",color:"#94a3b8",
+   why:"Первые минуты после пробуждения мозг ещё в дельта/тета. Не хватать телефон — значит не нагружать SN внешним стимулом. Просто полежать без экрана: дать дефолтной сети плавно перейти в рабочий режим."},
   {id:"meditation",label:"Медитация",dur:20,icon:"◎",tag:"CEN напрямую",color:"#7c6aff",
    why:"Каждый раз когда замечаете отвлечение и возвращаетесь -- dlPFC делает повторение. За 20 минут их 30--50. Силовая тренировка префронтальной коры."},
+  {id:"washing",label:"Умывание",dur:15,icon:"◐",tag:"Закрытый цикл",color:"#38bdf8",
+   why:"Утренний душ/умывание прохладной водой — мягкий стимул для SN. Завершённый цикл: начал — закончил. Ещё одна тренировка CEN на структуре."},
+  {id:"cooking",label:"Готовите завтрак",dur:20,icon:"◑",tag:"Закрытый цикл",color:"#fb923c",
+   why:"Готовка — серия маленьких решений и завершённых действий. 20 минут это десятки микро-циклов CEN. Ощутимый результат на тарелке = дофамин завершения."},
+  {id:"breakfast",label:"Завтрак",dur:20,icon:"●",tag:"Глюкоза для dlPFC",color:"#f59e0b",
+   why:"dlPFC потребляет глюкозу. Первый приём пищи задаёт ресурс на утро. Без телефона за столом — внимание остаётся на еде, без переключений."},
   {id:"writing",label:"Запись от руки",dur:5,icon:"✦",tag:"dlPFC активация",color:"#a78bfa",
    why:"Письмо от руки требует удержания мысли в рабочей памяти. Прямая нагрузка на CEN -- в отличие от печати, которая автоматична."},
-  {id:"deep_work",label:"Глубокая работа",dur:50,icon:"▣",tag:"Главная тренировка",color:"#60a5fa",
-   why:"Одна задача, телефон в другой комнате. Сам факт телефона рядом снижает ресурс CEN на 10--20%. Каждый момент без отвлечения -- повторение."},
+  {id:"deep_work",label:"Экзистенциальная безопасность",dur:50,icon:"▣",tag:"Главная тренировка",color:"#60a5fa",
+   why:"50 минут одной задачи без переключений. Телефон в другой комнате. Это и есть силовая тренировка dlPFC: каждый момент удержания внимания — повторение."},
   {id:"walk",label:"Прогулка без телефона",dur:20,icon:"◈",tag:"DMN↔CEN синхронизация",color:"#4ade80",
    why:"Во время ходьбы без стимуляции DMN и CEN синхронизируются. Это не отдых -- интеграция. Поэтому лучшие идеи приходят на прогулке."},
+  {id:"cleaning",label:"Уборка",dur:20,icon:"🧹",tag:"Микро-циклы CEN",color:"#34d399",
+   why:"Каждое завершённое действие — цикл CEN. 20 минут уборки это десятки микро-циклов: взял, положил, протёр, готово. Для истощённой CEN это мягкая но эффективная тренировка."},
+  {id:"onething",label:"Одно дело дома",dur:15,icon:"◉",tag:"Закрытый цикл",color:"#a78bfa",
+   why:"Одна задача, одно завершение. Не важно что: помыть посуду, разобрать стол. Главное — начал и закончил. Это полный цикл CEN."},
+  {id:"bath",label:"Горячая ванна",dur:0,icon:"◑",tag:"Вечерний ритуал",color:"#38bdf8",
+   why:"Горячая ванна за 1--2 часа до сна снижает температуру тела после выхода, что ускоряет засыпание и улучшает глубокий сон. Прямо влияет на восстановление prefrontal cortex за ночь."},
   {id:"sleep",label:"Фиксированный отбой",dur:0,icon:"◐",tag:"Базовое условие",color:"#fbbf24",
    why:"Одна ночь недосыпа снижает производительность prefrontal cortex на 20--30%. Никакие практики это не компенсируют."}
+];
+
+var VARIANTS=[
+  {id:"v6",icon:"⚡",label:"Встал в 6:00",color:"#f97316",
+   plan:[
+     {time:"6:00",id:"lying",dur:3},
+     {time:"6:05",id:"meditation",dur:10},
+     {time:"6:15",id:"washing",dur:15},
+     {time:"6:30",id:"cooking",dur:20},
+     {time:"6:50",id:"breakfast",dur:20},
+     {time:"7:10",id:"walk",dur:40},
+     {time:"7:50",id:"cleaning",dur:30},
+     {time:"8:20",id:"deep_work",dur:50}
+   ]},
+  {id:"v630",icon:"⚡",label:"Встал в 6:30",color:"#f97316",
+   plan:[
+     {time:"6:30",id:"lying",dur:3},
+     {time:"6:35",id:"meditation",dur:10},
+     {time:"6:45",id:"washing",dur:15},
+     {time:"7:00",id:"cooking",dur:20},
+     {time:"7:20",id:"breakfast",dur:20},
+     {time:"7:40",id:"walk",dur:35},
+     {time:"8:15",id:"cleaning",dur:30},
+     {time:"8:45",id:"deep_work",dur:50}
+   ]},
+  {id:"v7",icon:"✦",label:"Встал в 7:00",color:"#a78bfa",
+   plan:[
+     {time:"7:00",id:"lying",dur:3},
+     {time:"7:05",id:"meditation",dur:10},
+     {time:"7:15",id:"washing",dur:15},
+     {time:"7:30",id:"cooking",dur:20},
+     {time:"7:50",id:"breakfast",dur:20},
+     {time:"8:10",id:"walk",dur:30},
+     {time:"8:40",id:"cleaning",dur:30}
+   ]},
+  {id:"v730",icon:"✦",label:"Встал в 7:30",color:"#a78bfa",
+   plan:[
+     {time:"7:30",id:"lying",dur:3},
+     {time:"7:35",id:"meditation",dur:10},
+     {time:"7:45",id:"washing",dur:15},
+     {time:"8:00",id:"cooking",dur:20},
+     {time:"8:20",id:"breakfast",dur:20},
+     {time:"8:40",id:"walk",dur:25},
+     {time:"9:05",id:"cleaning",dur:20}
+   ]},
+  {id:"v8",icon:"◎",label:"Встал в 8:00",color:"#7c6aff",
+   plan:[
+     {time:"8:00",id:"lying",dur:3},
+     {time:"8:05",id:"meditation",dur:10},
+     {time:"8:15",id:"washing",dur:15},
+     {time:"8:30",id:"cooking",dur:20},
+     {time:"8:50",id:"breakfast",dur:20},
+     {time:"9:10",id:"walk",dur:20},
+     {time:"9:30",id:"cleaning",dur:20}
+   ]},
+  {id:"v9",icon:"◐",label:"Встал в 8:30--9:00",color:"#fbbf24",
+   plan:[
+     {time:"9:00",id:"lying",dur:3},
+     {time:"9:05",id:"washing",dur:15},
+     {time:"9:20",id:"cooking",dur:20},
+     {time:"9:40",id:"breakfast",dur:20},
+     {time:"10:00",id:"walk",dur:15},
+     {time:"10:15",id:"onething",dur:15}
+   ]}
 ];
 var CARDS=[
   {title:"Что такое CEN",sub:"Исполнительная сеть",icon:"◈",color:"#7c6aff",
@@ -84,7 +160,7 @@ var EQ=[
   {id:"clarity",label:"Ясность мышления сейчас?",inv:false}
 ];
 
-var state={tab:"checklist",checked:{},history:[],checkin:null,openTask:null,openCard:null,timers:{},scores:{}};
+var state={tab:"summary",checked:{},history:[],checkin:null,openTask:null,timers:{},scores:{},variant:null};
 
 function today(){return new Date().toISOString().split("T")[0];}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -94,15 +170,20 @@ function init(){
 var ch=load("cen:checked:"+today());
 var hi=load("cen:history");
 var ci=load("cen:checkin:"+today());
+var va=load("cen:variant:"+today());
 if(ch)state.checked=ch;
 if(hi)state.history=hi;
 if(ci)state.checkin=ci;
+if(va)state.variant=va;
 TASKS.forEach(function(t){
 if(t.dur>0) state.timers[t.id]={sec:t.dur*60,on:false,done:false};
 });
 setInterval(tick,1000);
 render();
 }
+
+function setVariant(id){state.variant=id;save("cen:variant:"+today(),id);render();}
+function clearVariant(){state.variant=null;localStorage.removeItem("cen:variant:"+today());render();}
 
 function tick(){
 var changed=false;
@@ -152,7 +233,7 @@ var done=Object.values(state.checked).filter(Boolean).length;
 var h=new Date().getHours();
 var hi=h<12?"Доброе утро":h<18?"Добрый день":"Добрый вечер";
 var pct=Math.round(done/TASKS.length*100);
-var tabs=[{id:"checklist",label:"День",icon:"▣"},{id:"evening",label:"Вечер",icon:"◐"}];
+var tabs=[{id:"morning",label:"Утро",icon:"◎"},{id:"day",label:"День",icon:"▣"},{id:"evening",label:"Вечер",icon:"◐"},{id:"summary",label:"Сводка",icon:"◈"}];
 var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
 html+='<div><div style="font-size:10px;color:#6b6a85;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px">CEN Trainer</div>';
 html+='<div style="font-size:20px;font-weight:700;color:#e8e6ff">'+hi+'</div></div>';
@@ -193,50 +274,26 @@ else{tm.on=!tm.on;}
 render();
 }
 
-function renderMorning(){
-var days=state.history.length;
-var html='<div class="card" style="border-color:#3d3580;background:rgba(124,106,255,0.08)">';
-html+='<div style="font-size:10px;color:#7c6aff;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">Нейронаука дня</div>';
-html+='<div style="font-size:13px;color:#e8e6ff;line-height:1.75">CEN тренирует <strong style="color:#7c6aff">структура</strong>, не содержание. Запланировал сериал и остановился -- лучше для dlPFC, чем бесплановая «полезная» активность.</div></div>';
-html+='<div class="card"><div style="font-size:11px;color:#6b6a85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Три сети мозга</div>';
-var nets=[{n:"DMN",d:"Внутренний рассказчик",c:"#a78bfa",note:"Сериалы, мечты, мысли в медитации"},{n:"SN",d:"Модератор",c:"#fbbf24",note:"Замечает важное, решает кому слово"},{n:"CEN",d:"Директор",c:"#7c6aff",note:"Работа, планирование, медитация"}];
-nets.forEach(function(n){
-html+='<div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">';
-html+='<div style="width:36px;height:36px;border-radius:8px;background:'+n.c+'22;border:1px solid '+n.c+'44;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;color:'+n.c+';flex-shrink:0">'+n.n+'</div>';
-html+='<div><div style="font-size:12px;font-weight:600;color:#e8e6ff">'+n.d+'</div><div style="font-size:11px;color:#6b6a85">'+n.note+'</div></div></div>';
-});
-html+='</div>';
-html+='<div style="font-size:11px;color:#6b6a85;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">План дня</div>';
-TASKS.forEach(function(t){
-var ch=!!state.checked[t.id];
-html+='<div style="display:flex;align-items:center;gap:12px;background:'+(ch?"rgba(74,222,128,0.04)":"#13131a")+';border:1px solid '+(ch?"rgba(74,222,128,0.2)":"#2a2a3a")+';border-radius:12px;padding:11px 14px;margin-bottom:8px">';
-html+='<span style="font-size:16px;color:'+(ch?"#4ade80":t.color)+'">'+t.icon+'</span>';
-html+='<div style="flex:1"><div style="font-size:13px;font-weight:600;color:'+(ch?"#6b6a85":"#e8e6ff")+';text-decoration:'+(ch?"line-through":"none")+'">'+t.label+'</div>';
-html+='<div style="font-size:10px;color:#6b6a85">'+(t.dur>0?t.dur+" мин":"По расписанию")+'</div></div>';
-html+='<div style="font-size:9px;color:'+t.color+';background:'+t.color+'22;border-radius:6px;padding:3px 7px;font-weight:600">'+t.tag+'</div></div>';
-});
-html+='<div class="card" style="margin-top:4px"><div style="font-size:11px;color:#6b6a85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Дорожная карта</div>';
-[{p:"1--2 нед",d:"Убираем разрушителей. Раздражение нормально.",c:"#f87171",a:days<14},{p:"3--6 нед",d:"Прямая тренировка dlPFC.",c:"#fbbf24",a:days>=14&&days<42},{p:"7--12 нед",d:"CEN как базовое состояние.",c:"#4ade80",a:days>=42}].forEach(function(item){
-html+='<div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;opacity:'+(item.a?"1":"0.4")+'">';
-html+='<div style="font-size:9px;font-weight:700;color:'+item.c+';background:'+item.c+'22;border-radius:6px;padding:3px 7px;white-space:nowrap;flex-shrink:0">'+item.p+'</div>';
-html+='<div style="font-size:12px;color:'+(item.a?"#e8e6ff":"#6b6a85")+';line-height:1.6">'+(item.a?"← сейчас · ":"")+item.d+'</div></div>';
-});
-html+='</div>';
-return html;
-}
+function findTask(id){for(var i=0;i<TASKS.length;i++)if(TASKS[i].id===id)return TASKS[i];return null;}
 
-function renderChecklist(){
-var html='<div style="font-size:12px;color:#6b6a85;margin-bottom:14px;line-height:1.6">Нажмите на задачу -- объяснение и таймер. Галочка -- выполнено.</div>';
-TASKS.forEach(function(t){
+function taskCard(t,opt){
+opt=opt||{};
+var displayDur=opt.dur!==undefined?opt.dur:t.dur;
+var refDur=t.dur;
 var ch=!!state.checked[t.id];
 var open=state.openTask===t.id;
-html+='<div style="background:'+(ch?"rgba(74,222,128,0.04)":"#13131a")+';border:1px solid '+(ch?"rgba(74,222,128,0.25)":"#2a2a3a")+';border-radius:16px;margin-bottom:10px;overflow:hidden">';
+var html='<div style="background:'+(ch?"rgba(74,222,128,0.04)":"#13131a")+';border:1px solid '+(ch?"rgba(74,222,128,0.25)":"#2a2a3a")+';border-radius:16px;margin-bottom:10px;overflow:hidden">';
 html+='<div class="task-row" style="background:transparent;border:none;margin:0;border-radius:0" onclick="openTask(\''+t.id+'\')">';
+if(opt.time)html+='<div style="font-size:11px;color:#6b6a85;font-weight:600;width:42px;flex-shrink:0">'+opt.time+'</div>';
 html+='<div style="width:36px;height:36px;border-radius:10px;background:'+(ch?"#052e16":t.color+"22")+';border:1px solid '+(ch?"rgba(74,222,128,0.3)":t.color+"44")+';display:flex;align-items:center;justify-content:center;font-size:16px;color:'+(ch?"#4ade80":t.color)+';flex-shrink:0">'+t.icon+'</div>';
-html+='<div style="flex:1"><div style="font-size:14px;font-weight:600;color:'+(ch?"#6b6a85":"#e8e6ff")+';text-decoration:'+(ch?"line-through":"none")+'">'+t.label+'</div>';
+html+='<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:'+(ch?"#6b6a85":"#e8e6ff")+';text-decoration:'+(ch?"line-through":"none")+'">'+t.label+'</div>';
 html+='<div style="font-size:11px;color:'+t.color+';margin-top:2px">'+t.tag+'</div></div>';
-html+='<div style="display:flex;align-items:center;gap:10px">';
-if(t.dur>0)html+='<span style="font-size:11px;color:#6b6a85">'+t.dur+'м</span>';
+html+='<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">';
+if(displayDur>0){
+var durLabel=displayDur+'м';
+if(opt.dur!==undefined&&opt.dur!==refDur)durLabel+='<span style="color:#3d3c55"> · '+refDur+'м</span>';
+html+='<span style="font-size:11px;color:#6b6a85">'+durLabel+'</span>';
+}
 html+='<div onclick="event.stopPropagation();toggleTask(\''+t.id+'\')" style="width:22px;height:22px;border-radius:6px;border:2px solid '+(ch?"#4ade80":"#2a2a3a")+';background:'+(ch?"#4ade80":"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;color:#000;font-size:12px;font-weight:800">'+(ch?"✓":"")+'</div>';
 html+='</div></div>';
 if(open){
@@ -254,34 +311,97 @@ html+='<svg width="88" height="88" style="transform:rotate(-90deg);position:abso
 html+='<circle cx="44" cy="44" r="36" fill="none" stroke="#2a2a3a" stroke-width="4"/>';
 html+='<circle cx="44" cy="44" r="36" fill="none" stroke="'+strokeColor+'" stroke-width="4" stroke-dasharray="'+circ+'" stroke-dashoffset="'+offset+'" stroke-linecap="round"/>';
 html+='</svg>';
-html+='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:'+(tm.done?"#4ade80":"#e8e6ff")+';font-family:monospace">'+(tm.done?"✓":fmt(tm.sec))+'</div></div>';
+html+='<div style="position:absolute;inset:0;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:'+(tm.done?"#4ade80":"#e8e6ff")+';font-family:monospace">'+(tm.done?"✓":fmt(tm.sec))+'</div></div>';
 html+='<button onclick="toggleTimer(\''+t.id+'\')" style="padding:6px 18px;border-radius:8px;font-size:12px;font-weight:600;background:'+(tm.done?"#052e16":tm.on?"#1c1c28":"rgba(124,106,255,0.15)")+';border:1px solid '+(tm.done?"#4ade80":tm.on?"#2a2a3a":"#7c6aff")+';color:'+(tm.done?"#4ade80":tm.on?"#6b6a85":"#7c6aff")+'">'+(tm.done?"Сброс":tm.on?"Пауза":"Старт")+'</button>';
 html+='</div>';
 }
 html+='</div>';
 }
 html+='</div>';
-});
-html+='<div style="margin-top:4px;background:#fbbf2410;border:1px solid #fbbf2430;border-radius:14px;padding:14px">';
-html+='<div style="font-size:10px;color:#fbbf24;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Принцип планирования</div>';
-html+='<div style="font-size:12px;color:#6b6a85;line-height:1.7">CEN тренирует структура, не содержание. Запланировал сериал → остановился вовремя = полный цикл CEN.</div></div>';
 return html;
 }
 
-function openCard(i){state.openCard=state.openCard===i?null:i;render();}
-
-function renderLearn(){
-var html='<div style="font-size:12px;color:#6b6a85;margin-bottom:14px;line-height:1.6">Понимание механизма -- это мотивация. Нажмите для раскрытия.</div>';
-CARDS.forEach(function(c,i){
-var open=state.openCard===i;
-html+='<div onclick="openCard('+i+')" style="background:#13131a;border:1px solid '+(open?c.color+"44":"#2a2a3a")+';border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer">';
-html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(open?"10px":"0")+'">';
-html+='<div style="width:32px;height:32px;border-radius:8px;background:'+c.color+'22;border:1px solid '+c.color+'44;display:flex;align-items:center;justify-content:center;font-size:14px;color:'+c.color+';flex-shrink:0">'+c.icon+'</div>';
-html+='<div style="flex:1"><div style="font-size:13px;font-weight:600;color:#e8e6ff">'+c.title+'</div><div style="font-size:11px;color:#6b6a85">'+c.sub+'</div></div>';
-html+='<span style="color:#3d3c55;font-size:10px">'+(open?"▲":"▼")+'</span></div>';
-if(open)html+='<div style="font-size:12px;color:#6b6a85;line-height:1.75">'+c.body+'</div>';
-html+='</div>';
+function renderMorning(){
+if(!state.variant){
+var html='<div style="font-size:13px;color:#e8e6ff;margin-bottom:14px;line-height:1.6">Во сколько встал? Выбери — загружу план утра.</div>';
+VARIANTS.forEach(function(v){
+html+='<div onclick="setVariant(\''+v.id+'\')" style="display:flex;align-items:center;gap:14px;background:#13131a;border:1px solid #2a2a3a;border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer">';
+html+='<div style="width:40px;height:40px;border-radius:10px;background:'+v.color+'22;border:1px solid '+v.color+'44;display:flex;align-items:center;justify-content:center;font-size:18px;color:'+v.color+';flex-shrink:0">'+v.icon+'</div>';
+html+='<div style="flex:1"><div style="font-size:14px;font-weight:600;color:#e8e6ff">'+v.label+'</div>';
+html+='<div style="font-size:11px;color:#6b6a85;margin-top:2px">'+v.plan.length+' задач</div></div>';
+html+='<span style="color:#3d3c55;font-size:14px">›</span></div>';
 });
+return html;
+}
+var v=null;
+for(var i=0;i<VARIANTS.length;i++)if(VARIANTS[i].id===state.variant){v=VARIANTS[i];break;}
+if(!v){state.variant=null;return renderMorning();}
+var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
+html+='<div><div style="font-size:11px;color:#6b6a85;text-transform:uppercase;letter-spacing:1px">План утра</div>';
+html+='<div style="font-size:16px;font-weight:700;color:#e8e6ff">'+v.label+'</div></div>';
+html+='<button onclick="clearVariant()" style="background:transparent;border:1px solid #2a2a3a;color:#6b6a85;border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer">Сменить</button></div>';
+v.plan.forEach(function(p){
+var t=findTask(p.id);
+if(t)html+=taskCard(t,{time:p.time,dur:p.dur});
+});
+return html;
+}
+
+function renderDay(){
+var html='<div style="text-align:center;padding:60px 20px;color:#6b6a85;font-size:13px;line-height:1.6">';
+html+='<div style="font-size:32px;margin-bottom:14px">▣</div>';
+html+='<div style="font-size:15px;color:#e8e6ff;font-weight:600;margin-bottom:6px">Варианты дня</div>';
+html+='<div>Скоро тут будет выбор дневного плана. Все задачи доступны во вкладке <strong style="color:#7c6aff">Сводка</strong>.</div></div>';
+return html;
+}
+
+function renderEveningTasks(){
+var ids=["bath","sleep"];
+var html='<div style="font-size:12px;color:#6b6a85;margin-bottom:14px;line-height:1.6">Базовые вечерние ритуалы. Выбор варианта вечера будет позже.</div>';
+ids.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
+return html;
+}
+
+function renderQuestionnaire(){
+if(state.checkin){
+var html='<div style="display:flex;gap:8px;margin-bottom:10px">';
+EQ.forEach(function(q){
+var v=state.checkin[q.id];
+var disp=q.inv?6-v:v;
+html+='<div style="flex:1;background:#0a0a0f;border:1px solid #2a2a3a;border-radius:10px;padding:10px 6px;text-align:center">';
+html+='<div style="font-size:20px;font-weight:700;color:#7c6aff">'+disp+'</div>';
+html+='<div style="font-size:9px;color:#6b6a85">'+(q.id==="focus"?"фокус":q.id==="phone"?"без тел.":"ясность")+'</div></div>';
+});
+html+='</div>';
+html+='<button onclick="resetCheckin()" style="width:100%;background:transparent;border:1px solid #2a2a3a;color:#6b6a85;border-radius:10px;padding:8px;font-size:11px;cursor:pointer">Изменить ответы</button>';
+return html;
+}
+var html='';
+EQ.forEach(function(q){
+html+='<div style="margin-bottom:14px"><div style="font-size:12px;color:#e8e6ff;margin-bottom:8px">'+q.label+'</div><div style="display:flex;gap:6px">';
+[1,2,3,4,5].forEach(function(n){
+var sel=state.scores[q.id]===n;
+html+='<button onclick="setScore(\''+q.id+'\','+n+')" class="score-btn'+(sel?" selected":"")+'" style="height:38px">'+n+'</button>';
+});
+html+='</div></div>';
+});
+var ready=EQ.every(function(q){return state.scores[q.id]!==undefined;});
+if(ready)html+='<button class="save-btn" onclick="saveDay()">Сохранить день</button>';
+return html;
+}
+
+function renderSummary(){
+var done=Object.values(state.checked).filter(Boolean).length;
+var html='<div style="font-size:12px;color:#6b6a85;margin-bottom:14px;line-height:1.6">Все задачи в одном месте · '+done+' из '+TASKS.length+' выполнено.</div>';
+TASKS.forEach(function(t){html+=taskCard(t);});
+html+='<div class="card" style="margin-top:16px"><div style="font-size:11px;color:#6b6a85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Вечерний опрос</div>';
+html+=renderQuestionnaire();
+html+='</div>';
+if(state.history.length>0){
+html+='<div class="card" style="margin-top:12px"><div style="font-size:11px;color:#6b6a85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">История · '+state.history.length+' дн.</div>';
+html+=renderChart()+'</div>';
+}
+html+=renderBackup();
 return html;
 }
 
@@ -387,51 +507,13 @@ html+='</div></div>';
 return html;
 }
 
-function renderEvening(){
-if(state.checkin){
-var html='<div style="text-align:center;padding:24px 0 20px">';
-html+='<div style="font-size:36px;margin-bottom:10px">◎</div>';
-html+='<div style="font-size:18px;font-weight:700;color:#e8e6ff;margin-bottom:6px">День сохранён</div>';
-html+='<div style="font-size:13px;color:#6b6a85">CEN получила нагрузку. Хороший сон закрепит.</div></div>';
-html+='<div style="display:flex;gap:8px;margin-bottom:16px">';
-EQ.forEach(function(q){
-var v=state.checkin[q.id];
-var disp=q.inv?6-v:v;
-html+='<div style="flex:1;background:#13131a;border:1px solid #2a2a3a;border-radius:12px;padding:10px 8px;text-align:center">';
-html+='<div style="font-size:22px;font-weight:700;color:#7c6aff">'+disp+'</div>';
-html+='<div style="font-size:9px;color:#6b6a85">'+(q.id==="focus"?"фокус":q.id==="phone"?"без тел.":"ясность")+'</div></div>';
-});
-html+='</div>';
-html+='<div class="card"><div style="font-size:11px;color:#6b6a85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">График CEN · '+state.history.length+' дн.</div>';
-html+=renderChart()+'</div>';
-html+='<button onclick="resetCheckin()" style="width:100%;background:transparent;border:1px solid #2a2a3a;color:#6b6a85;border-radius:10px;padding:9px;font-size:12px;cursor:pointer;margin-top:8px">Изменить ответы</button>';
-html+=renderBackup();
-return html;
-}
-var html='<div style="background:rgba(124,106,255,0.1);border:1px solid #3d3580;border-radius:16px;padding:14px;margin-bottom:16px;font-size:13px;color:#e8e6ff;line-height:1.7">Вечерний чекин -- не самооценка. Данные для понимания корреляций с практиками.</div>';
-EQ.forEach(function(q){
-html+='<div style="margin-bottom:18px"><div style="font-size:13px;color:#e8e6ff;margin-bottom:8px">'+q.label+'</div><div style="display:flex;gap:8px">';
-[1,2,3,4,5].forEach(function(n){
-var sel=state.scores[q.id]===n;
-html+='<button onclick="setScore(\''+q.id+'\','+n+')" class="score-btn'+(sel?" selected":"")+'">'+n+'</button>';
-});
-html+='</div></div>';
-});
-var ready=EQ.every(function(q){return state.scores[q.id]!==undefined;});
-if(ready)html+='<button class="save-btn" onclick="saveDay()">Сохранить день</button>';
-if(state.history.length>0){
-html+='<div class="card" style="margin-top:20px"><div style="font-size:11px;color:#6b6a85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">История · '+state.history.length+' дн.</div>';
-html+=renderChart()+'</div>';
-}
-html+=renderBackup();
-return html;
-}
-
 function render(){
 renderHeader();
 var html="";
-if(state.tab==="checklist")html=renderChecklist();
-else html=renderEvening();
+if(state.tab==="morning")html=renderMorning();
+else if(state.tab==="day")html=renderDay();
+else if(state.tab==="evening")html=renderEveningTasks();
+else html=renderSummary();
 document.getElementById("content").innerHTML=html;
 }
 
