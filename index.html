@@ -169,6 +169,13 @@ var EQ=[
   {id:"clarity",label:"Ясность мышления сейчас?",inv:false}
 ];
 
+var DEFAULT_DEBUFFS=[
+  {id:"social",label:"Instagram, YouTube",icon:"📱",tag:"Соц. сети"},
+  {id:"warcraft",label:"Warcraft",icon:"🎮",tag:"Игры"},
+  {id:"porn",label:"Просмотр порно",icon:"◐",tag:"Дофамин"},
+  {id:"junkfood",label:"Вредная еда",icon:"🍔",tag:"Дофамин"}
+];
+
 var state={tab:"summary",checked:{},history:[],checkin:null,openTask:null,timers:{},scores:{},variant:null};
 
 function today(){return new Date().toISOString().split("T")[0];}
@@ -193,6 +200,34 @@ render();
 
 function setVariant(id){state.variant=id;save("cen:variant:"+today(),id);render();}
 function clearVariant(){state.variant=null;localStorage.removeItem("cen:variant:"+today());render();}
+
+function getDebuffs(){return load("cen:debuffs")||DEFAULT_DEBUFFS;}
+function getDebuffLog(date){return load("cen:debuff_log:"+(date||today()))||{};}
+function setDebuffMinutes(id,n){
+var log=getDebuffLog();
+log[id]=Math.max(0,n|0);
+save("cen:debuff_log:"+today(),log);
+render();
+}
+function addDebuffMinutes(id,delta){
+var log=getDebuffLog();
+setDebuffMinutes(id,(log[id]||0)+delta);
+}
+function editDebuffMinutes(id){
+var log=getDebuffLog();
+var current=log[id]||0;
+var input=prompt("Минуты сегодня:",String(current));
+if(input===null)return;
+var n=parseInt(input,10);
+if(isNaN(n))return;
+setDebuffMinutes(id,n);
+}
+function getDebuffTotal(date){
+var log=getDebuffLog(date);
+var total=0;
+Object.keys(log).forEach(function(k){total+=log[k]||0;});
+return total;
+}
 
 function getVariantOrder(v){
 var saved=load("cen:order:"+v.id);
@@ -386,6 +421,7 @@ html+='<div style="flex:1"><div style="font-size:14px;font-weight:600;color:#e8e
 html+='<div style="font-size:11px;color:#6b6a85;margin-top:2px">'+v.plan.length+' задач</div></div>';
 html+='<span style="color:#3d3c55;font-size:14px">›</span></div>';
 });
+html+=renderDebuffs();
 return html;
 }
 var v=null;
@@ -402,6 +438,7 @@ withTimes.forEach(function(p,i){
 var t=findTask(p.id);
 if(t)html+=taskCard(t,{time:p.time,dur:p.dur,arrows:true,variantId:v.id,first:i===0,last:i===withTimes.length-1});
 });
+html+=renderDebuffs();
 return html;
 }
 
@@ -452,6 +489,7 @@ function renderSummary(){
 var done=Object.values(state.checked).filter(Boolean).length;
 var html='<div style="font-size:12px;color:#6b6a85;margin-bottom:14px;line-height:1.6">Все задачи в одном месте · '+done+' из '+TASKS.length+' выполнено.</div>';
 TASKS.forEach(function(t){html+=taskCard(t);});
+html+=renderDebuffs();
 html+='<div class="card" style="margin-top:16px"><div style="font-size:11px;color:#6b6a85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Вечерний опрос</div>';
 html+=renderQuestionnaire();
 html+='</div>';
@@ -476,6 +514,30 @@ render();
 }
 
 function resetCheckin(){state.checkin=null;render();}
+
+function renderDebuffs(){
+var debuffs=getDebuffs();
+var log=getDebuffLog();
+var total=getDebuffTotal();
+var html='<div class="card" style="margin-top:16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
+html+='<div style="font-size:11px;color:#6b6a85;text-transform:uppercase;letter-spacing:1px">Debuff</div>';
+html+='<div style="font-size:11px;color:#6b6a85">сегодня <span style="color:'+(total>0?"#f87171":"#e8e6ff")+';font-weight:700">'+total+'м</span></div></div>';
+html+='<div style="font-size:11px;color:#6b6a85;line-height:1.5;margin-bottom:12px">Что забирает ресурс CEN. Залогируй минуты — без оценок, просто факт.</div>';
+debuffs.forEach(function(d){
+var mins=log[d.id]||0;
+html+='<div style="display:flex;align-items:center;gap:10px;background:#0a0a0f;border:1px solid #2a2a3a;border-radius:12px;padding:10px;margin-bottom:8px">';
+html+='<div style="width:32px;height:32px;border-radius:8px;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.15);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+d.icon+'</div>';
+html+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#e8e6ff">'+d.label+'</div>';
+html+='<div style="font-size:10px;color:#6b6a85">'+d.tag+'</div></div>';
+html+='<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">';
+html+='<button onclick="addDebuffMinutes(\''+d.id+'\',-5)" style="width:26px;height:26px;border-radius:6px;background:#13131a;border:1px solid #2a2a3a;color:#e8e6ff;font-size:14px;cursor:pointer;padding:0">−</button>';
+html+='<div onclick="editDebuffMinutes(\''+d.id+'\')" style="min-width:42px;text-align:center;font-size:13px;font-weight:600;color:'+(mins>0?"#f87171":"#6b6a85")+';cursor:pointer">'+mins+'м</div>';
+html+='<button onclick="addDebuffMinutes(\''+d.id+'\',5)" style="width:26px;height:26px;border-radius:6px;background:#13131a;border:1px solid #2a2a3a;color:#e8e6ff;font-size:14px;cursor:pointer;padding:0">+</button>';
+html+='</div></div>';
+});
+html+='</div>';
+return html;
+}
 
 function renderChart(){
 if(!state.history.length)return '<div style="text-align:center;color:#6b6a85;font-size:12px;padding:20px 0">Данные появятся после первого чекина</div>';
@@ -509,6 +571,14 @@ html+='</div><div style="display:flex;gap:6px">';
 html+='<div style="flex:1;background:rgba(124,106,255,0.15);border:1px solid #3d3580;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:#7c6aff">'+avg+'</div><div style="font-size:10px;color:#6b6a85">средний</div></div>';
 html+='<div style="flex:1;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:#fbbf24">'+streak+'</div><div style="font-size:10px;color:#6b6a85">стрик</div></div>';
 html+='<div style="flex:1;background:'+(trend>=0?"rgba(74,222,128,0.08)":"rgba(248,113,113,0.08)")+';border:1px solid '+(trend>=0?"rgba(74,222,128,0.2)":"rgba(248,113,113,0.2)")+';border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:'+(trend>=0?"#4ade80":"#f87171")+'">'+(trend>0?"+":"")+trend+'</div><div style="font-size:10px;color:#6b6a85">динамика</div></div>';
+html+='</div>';
+var todayDebuff=getDebuffTotal();
+var debuffSum=0,debuffCount=0;
+last.forEach(function(d){var t=getDebuffTotal(d.date);if(t>0){debuffSum+=t;debuffCount++;}});
+var avgDebuff=debuffCount?Math.round(debuffSum/debuffCount):0;
+html+='<div style="margin-top:8px;padding:9px 12px;background:#0a0a0f;border:1px solid #2a2a3a;border-radius:10px;display:flex;justify-content:space-between;align-items:center;font-size:11px">';
+html+='<span style="color:#6b6a85">Debuff сегодня</span>';
+html+='<span style="color:'+(todayDebuff>60?"#f87171":todayDebuff>0?"#fbbf24":"#6b6a85")+';font-weight:700">'+todayDebuff+'м<span style="color:#6b6a85;font-weight:400"> · среднее '+avgDebuff+'м</span></span>';
 html+='</div>';
 return html;
 }
