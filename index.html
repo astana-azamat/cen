@@ -76,66 +76,72 @@ var TASKS=[
 ];
 
 var VARIANTS=[
-  {id:"v6",icon:"⚡",label:"Встал в 6:00",color:"#f97316",
+  {id:"v6",icon:"⚡",label:"Встал в 6:00",color:"#f97316",startTime:"6:00",
    plan:[
-     {time:"6:00",id:"lying",dur:3},
-     {time:"6:05",id:"meditation",dur:10},
-     {time:"6:15",id:"washing",dur:15},
-     {time:"6:30",id:"cooking",dur:20},
-     {time:"6:50",id:"breakfast",dur:20},
-     {time:"7:10",id:"walk",dur:40},
-     {time:"7:50",id:"cleaning",dur:30},
-     {time:"8:20",id:"deep_work",dur:50}
+     {id:"calibration",dur:3},
+     {id:"lying",dur:3},
+     {id:"meditation",dur:10},
+     {id:"washing",dur:15},
+     {id:"cooking",dur:20},
+     {id:"breakfast",dur:20},
+     {id:"walk",dur:40},
+     {id:"cleaning",dur:30},
+     {id:"deep_work",dur:50}
    ]},
-  {id:"v630",icon:"⚡",label:"Встал в 6:30",color:"#f97316",
+  {id:"v630",icon:"⚡",label:"Встал в 6:30",color:"#f97316",startTime:"6:30",
    plan:[
-     {time:"6:30",id:"lying",dur:3},
-     {time:"6:35",id:"meditation",dur:10},
-     {time:"6:45",id:"washing",dur:15},
-     {time:"7:00",id:"cooking",dur:20},
-     {time:"7:20",id:"breakfast",dur:20},
-     {time:"7:40",id:"walk",dur:35},
-     {time:"8:15",id:"cleaning",dur:30},
-     {time:"8:45",id:"deep_work",dur:50}
+     {id:"calibration",dur:3},
+     {id:"lying",dur:3},
+     {id:"meditation",dur:10},
+     {id:"washing",dur:15},
+     {id:"cooking",dur:20},
+     {id:"breakfast",dur:20},
+     {id:"walk",dur:35},
+     {id:"cleaning",dur:30},
+     {id:"deep_work",dur:50}
    ]},
-  {id:"v7",icon:"✦",label:"Встал в 7:00",color:"#a78bfa",
+  {id:"v7",icon:"✦",label:"Встал в 7:00",color:"#a78bfa",startTime:"7:00",
    plan:[
-     {time:"7:00",id:"lying",dur:3},
-     {time:"7:05",id:"meditation",dur:10},
-     {time:"7:15",id:"washing",dur:15},
-     {time:"7:30",id:"cooking",dur:20},
-     {time:"7:50",id:"breakfast",dur:20},
-     {time:"8:10",id:"walk",dur:30},
-     {time:"8:40",id:"cleaning",dur:30}
+     {id:"calibration",dur:3},
+     {id:"lying",dur:3},
+     {id:"meditation",dur:10},
+     {id:"washing",dur:15},
+     {id:"cooking",dur:20},
+     {id:"breakfast",dur:20},
+     {id:"walk",dur:30},
+     {id:"cleaning",dur:30}
    ]},
-  {id:"v730",icon:"✦",label:"Встал в 7:30",color:"#a78bfa",
+  {id:"v730",icon:"✦",label:"Встал в 7:30",color:"#a78bfa",startTime:"7:30",
    plan:[
-     {time:"7:30",id:"lying",dur:3},
-     {time:"7:35",id:"meditation",dur:10},
-     {time:"7:45",id:"washing",dur:15},
-     {time:"8:00",id:"cooking",dur:20},
-     {time:"8:20",id:"breakfast",dur:20},
-     {time:"8:40",id:"walk",dur:25},
-     {time:"9:05",id:"cleaning",dur:20}
+     {id:"calibration",dur:3},
+     {id:"lying",dur:3},
+     {id:"meditation",dur:10},
+     {id:"washing",dur:15},
+     {id:"cooking",dur:20},
+     {id:"breakfast",dur:20},
+     {id:"walk",dur:25},
+     {id:"cleaning",dur:20}
    ]},
-  {id:"v8",icon:"◎",label:"Встал в 8:00",color:"#7c6aff",
+  {id:"v8",icon:"◎",label:"Встал в 8:00",color:"#7c6aff",startTime:"8:00",
    plan:[
-     {time:"8:00",id:"lying",dur:3},
-     {time:"8:05",id:"meditation",dur:10},
-     {time:"8:15",id:"washing",dur:15},
-     {time:"8:30",id:"cooking",dur:20},
-     {time:"8:50",id:"breakfast",dur:20},
-     {time:"9:10",id:"walk",dur:20},
-     {time:"9:30",id:"cleaning",dur:20}
+     {id:"calibration",dur:3},
+     {id:"lying",dur:3},
+     {id:"meditation",dur:10},
+     {id:"washing",dur:15},
+     {id:"cooking",dur:20},
+     {id:"breakfast",dur:20},
+     {id:"walk",dur:20},
+     {id:"cleaning",dur:20}
    ]},
-  {id:"v9",icon:"◐",label:"Встал в 8:30--9:00",color:"#fbbf24",
+  {id:"v9",icon:"◐",label:"Встал в 8:30--9:00",color:"#fbbf24",startTime:"9:00",
    plan:[
-     {time:"9:00",id:"lying",dur:3},
-     {time:"9:05",id:"washing",dur:15},
-     {time:"9:20",id:"cooking",dur:20},
-     {time:"9:40",id:"breakfast",dur:20},
-     {time:"10:00",id:"walk",dur:15},
-     {time:"10:15",id:"onething",dur:15}
+     {id:"calibration",dur:3},
+     {id:"lying",dur:3},
+     {id:"washing",dur:15},
+     {id:"cooking",dur:20},
+     {id:"breakfast",dur:20},
+     {id:"walk",dur:15},
+     {id:"onething",dur:15}
    ]}
 ];
 var CARDS=[
@@ -184,6 +190,46 @@ render();
 
 function setVariant(id){state.variant=id;save("cen:variant:"+today(),id);render();}
 function clearVariant(){state.variant=null;localStorage.removeItem("cen:variant:"+today());render();}
+
+function getVariantOrder(v){
+var saved=load("cen:order:"+v.id);
+var ids=v.plan.map(function(p){return p.id;});
+if(!saved||!saved.length)return ids;
+var result=[];
+saved.forEach(function(id){if(ids.indexOf(id)!==-1)result.push(id);});
+ids.forEach(function(id){if(result.indexOf(id)===-1)result.push(id);});
+return result;
+}
+
+function moveTask(variantId,taskId,direction){
+var v=null;
+for(var i=0;i<VARIANTS.length;i++)if(VARIANTS[i].id===variantId){v=VARIANTS[i];break;}
+if(!v)return;
+var order=getVariantOrder(v);
+var idx=order.indexOf(taskId);
+if(idx===-1)return;
+var newIdx=idx+direction;
+if(newIdx<0||newIdx>=order.length)return;
+var tmp=order[idx];order[idx]=order[newIdx];order[newIdx]=tmp;
+save("cen:order:"+variantId,order);
+render();
+}
+
+function computeTimes(v,orderedIds){
+var planMap={};
+v.plan.forEach(function(p){planMap[p.id]=p;});
+var parts=v.startTime.split(":");
+var total=parseInt(parts[0],10)*60+parseInt(parts[1],10);
+var result=[];
+orderedIds.forEach(function(id){
+var p=planMap[id];if(!p)return;
+var hh=Math.floor(total/60),mm=total%60;
+var timeStr=hh+":"+(mm<10?"0":"")+mm;
+result.push({id:p.id,dur:p.dur,time:timeStr});
+total+=p.dur;
+});
+return result;
+}
 
 function tick(){
 var changed=false;
@@ -288,7 +334,13 @@ if(opt.time)html+='<div style="font-size:11px;color:#6b6a85;font-weight:600;widt
 html+='<div style="width:36px;height:36px;border-radius:10px;background:'+(ch?"#052e16":t.color+"22")+';border:1px solid '+(ch?"rgba(74,222,128,0.3)":t.color+"44")+';display:flex;align-items:center;justify-content:center;font-size:16px;color:'+(ch?"#4ade80":t.color)+';flex-shrink:0">'+t.icon+'</div>';
 html+='<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:'+(ch?"#6b6a85":"#e8e6ff")+';text-decoration:'+(ch?"line-through":"none")+'">'+t.label+'</div>';
 html+='<div style="font-size:11px;color:'+t.color+';margin-top:2px">'+t.tag+'</div></div>';
-html+='<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">';
+html+='<div style="display:flex;align-items:center;gap:6px;flex-shrink:0">';
+if(opt.arrows&&opt.variantId){
+html+='<div style="display:flex;flex-direction:column;gap:2px">';
+html+='<button onclick="event.stopPropagation();moveTask(\''+opt.variantId+'\',\''+t.id+'\',-1)" '+(opt.first?'disabled ':'')+'style="width:22px;height:18px;border-radius:4px;background:#0a0a0f;border:1px solid #2a2a3a;color:'+(opt.first?'#3d3c55':'#a78bfa')+';font-size:9px;cursor:'+(opt.first?'not-allowed':'pointer')+';padding:0;line-height:1">▲</button>';
+html+='<button onclick="event.stopPropagation();moveTask(\''+opt.variantId+'\',\''+t.id+'\',1)" '+(opt.last?'disabled ':'')+'style="width:22px;height:18px;border-radius:4px;background:#0a0a0f;border:1px solid #2a2a3a;color:'+(opt.last?'#3d3c55':'#a78bfa')+';font-size:9px;cursor:'+(opt.last?'not-allowed':'pointer')+';padding:0;line-height:1">▼</button>';
+html+='</div>';
+}
 if(displayDur>0){
 var durLabel=displayDur+'м';
 if(opt.dur!==undefined&&opt.dur!==refDur)durLabel+='<span style="color:#3d3c55"> · '+refDur+'м</span>';
@@ -340,9 +392,12 @@ var html='<div style="display:flex;align-items:center;justify-content:space-betw
 html+='<div><div style="font-size:11px;color:#6b6a85;text-transform:uppercase;letter-spacing:1px">План утра</div>';
 html+='<div style="font-size:16px;font-weight:700;color:#e8e6ff">'+v.label+'</div></div>';
 html+='<button onclick="clearVariant()" style="background:transparent;border:1px solid #2a2a3a;color:#6b6a85;border-radius:8px;padding:6px 12px;font-size:11px;cursor:pointer">Сменить</button></div>';
-v.plan.forEach(function(p){
+html+='<div style="font-size:11px;color:#6b6a85;margin-bottom:10px;line-height:1.5">Стрелки — переставить порядок (сохраняется навсегда). Времена пересчитаются.</div>';
+var ordered=getVariantOrder(v);
+var withTimes=computeTimes(v,ordered);
+withTimes.forEach(function(p,i){
 var t=findTask(p.id);
-if(t)html+=taskCard(t,{time:p.time,dur:p.dur});
+if(t)html+=taskCard(t,{time:p.time,dur:p.dur,arrows:true,variantId:v.id,first:i===0,last:i===withTimes.length-1});
 });
 return html;
 }
