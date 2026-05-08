@@ -16,8 +16,9 @@ body{background:#0a0a0f;color:#e8e6ff;font-family:system-ui,sans-serif;min-heigh
 button{font-family:inherit;cursor:pointer;border:none}
 .app{max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
 .header{padding:20px 20px 0;background:#0a0a0f;position:sticky;top:0;z-index:10}
-.content{flex:1;padding:0 20px 80px;overflow-y:auto}
-.tabs{display:flex;gap:4px;background:#13131a;border-radius:14px;padding:4px;margin-bottom:16px}
+.content{flex:1;padding:0 20px 110px;overflow-y:auto}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:#0a0a0f;border-top:1px solid #2a2a3a;padding:8px 12px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:100}
+.tabs{display:flex;gap:4px;background:#13131a;border-radius:14px;padding:4px}
 .tab{flex:1;padding:8px 4px;border-radius:10px;background:transparent;color:#6b6a85;font-size:10px;font-weight:600;border-bottom:2px solid transparent;text-align:center}
 .tab.active{background:rgba(124,106,255,0.15);color:#7c6aff;border-bottom:2px solid #7c6aff}
 .tab-icon{font-size:14px;margin-bottom:2px}
@@ -48,6 +49,7 @@ button{font-family:inherit;cursor:pointer;border:none}
   <div class="header" id="header"></div>
   <div class="content" id="content"></div>
 </div>
+<div class="bottom-nav"><div class="tabs" id="bottom-nav"></div></div>
 <script>
 var TASKS=[
   {id:"calibration",label:"Калибровка",dur:3,icon:"⚡",tag:"Гашение DMN",color:"#f97316",
@@ -82,8 +84,7 @@ var VARIANTS=[
   {id:"v6",icon:"⚡",label:"Встал в 6:00",color:"#f97316",startTime:"6:00",
    plan:[
      {id:"calibration",dur:3},
-     {id:"lying",dur:3},
-     {id:"meditation",dur:10},
+     {id:"meditation",dur:9},
      {id:"washing",dur:15},
      {id:"cooking",dur:20},
      {id:"breakfast",dur:20},
@@ -94,8 +95,7 @@ var VARIANTS=[
   {id:"v630",icon:"⚡",label:"Встал в 6:30",color:"#f97316",startTime:"6:30",
    plan:[
      {id:"calibration",dur:3},
-     {id:"lying",dur:3},
-     {id:"meditation",dur:10},
+     {id:"meditation",dur:9},
      {id:"washing",dur:15},
      {id:"cooking",dur:20},
      {id:"breakfast",dur:20},
@@ -106,8 +106,7 @@ var VARIANTS=[
   {id:"v7",icon:"✦",label:"Встал в 7:00",color:"#a78bfa",startTime:"7:00",
    plan:[
      {id:"calibration",dur:3},
-     {id:"lying",dur:3},
-     {id:"meditation",dur:10},
+     {id:"meditation",dur:9},
      {id:"washing",dur:15},
      {id:"cooking",dur:20},
      {id:"breakfast",dur:20},
@@ -117,8 +116,7 @@ var VARIANTS=[
   {id:"v730",icon:"✦",label:"Встал в 7:30",color:"#a78bfa",startTime:"7:30",
    plan:[
      {id:"calibration",dur:3},
-     {id:"lying",dur:3},
-     {id:"meditation",dur:10},
+     {id:"meditation",dur:9},
      {id:"washing",dur:15},
      {id:"cooking",dur:20},
      {id:"breakfast",dur:20},
@@ -128,8 +126,7 @@ var VARIANTS=[
   {id:"v8",icon:"◎",label:"Встал в 8:00",color:"#7c6aff",startTime:"8:00",
    plan:[
      {id:"calibration",dur:3},
-     {id:"lying",dur:3},
-     {id:"meditation",dur:10},
+     {id:"meditation",dur:9},
      {id:"washing",dur:15},
      {id:"cooking",dur:20},
      {id:"breakfast",dur:20},
@@ -139,7 +136,6 @@ var VARIANTS=[
   {id:"v9",icon:"◐",label:"Встал в 8:30--9:00",color:"#fbbf24",startTime:"9:00",
    plan:[
      {id:"calibration",dur:3},
-     {id:"lying",dur:3},
      {id:"washing",dur:15},
      {id:"cooking",dur:20},
      {id:"breakfast",dur:20},
@@ -317,7 +313,6 @@ var done=Object.values(state.checked).filter(Boolean).length;
 var h=new Date().getHours();
 var hi=h<12?"Доброе утро":h<18?"Добрый день":"Добрый вечер";
 var pct=Math.round(done/TASKS.length*100);
-var tabs=[{id:"morning",label:"Утро",icon:"◎"},{id:"day",label:"День",icon:"▣"},{id:"evening",label:"Вечер",icon:"◐"},{id:"summary",label:"Сводка",icon:"◈"}];
 var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
 html+='<div><div style="font-size:10px;color:#6b6a85;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px">CEN Trainer</div>';
 html+='<div style="font-size:20px;font-weight:700;color:#e8e6ff">'+hi+'</div></div>';
@@ -329,13 +324,17 @@ html+='<div style="margin-bottom:14px"><div style="display:flex;justify-content:
 html+='<span style="font-size:11px;color:#6b6a85">Прогресс дня</span>';
 html+='<span style="font-size:11px;color:#7c6aff;font-weight:600">'+done+'/'+TASKS.length+'</span></div>';
 html+='<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>';
-html+='<div class="tabs">';
+document.getElementById("header").innerHTML=html;
+}
+
+function renderBottomNav(){
+var tabs=[{id:"morning",label:"Утро",icon:"◎"},{id:"day",label:"День",icon:"▣"},{id:"evening",label:"Вечер",icon:"◐"},{id:"summary",label:"Сводка",icon:"◈"}];
+var html='';
 tabs.forEach(function(t){
 html+='<button class="tab'+(state.tab===t.id?' active':'')+'" onclick="setTab(\''+t.id+'\')">';
 html+='<div class="tab-icon">'+t.icon+'</div>'+t.label+'</button>';
 });
-html+='</div>';
-document.getElementById("header").innerHTML=html;
+document.getElementById("bottom-nav").innerHTML=html;
 }
 
 function setTab(t){state.tab=t;render();}
@@ -451,7 +450,7 @@ return html;
 }
 
 function renderEveningTasks(){
-var ids=["bath","sleep"];
+var ids=["lying","bath","sleep"];
 var html='<div style="font-size:12px;color:#6b6a85;margin-bottom:14px;line-height:1.6">Базовые вечерние ритуалы. Выбор варианта вечера будет позже.</div>';
 ids.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 return html;
@@ -637,6 +636,7 @@ return html;
 
 function render(){
 renderHeader();
+renderBottomNav();
 var html="";
 if(state.tab==="morning")html=renderMorning();
 else if(state.tab==="day")html=renderDay();
