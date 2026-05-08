@@ -40,7 +40,7 @@ button{font-family:inherit;cursor:pointer;border:none;font-weight:500}
 .card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:20px;margin-bottom:14px}
 .row{display:flex;align-items:center;gap:12px}
 .progress-bar{height:6px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px}
-.progress-fill{height:100%;border-radius:6px;background:var(--accent);transition:width 0.5s ease}
+.progress-fill{height:100%;border-radius:6px;background:var(--purple);transition:width 0.5s ease}
 .task-row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:transform 0.15s ease}
 .task-row.done{background:rgba(200,255,90,0.18);border-color:rgba(200,255,90,0.6)}
 .task-icon{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-weight:300}
@@ -196,13 +196,10 @@ function renderHeader(){
 var days=Math.max(getActiveDays(),state.history.length);
 var phase=days<14?{n:1,label:"Стабилизация",color:"#8B8B85"}:days<42?{n:2,label:"Строим",color:"#FB923C"}:{n:3,label:"Закрепление",color:"#84CC16"};
 var done=Object.values(state.checked).filter(Boolean).length;
-var h=new Date().getHours();
-var hi=h<12?"Доброе утро":h<18?"Добрый день":"Добрый вечер";
 var pct=Math.round(done/TASKS.length*100);
 var html='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px">';
-html+='<div><div style="font-size:10px;color:#8B8B85;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-weight:500">CEN Trainer</div>';
-html+='<div style="font-size:28px;font-weight:600;color:#1A1A1A;letter-spacing:-0.5px;line-height:1.1">'+hi+'</div></div>';
-html+='<div style="text-align:right;flex-shrink:0;padding-top:8px">';
+html+='<div><div style="font-size:10px;color:#8B8B85;letter-spacing:2px;text-transform:uppercase;font-weight:500">CEN Trainer</div></div>';
+html+='<div style="text-align:right;flex-shrink:0">';
 html+='<div style="font-size:10px;color:'+phase.color+';font-weight:600;text-transform:uppercase;letter-spacing:1.2px">'+phase.label+'</div>';
 html+='<div style="font-size:11px;color:#8B8B85;margin-top:4px">'+days+' дн</div></div></div>';
 html+='<div style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;margin-bottom:8px">';
@@ -240,7 +237,7 @@ function findTask(id){for(var i=0;i<TASKS.length;i++)if(TASKS[i].id===id)return 
 function taskCard(t){
 var ch=!!state.checked[t.id];
 var open=state.openTask===t.id;
-var html='<div style="background:'+(ch?"rgba(200,255,90,0.22)":"#FFFFFF")+';border:1px solid '+(ch?"rgba(200,255,90,0.6)":"#ECECEA")+';border-radius:22px;margin-bottom:10px;overflow:hidden">';
+var html='<div style="background:#FFFFFF;border:1px solid #ECECEA;border-radius:22px;margin-bottom:10px;overflow:hidden">';
 html+='<div style="display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer" onclick="openTask(\''+t.id+'\')">';
 html+='<div style="width:40px;height:40px;border-radius:14px;background:'+(ch?"#C8FF5A":t.color+"1F")+';display:flex;align-items:center;justify-content:center;font-size:16px;color:'+(ch?"#1A1A1A":t.color)+';flex-shrink:0;font-weight:300">'+t.icon+'</div>';
 html+='<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:'+(ch?"#8B8B85":"#1A1A1A")+';text-decoration:'+(ch?"line-through":"none")+';letter-spacing:-0.1px">'+t.label+'</div>';
