@@ -68,10 +68,14 @@ var TASKS=[
    why:"50 минут одной задачи без переключений. Телефон в другой комнате. Это и есть силовая тренировка dlPFC: каждый момент удержания внимания — повторение."},
   {id:"walk",label:"Прогулка без телефона",dur:20,icon:"◈",tag:"DMN↔CEN синхронизация",color:"#4ade80",
    why:"Во время ходьбы без стимуляции DMN и CEN синхронизируются. Это не отдых -- интеграция. Поэтому лучшие идеи приходят на прогулке."},
-  {id:"cleaning",label:"Уборка",dur:20,icon:"🧹",tag:"Микро-циклы CEN",color:"#34d399",
-   why:"Каждое завершённое действие — цикл CEN. 20 минут уборки это десятки микро-циклов: взял, положил, протёр, готово. Для истощённой CEN это мягкая но эффективная тренировка."},
+  {id:"cleaning",label:"Порядок",dur:20,icon:"🧹",tag:"И вещей, и мыслей",color:"#34d399",
+   why:"Порядок и в вещах, и в мыслях. 20 минут уборки = десятки завершённых циклов CEN. Убранное пространство снижает фоновую нагрузку на внимание — меньше мест где зацепится мысль."},
   {id:"onething",label:"Одно дело дома",dur:15,icon:"◉",tag:"Закрытый цикл",color:"#a78bfa",
    why:"Одна задача, одно завершение. Не важно что: помыть посуду, разобрать стол. Главное — начал и закончил. Это полный цикл CEN."},
+  {id:"food_plan",label:"План на еду на завтра",dur:0,icon:"◇",tag:"Снять решение",color:"#a78bfa",
+   why:"Решение что есть завтра принимается сегодня вечером. Утром CEN не тратится на выбор и не ловится на импульс к мусорной еде. Свежая CEN утром просто исполняет."},
+  {id:"drink",label:"Кефир и тёплая вода",dur:0,icon:"◍",tag:"Подготовка ко сну",color:"#38bdf8",
+   why:"Кефир даёт триптофан — предшественник серотонина и мелатонина. Тёплая вода успокаивает ЖКТ и снижает кортизол. Оба сигнала телу что день закончен."},
   {id:"bath",label:"Горячая ванна",dur:0,icon:"◑",tag:"Вечерний ритуал",color:"#38bdf8",
    why:"Горячая ванна за 1--2 часа до сна снижает температуру тела после выхода, что ускоряет засыпание и улучшает глубокий сон. Прямо влияет на восстановление prefrontal cortex за ночь."},
   {id:"sleep",label:"Фиксированный отбой",dur:0,icon:"◐",tag:"Базовое условие",color:"#fbbf24",
@@ -86,7 +90,6 @@ var VARIANTS=[
      {id:"washing",dur:15},
      {id:"breakfast",dur:40},
      {id:"walk",dur:40},
-     {id:"cleaning",dur:30},
      {id:"deep_work",dur:50}
    ]},
   {id:"v630",icon:"⚡",label:"Встал в 6:30",color:"#f97316",startTime:"6:30",
@@ -96,7 +99,6 @@ var VARIANTS=[
      {id:"washing",dur:15},
      {id:"breakfast",dur:40},
      {id:"walk",dur:35},
-     {id:"cleaning",dur:30},
      {id:"deep_work",dur:50}
    ]},
   {id:"v7",icon:"✦",label:"Встал в 7:00",color:"#a78bfa",startTime:"7:00",
@@ -105,8 +107,7 @@ var VARIANTS=[
      {id:"meditation",dur:9},
      {id:"washing",dur:15},
      {id:"breakfast",dur:40},
-     {id:"walk",dur:30},
-     {id:"cleaning",dur:30}
+     {id:"walk",dur:30}
    ]},
   {id:"v730",icon:"✦",label:"Встал в 7:30",color:"#a78bfa",startTime:"7:30",
    plan:[
@@ -114,8 +115,7 @@ var VARIANTS=[
      {id:"meditation",dur:9},
      {id:"washing",dur:15},
      {id:"breakfast",dur:40},
-     {id:"walk",dur:25},
-     {id:"cleaning",dur:20}
+     {id:"walk",dur:25}
    ]},
   {id:"v8",icon:"◎",label:"Встал в 8:00",color:"#7c6aff",startTime:"8:00",
    plan:[
@@ -123,8 +123,7 @@ var VARIANTS=[
      {id:"meditation",dur:9},
      {id:"washing",dur:15},
      {id:"breakfast",dur:40},
-     {id:"walk",dur:20},
-     {id:"cleaning",dur:20}
+     {id:"walk",dur:20}
    ]},
   {id:"v9",icon:"◐",label:"Встал в 8:30--9:00",color:"#fbbf24",startTime:"9:00",
    plan:[
@@ -164,7 +163,7 @@ var DEFAULT_DEBUFFS=[
   {id:"junkfood",label:"Вредная еда",icon:"🍔",tag:"Дофамин"}
 ];
 
-var state={tab:"summary",checked:{},history:[],checkin:null,openTask:null,timers:{},scores:{},variant:null};
+var state={tab:"summary",checked:{},history:[],checkin:null,openTask:null,scores:{},variant:null};
 
 function today(){return new Date().toISOString().split("T")[0];}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -179,10 +178,6 @@ if(ch)state.checked=ch;
 if(hi)state.history=hi;
 if(ci)state.checkin=ci;
 if(va)state.variant=va;
-TASKS.forEach(function(t){
-if(t.dur>0) state.timers[t.id]={sec:t.dur*60,on:false,done:false};
-});
-setInterval(tick,1000);
 render();
 }
 
@@ -257,21 +252,6 @@ total+=p.dur;
 return result;
 }
 
-function tick(){
-var changed=false;
-TASKS.forEach(function(t){
-if(t.dur>0&&state.timers[t.id].on){
-if(state.timers[t.id].sec>0){state.timers[t.id].sec--;changed=true;}
-else{state.timers[t.id].on=false;state.timers[t.id].done=true;changed=true;}
-}
-});
-if(changed)render();
-}
-
-function fmt(sec){
-return ("0"+Math.floor(sec/60)).slice(-2)+":"+("0"+(sec%60)).slice(-2);
-}
-
 function el(tag,attr,html){
 var e=document.createElement(tag);
 if(attr)Object.keys(attr).forEach(function(k){
@@ -342,13 +322,6 @@ state.openTask=state.openTask===id?null:id;
 render();
 }
 
-function toggleTimer(id){
-var tm=state.timers[id];
-if(tm.done){tm.sec=TASKS.find(function(t){return t.id===id;}).dur*60;tm.on=false;tm.done=false;}
-else{tm.on=!tm.on;}
-render();
-}
-
 function findTask(id){for(var i=0;i<TASKS.length;i++)if(TASKS[i].id===id)return TASKS[i];return null;}
 
 function taskCard(t,opt){
@@ -379,23 +352,7 @@ html+='<div onclick="event.stopPropagation();toggleTask(\''+t.id+'\')" style="wi
 html+='</div></div>';
 if(open){
 html+='<div style="border-top:1px solid #2a2a3a;padding:14px 16px">';
-html+='<div style="font-size:12px;color:#6b6a85;line-height:1.75;background:rgba(124,106,255,0.1);border-radius:10px;padding:10px 12px;border-left:3px solid '+t.color+';margin-bottom:'+(t.dur>0?"14px":"0")+'">'+t.why+'</div>';
-if(t.dur>0){
-var tm=state.timers[t.id];
-var prog=1-tm.sec/(t.dur*60);
-var r=36,circ=2*Math.PI*r;
-var offset=circ*(1-prog);
-var strokeColor=tm.done?"#4ade80":t.color;
-html+='<div style="display:flex;flex-direction:column;align-items:center;gap:8px">';
-html+='<div style="position:relative;width:88px;height:88px">';
-html+='<svg width="88" height="88" style="transform:rotate(-90deg);position:absolute">';
-html+='<circle cx="44" cy="44" r="36" fill="none" stroke="#2a2a3a" stroke-width="4"/>';
-html+='<circle cx="44" cy="44" r="36" fill="none" stroke="'+strokeColor+'" stroke-width="4" stroke-dasharray="'+circ+'" stroke-dashoffset="'+offset+'" stroke-linecap="round"/>';
-html+='</svg>';
-html+='<div style="position:absolute;inset:0;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:'+(tm.done?"#4ade80":"#e8e6ff")+';font-family:monospace">'+(tm.done?"✓":fmt(tm.sec))+'</div></div>';
-html+='<button onclick="toggleTimer(\''+t.id+'\')" style="padding:6px 18px;border-radius:8px;font-size:12px;font-weight:600;background:'+(tm.done?"#052e16":tm.on?"#1c1c28":"rgba(124,106,255,0.15)")+';border:1px solid '+(tm.done?"#4ade80":tm.on?"#2a2a3a":"#7c6aff")+';color:'+(tm.done?"#4ade80":tm.on?"#6b6a85":"#7c6aff")+'">'+(tm.done?"Сброс":tm.on?"Пауза":"Старт")+'</button>';
-html+='</div>';
-}
+html+='<div style="font-size:12px;color:#6b6a85;line-height:1.75;background:rgba(124,106,255,0.1);border-radius:10px;padding:10px 12px;border-left:3px solid '+t.color+'">'+t.why+'</div>';
 html+='</div>';
 }
 html+='</div>';
@@ -442,7 +399,7 @@ return html;
 }
 
 function renderEveningTasks(){
-var ids=["lying","bath","sleep"];
+var ids=["food_plan","cleaning","bath","drink","lying","sleep"];
 var html='<div style="font-size:12px;color:#6b6a85;margin-bottom:14px;line-height:1.6">Базовые вечерние ритуалы. Выбор варианта вечера будет позже.</div>';
 ids.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 return html;
@@ -480,9 +437,9 @@ function renderSummary(){
 var done=Object.values(state.checked).filter(Boolean).length;
 var html='<div style="font-size:12px;color:#6b6a85;margin-bottom:14px;line-height:1.6">Все задачи · '+done+' из '+TASKS.length+' выполнено.</div>';
 var GROUPS=[
-  {label:"Утро",icon:"◎",color:"#7c6aff",ids:["calibration","meditation","washing","breakfast","walk","cleaning"]},
+  {label:"Утро",icon:"◎",color:"#7c6aff",ids:["calibration","meditation","washing","breakfast","walk"]},
   {label:"День",icon:"▣",color:"#60a5fa",ids:["writing","deep_work","onething"]},
-  {label:"Вечер",icon:"◐",color:"#fbbf24",ids:["lying","bath","sleep"]}
+  {label:"Вечер",icon:"◐",color:"#fbbf24",ids:["food_plan","cleaning","bath","drink","lying","sleep"]}
 ];
 GROUPS.forEach(function(g,gi){
 var groupDone=g.ids.filter(function(id){return !!state.checked[id];}).length;
