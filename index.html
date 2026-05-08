@@ -3,45 +3,51 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
+<meta name="theme-color" content="#F4F4F2">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="CEN Trainer">
 <title>CEN Trainer</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:#0a0a0f;color:#e8e6ff;font-family:system-ui,sans-serif;min-height:100vh}
-button{font-family:inherit;cursor:pointer;border:none}
+:root{
+--bg:#F4F4F2;
+--surface:#FFFFFF;
+--border:#ECECEA;
+--text:#1A1A1A;
+--muted:#8B8B85;
+--soft:#C8C8C5;
+--accent:#C8FF5A;
+--accent-dark:#84CC16;
+--purple:#7C6AFF;
+--orange:#FB923C;
+--pink:#EC4899;
+}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Inter",system-ui,sans-serif;font-weight:400;min-height:100vh;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;font-weight:500}
 .app{max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column}
-.header{padding:20px 20px 0;background:#0a0a0f;position:sticky;top:0;z-index:10}
-.content{flex:1;padding:0 20px 110px;overflow-y:auto}
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:#0a0a0f;border-top:1px solid #2a2a3a;padding:8px 12px;padding-bottom:calc(8px + env(safe-area-inset-bottom,0px));z-index:100}
-.tabs{display:flex;gap:4px;background:#13131a;border-radius:14px;padding:4px}
-.tab{flex:1;padding:8px 4px;border-radius:10px;background:transparent;color:#6b6a85;font-size:10px;font-weight:600;border-bottom:2px solid transparent;text-align:center}
-.tab.active{background:rgba(124,106,255,0.15);color:#7c6aff;border-bottom:2px solid #7c6aff}
-.tab-icon{font-size:14px;margin-bottom:2px}
-.card{background:#13131a;border:1px solid #2a2a3a;border-radius:16px;padding:16px;margin-bottom:12px}
+.header{padding:28px 22px 0;background:var(--bg);position:sticky;top:0;z-index:10}
+.content{flex:1;padding:0 22px 130px;overflow-y:auto}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:var(--bg);padding:8px 16px;padding-bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:100}
+.tabs{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:6px}
+.tab{flex:1;padding:10px 4px;border-radius:20px;background:transparent;color:var(--muted);font-size:10px;font-weight:500;text-align:center;letter-spacing:0.3px}
+.tab.active{background:var(--accent);color:var(--text);font-weight:600}
+.tab-icon{font-size:14px;margin-bottom:3px;font-weight:300}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:20px;margin-bottom:14px}
 .row{display:flex;align-items:center;gap:12px}
-.badge{font-size:9px;font-weight:700;border-radius:6px;padding:3px 7px}
-.progress-bar{height:4px;background:#2a2a3a;border-radius:4px;overflow:hidden;margin-bottom:16px}
-.progress-fill{height:100%;border-radius:4px;background:linear-gradient(to right,#7c6aff,#a78bfa);transition:width 0.5s}
-.task-row{display:flex;align-items:center;gap:12px;background:#13131a;border:1px solid #2a2a3a;border-radius:16px;padding:14px 16px;margin-bottom:10px;cursor:pointer}
-.task-row.done{background:rgba(74,222,128,0.04);border-color:rgba(74,222,128,0.25)}
-.task-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
-.task-detail{border-top:1px solid #2a2a3a;padding:14px 16px}
-.why-box{font-size:12px;color:#6b6a85;line-height:1.75;background:rgba(124,106,255,0.15);border-radius:10px;padding:10px 12px;margin-bottom:14px}
-.checkbox{width:22px;height:22px;border-radius:6px;border:2px solid #2a2a3a;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;color:#000;font-size:12px;font-weight:800}
-.checkbox.checked{background:#4ade80;border-color:#4ade80}
-.timer-wrap{display:flex;flex-direction:column;align-items:center;gap:8px}
-.timer-btn{padding:6px 18px;border-radius:8px;font-size:12px;font-weight:600}
-.learn-card{background:#13131a;border:1px solid #2a2a3a;border-radius:14px;padding:14px 16px;margin-bottom:10px;cursor:pointer}
-.learn-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
-.score-btn{width:44px;height:44px;border-radius:10px;border:1px solid #2a2a3a;background:#13131a;color:#6b6a85;font-size:14px;font-weight:700;cursor:pointer}
-.score-btn.selected{background:rgba(124,106,255,0.15);border-color:#7c6aff;color:#7c6aff}
-.save-btn{width:100%;padding:13px;border-radius:12px;background:rgba(124,106,255,0.15);border:1px solid #7c6aff;color:#7c6aff;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px}
-.chart-bar{border-radius:5px;background:linear-gradient(to top,#7c6aff,#3d3580);transition:height 0.6s}
+.progress-bar{height:6px;background:var(--border);border-radius:6px;overflow:hidden;margin-bottom:20px}
+.progress-fill{height:100%;border-radius:6px;background:var(--accent);transition:width 0.5s ease}
+.task-row{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:transform 0.15s ease}
+.task-row.done{background:rgba(200,255,90,0.18);border-color:rgba(200,255,90,0.6)}
+.task-icon{width:40px;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;font-weight:300}
+.score-btn{width:44px;height:44px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;transition:all 0.15s}
+.score-btn.selected{background:var(--accent);border-color:var(--accent);color:var(--text);font-weight:600}
+.save-btn{width:100%;padding:15px;border-radius:18px;background:var(--accent);border:none;color:var(--text);font-size:14px;font-weight:600;cursor:pointer;margin-top:10px}
+.chart-bar{border-radius:6px;background:var(--accent);transition:height 0.6s ease}
 </style>
 </head>
 <body>
@@ -52,33 +58,33 @@ button{font-family:inherit;cursor:pointer;border:none}
 <div class="bottom-nav"><div class="tabs" id="bottom-nav"></div></div>
 <script>
 var TASKS=[
-  {id:"calibration",label:"Калибровка",dur:3,icon:"⚡",tag:"Гашение DMN",color:"#f97316",
+  {id:"calibration",label:"Калибровка",dur:3,icon:"▲",tag:"Гашение DMN",color:"#FB923C",
    why:"Поставил чайник — пока кипит, 1 минута отжиманий и 1 минута приседаний. Резкая физическая нагрузка активирует SN и гасит утреннюю DMN. К моменту когда чайник готов — CEN уже работает."},
-  {id:"lying",label:"Лежите без телефона",dur:3,icon:"☾",tag:"Мягкий запуск",color:"#94a3b8",
+  {id:"lying",label:"Лежите без телефона",dur:3,icon:"⌒",tag:"Мягкий запуск",color:"#EC4899",
    why:"Первые минуты после пробуждения мозг ещё в дельта/тета. Не хватать телефон — значит не нагружать SN внешним стимулом. Просто полежать без экрана: дать дефолтной сети плавно перейти в рабочий режим."},
-  {id:"meditation",label:"Медитация",dur:9,icon:"◎",tag:"CEN напрямую",color:"#7c6aff",
+  {id:"meditation",label:"Медитация",dur:9,icon:"◎",tag:"CEN напрямую",color:"#7C6AFF",
    why:"Каждый раз когда замечаете отвлечение и возвращаетесь -- dlPFC делает повторение. 9 минут — короткий блок без скатывания в расслабление. Силовая тренировка префронтальной коры."},
-  {id:"washing",label:"Умывание",dur:15,icon:"◐",tag:"Закрытый цикл",color:"#38bdf8",
+  {id:"washing",label:"Умывание",dur:15,icon:"◐",tag:"Закрытый цикл",color:"#84CC16",
    why:"Утренний душ/умывание прохладной водой — мягкий стимул для SN. Завершённый цикл: начал — закончил. Ещё одна тренировка CEN на структуре."},
-  {id:"breakfast",label:"Завтрак",dur:40,icon:"●",tag:"Глюкоза для dlPFC",color:"#f59e0b",
+  {id:"breakfast",label:"Завтрак",dur:40,icon:"●",tag:"Глюкоза для dlPFC",color:"#FB923C",
    why:"Готовка + еда без телефона. 40 минут на один процесс. Готовка — десятки маленьких завершённых циклов (взял-нарезал-готово), тренирует CEN на структуре. Сам завтрак даёт глюкозу для dlPFC. Без телефона за столом — внимание остаётся на еде."},
-  {id:"writing",label:"Запись от руки",dur:5,icon:"✦",tag:"dlPFC активация",color:"#a78bfa",
+  {id:"writing",label:"Запись от руки",dur:5,icon:"▤",tag:"dlPFC активация",color:"#7C6AFF",
    why:"Письмо от руки требует удержания мысли в рабочей памяти. Прямая нагрузка на CEN -- в отличие от печати, которая автоматична."},
-  {id:"deep_work",label:"Экзистенциальная безопасность",dur:50,icon:"▣",tag:"Главная тренировка",color:"#60a5fa",
+  {id:"deep_work",label:"Экзистенциальная безопасность",dur:50,icon:"■",tag:"Главная тренировка",color:"#7C6AFF",
    why:"50 минут одной задачи без переключений. Телефон в другой комнате. Это и есть силовая тренировка dlPFC: каждый момент удержания внимания — повторение."},
-  {id:"walk",label:"Прогулка без телефона",dur:20,icon:"◈",tag:"DMN↔CEN синхронизация",color:"#4ade80",
+  {id:"walk",label:"Прогулка без телефона",dur:20,icon:"◇",tag:"DMN↔CEN синхронизация",color:"#84CC16",
    why:"Во время ходьбы без стимуляции DMN и CEN синхронизируются. Это не отдых -- интеграция. Поэтому лучшие идеи приходят на прогулке."},
-  {id:"cleaning",label:"Порядок",dur:20,icon:"🧹",tag:"И вещей, и мыслей",color:"#34d399",
+  {id:"cleaning",label:"Порядок",dur:20,icon:"◈",tag:"И вещей, и мыслей",color:"#84CC16",
    why:"Порядок и в вещах, и в мыслях. 20 минут уборки = десятки завершённых циклов CEN. Убранное пространство снижает фоновую нагрузку на внимание — меньше мест где зацепится мысль."},
-  {id:"onething",label:"Одно дело дома",dur:15,icon:"◉",tag:"Закрытый цикл",color:"#a78bfa",
+  {id:"onething",label:"Одно дело дома",dur:15,icon:"◆",tag:"Закрытый цикл",color:"#FB923C",
    why:"Одна задача, одно завершение. Не важно что: помыть посуду, разобрать стол. Главное — начал и закончил. Это полный цикл CEN."},
-  {id:"food_plan",label:"План на еду на завтра",dur:0,icon:"◇",tag:"Снять решение",color:"#a78bfa",
+  {id:"food_plan",label:"План на еду на завтра",dur:0,icon:"□",tag:"Снять решение",color:"#7C6AFF",
    why:"Решение что есть завтра принимается сегодня вечером. Утром CEN не тратится на выбор и не ловится на импульс к мусорной еде. Свежая CEN утром просто исполняет."},
-  {id:"drink",label:"Кефир и тёплая вода",dur:0,icon:"◍",tag:"Подготовка ко сну",color:"#38bdf8",
+  {id:"drink",label:"Кефир и тёплая вода",dur:0,icon:"○",tag:"Подготовка ко сну",color:"#84CC16",
    why:"Кефир даёт триптофан — предшественник серотонина и мелатонина. Тёплая вода успокаивает ЖКТ и снижает кортизол. Оба сигнала телу что день закончен."},
-  {id:"bath",label:"Горячая ванна",dur:0,icon:"◑",tag:"Вечерний ритуал",color:"#38bdf8",
+  {id:"bath",label:"Горячая ванна",dur:0,icon:"◑",tag:"Вечерний ритуал",color:"#EC4899",
    why:"Горячая ванна за 1--2 часа до сна снижает температуру тела после выхода, что ускоряет засыпание и улучшает глубокий сон. Прямо влияет на восстановление prefrontal cortex за ночь."},
-  {id:"sleep",label:"Фиксированный отбой",dur:0,icon:"◐",tag:"Базовое условие",color:"#fbbf24",
+  {id:"sleep",label:"Фиксированный отбой",dur:0,icon:"☽",tag:"Базовое условие",color:"#EC4899",
    why:"Одна ночь недосыпа снижает производительность prefrontal cortex на 20--30%. Никакие практики это не компенсируют."}
 ];
 
@@ -88,19 +94,19 @@ var TASK_GROUPS={
   evening:["food_plan","cleaning","bath","drink","lying","sleep"]
 };
 var CARDS=[
-  {title:"Что такое CEN",sub:"Исполнительная сеть",icon:"◈",color:"#7c6aff",
+  {title:"Что такое CEN",sub:"Исполнительная сеть",icon:"◈",color:"#7C6AFF",
    body:"CEN -- CEO мозга. Дорсолатеральная префронтальная кора (dlPFC) и задняя теменная кора. Отвечает за рабочую память, планирование, решения, подавление импульсов. Самая энергозатратная сеть."},
-  {title:"Три сети мозга",sub:"Как взаимодействуют",icon:"◎",color:"#a78bfa",
+  {title:"Три сети мозга",sub:"Как взаимодействуют",icon:"◎",color:"#7C6AFF",
    body:"DMN -- внутренний рассказчик, активна в покое и при сериалах. CEN -- директор, активна при усилии. SN -- модератор между ними, решает кому слово. В медитации тренируется связка SN↔CEN."},
-  {title:"Медитация: механизм",sub:"4 фазы",icon:"◉",color:"#4ade80",
+  {title:"Медитация: механизм",sub:"4 фазы",icon:"◉",color:"#1A1A1A",
    body:"(1) фокус -- CEN активна; (2) пришла мысль -- DMN захватывает; (3) заметили мысль -- SN сработала; (4) вернули внимание -- CEN снова. Шаг 3→4 и есть повторение. Реакция: заметить → назвать → вернуться."},
-  {title:"Планирование тренирует CEN",sub:"Даже сериал и пицца",icon:"▣",color:"#fbbf24",
+  {title:"Планирование тренирует CEN",sub:"Даже сериал и пицца",icon:"▣",color:"#FB923C",
    body:"CEN тренирует структура, не содержание. Запланировал сериал -- CEN активна. Остановился по плану -- подавление импульса = тренировка dlPFC. Сериал по плану лучше, чем бесплановая полезная активность."},
-  {title:"Мысли в медитации",sub:"Откуда и как реагировать",icon:"✦",color:"#f87171",
+  {title:"Мысли в медитации",sub:"Откуда и как реагировать",icon:"✦",color:"#EC4899",
    body:"Мысли -- это DMN. Момент когда заметили -- это SN. Бороться нельзя: усиливает мысль. Правильно: заметить → назвать тип (планирование, воспоминание) → не оценивать → вернуться к дыханию."},
-  {title:"Микро-задачи и CEN",sub:"1 минута уборки",icon:"◉",color:"#a78bfa",
+  {title:"Микро-задачи и CEN",sub:"1 минута уборки",icon:"◉",color:"#7C6AFF",
    body:"CEN тренирует завершённые циклы: решил → сделал → завершил. 1 минута уборки = 1 цикл. Для истощённой CEN много маленьких циклов эффективнее одного большого. Не заменяют длинные блоки -- там другая адаптация."},
-  {title:"Почему соцсети разрушают CEN",sub:"Механизм истощения",icon:"⚡",color:"#f87171",
+  {title:"Почему соцсети разрушают CEN",sub:"Механизм истощения",icon:"⚡",color:"#EC4899",
    body:"Соцсети требуют поверхностного переключения. CEN активируется без нагрузки -- как стоять с гантелями не поднимая. Каждое переключение -- микро-выброс дофамина, снижающий порог стимуляции."}
 ];
 var EQ=[
@@ -110,10 +116,10 @@ var EQ=[
 ];
 
 var DEFAULT_DEBUFFS=[
-  {id:"social",label:"Instagram, YouTube",icon:"📱",tag:"Соц. сети"},
-  {id:"warcraft",label:"Warcraft",icon:"🎮",tag:"Игры"},
+  {id:"social",label:"Instagram, YouTube",icon:"▢",tag:"Соц. сети"},
+  {id:"warcraft",label:"Warcraft",icon:"◇",tag:"Игры"},
   {id:"porn",label:"Просмотр порно",icon:"◐",tag:"Дофамин"},
-  {id:"junkfood",label:"Вредная еда",icon:"🍔",tag:"Дофамин"}
+  {id:"junkfood",label:"Вредная еда",icon:"●",tag:"Дофамин"}
 ];
 
 var state={tab:"morning",checked:{},history:[],checkin:null,openTask:null,scores:{}};
@@ -188,21 +194,20 @@ return Object.keys(dates).length;
 
 function renderHeader(){
 var days=Math.max(getActiveDays(),state.history.length);
-var phase=days<14?{n:1,label:"Стабилизация",color:"#f87171"}:days<42?{n:2,label:"Строим",color:"#fbbf24"}:{n:3,label:"Закрепление",color:"#4ade80"};
+var phase=days<14?{n:1,label:"Стабилизация",color:"#8B8B85"}:days<42?{n:2,label:"Строим",color:"#FB923C"}:{n:3,label:"Закрепление",color:"#84CC16"};
 var done=Object.values(state.checked).filter(Boolean).length;
 var h=new Date().getHours();
 var hi=h<12?"Доброе утро":h<18?"Добрый день":"Добрый вечер";
 var pct=Math.round(done/TASKS.length*100);
-var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">';
-html+='<div><div style="font-size:10px;color:#6b6a85;letter-spacing:2px;text-transform:uppercase;margin-bottom:2px">CEN Trainer</div>';
-html+='<div style="font-size:20px;font-weight:700;color:#e8e6ff">'+hi+'</div></div>';
-html+='<div style="background:'+phase.color+'22;border:1px solid '+phase.color+'44;border-radius:10px;padding:6px 10px;text-align:center">';
-html+='<div style="font-size:9px;color:'+phase.color+';font-weight:700;text-transform:uppercase">Фаза '+phase.n+'</div>';
-html+='<div style="font-size:11px;color:#e8e6ff;font-weight:600">'+phase.label+'</div>';
-html+='<div style="font-size:9px;color:#6b6a85">'+days+' дн.</div></div></div>';
-html+='<div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;margin-bottom:5px">';
-html+='<span style="font-size:11px;color:#6b6a85">Прогресс дня</span>';
-html+='<span style="font-size:11px;color:#7c6aff;font-weight:600">'+done+'/'+TASKS.length+'</span></div>';
+var html='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:24px;gap:12px">';
+html+='<div><div style="font-size:10px;color:#8B8B85;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;font-weight:500">CEN Trainer</div>';
+html+='<div style="font-size:28px;font-weight:600;color:#1A1A1A;letter-spacing:-0.5px;line-height:1.1">'+hi+'</div></div>';
+html+='<div style="text-align:right;flex-shrink:0;padding-top:8px">';
+html+='<div style="font-size:10px;color:'+phase.color+';font-weight:600;text-transform:uppercase;letter-spacing:1.2px">'+phase.label+'</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:4px">'+days+' дн</div></div></div>';
+html+='<div style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;margin-bottom:8px">';
+html+='<span style="font-size:11px;color:#8B8B85">Прогресс дня</span>';
+html+='<span style="font-size:11px;color:#1A1A1A;font-weight:600">'+done+'/'+TASKS.length+'</span></div>';
 html+='<div class="progress-bar"><div class="progress-fill" style="width:'+pct+'%"></div></div></div>';
 document.getElementById("header").innerHTML=html;
 }
@@ -235,18 +240,18 @@ function findTask(id){for(var i=0;i<TASKS.length;i++)if(TASKS[i].id===id)return 
 function taskCard(t){
 var ch=!!state.checked[t.id];
 var open=state.openTask===t.id;
-var html='<div style="background:'+(ch?"rgba(74,222,128,0.04)":"#13131a")+';border:1px solid '+(ch?"rgba(74,222,128,0.25)":"#2a2a3a")+';border-radius:16px;margin-bottom:10px;overflow:hidden">';
-html+='<div class="task-row" style="background:transparent;border:none;margin:0;border-radius:0" onclick="openTask(\''+t.id+'\')">';
-html+='<div style="width:36px;height:36px;border-radius:10px;background:'+(ch?"#052e16":t.color+"22")+';border:1px solid '+(ch?"rgba(74,222,128,0.3)":t.color+"44")+';display:flex;align-items:center;justify-content:center;font-size:16px;color:'+(ch?"#4ade80":t.color)+';flex-shrink:0">'+t.icon+'</div>';
-html+='<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;color:'+(ch?"#6b6a85":"#e8e6ff")+';text-decoration:'+(ch?"line-through":"none")+'">'+t.label+'</div>';
-html+='<div style="font-size:11px;color:'+t.color+';margin-top:2px">'+t.tag+'</div></div>';
-html+='<div style="display:flex;align-items:center;gap:8px;flex-shrink:0">';
-if(t.dur>0)html+='<span style="font-size:11px;color:#6b6a85">'+t.dur+'м</span>';
-html+='<div onclick="event.stopPropagation();toggleTask(\''+t.id+'\')" style="width:22px;height:22px;border-radius:6px;border:2px solid '+(ch?"#4ade80":"#2a2a3a")+';background:'+(ch?"#4ade80":"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;color:#000;font-size:12px;font-weight:800">'+(ch?"✓":"")+'</div>';
+var html='<div style="background:'+(ch?"rgba(200,255,90,0.22)":"#FFFFFF")+';border:1px solid '+(ch?"rgba(200,255,90,0.6)":"#ECECEA")+';border-radius:22px;margin-bottom:10px;overflow:hidden">';
+html+='<div style="display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer" onclick="openTask(\''+t.id+'\')">';
+html+='<div style="width:40px;height:40px;border-radius:14px;background:'+(ch?"#C8FF5A":t.color+"1F")+';display:flex;align-items:center;justify-content:center;font-size:16px;color:'+(ch?"#1A1A1A":t.color)+';flex-shrink:0;font-weight:300">'+t.icon+'</div>';
+html+='<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:'+(ch?"#8B8B85":"#1A1A1A")+';text-decoration:'+(ch?"line-through":"none")+';letter-spacing:-0.1px">'+t.label+'</div>';
+html+='<div style="font-size:11px;color:'+t.color+';margin-top:3px;font-weight:500">'+t.tag+'</div></div>';
+html+='<div style="display:flex;align-items:center;gap:10px;flex-shrink:0">';
+if(t.dur>0)html+='<span style="font-size:11px;color:#8B8B85">'+t.dur+'м</span>';
+html+='<div onclick="event.stopPropagation();toggleTask(\''+t.id+'\')" style="width:26px;height:26px;border-radius:9px;border:'+(ch?"none":"1.5px solid #D8D8D5")+';background:'+(ch?"#1A1A1A":"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;color:'+(ch?"#C8FF5A":"transparent")+';font-size:13px;font-weight:600">'+(ch?"✓":"")+'</div>';
 html+='</div></div>';
 if(open){
-html+='<div style="border-top:1px solid #2a2a3a;padding:14px 16px">';
-html+='<div style="font-size:12px;color:#6b6a85;line-height:1.75;background:rgba(124,106,255,0.1);border-radius:10px;padding:10px 12px;border-left:3px solid '+t.color+'">'+t.why+'</div>';
+html+='<div style="border-top:1px solid #F0F0EE;padding:16px 18px">';
+html+='<div style="font-size:12px;color:#5A5A55;line-height:1.7;background:'+t.color+'10;border-radius:14px;padding:12px 14px">'+t.why+'</div>';
 html+='</div>';
 }
 html+='</div>';
@@ -255,7 +260,7 @@ return html;
 
 function renderTaskGroup(ids){
 var done=ids.filter(function(id){return !!state.checked[id];}).length;
-var html='<div style="font-size:12px;color:#6b6a85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
+var html='<div style="font-size:12px;color:#8B8B85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
 ids.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 return html;
 }
@@ -266,24 +271,24 @@ function renderEveningTasks(){return renderTaskGroup(TASK_GROUPS.evening);}
 
 function renderQuestionnaire(){
 if(state.checkin){
-var html='<div style="display:flex;gap:8px;margin-bottom:10px">';
+var html='<div style="display:flex;gap:8px;margin-bottom:14px">';
 EQ.forEach(function(q){
 var v=state.checkin[q.id];
 var disp=q.inv?6-v:v;
-html+='<div style="flex:1;background:#0a0a0f;border:1px solid #2a2a3a;border-radius:10px;padding:10px 6px;text-align:center">';
-html+='<div style="font-size:20px;font-weight:700;color:#7c6aff">'+disp+'</div>';
-html+='<div style="font-size:9px;color:#6b6a85">'+(q.id==="focus"?"фокус":q.id==="phone"?"без тел.":"ясность")+'</div></div>';
+html+='<div style="flex:1;background:#F9F9F7;border:1px solid #ECECEA;border-radius:16px;padding:14px 6px;text-align:center">';
+html+='<div style="font-size:24px;font-weight:600;color:#1A1A1A;letter-spacing:-0.5px">'+disp+'</div>';
+html+='<div style="font-size:10px;color:#8B8B85;margin-top:4px">'+(q.id==="focus"?"фокус":q.id==="phone"?"без тел.":"ясность")+'</div></div>';
 });
 html+='</div>';
-html+='<button onclick="resetCheckin()" style="width:100%;background:transparent;border:1px solid #2a2a3a;color:#6b6a85;border-radius:10px;padding:8px;font-size:11px;cursor:pointer">Изменить ответы</button>';
+html+='<button onclick="resetCheckin()" style="width:100%;background:transparent;border:1px solid #ECECEA;color:#8B8B85;border-radius:14px;padding:10px;font-size:11px;cursor:pointer">Изменить ответы</button>';
 return html;
 }
 var html='';
 EQ.forEach(function(q){
-html+='<div style="margin-bottom:14px"><div style="font-size:12px;color:#e8e6ff;margin-bottom:8px">'+q.label+'</div><div style="display:flex;gap:6px">';
+html+='<div style="margin-bottom:18px"><div style="font-size:13px;color:#1A1A1A;margin-bottom:10px;font-weight:500">'+q.label+'</div><div style="display:flex;gap:6px">';
 [1,2,3,4,5].forEach(function(n){
 var sel=state.scores[q.id]===n;
-html+='<button onclick="setScore(\''+q.id+'\','+n+')" class="score-btn'+(sel?" selected":"")+'" style="height:38px">'+n+'</button>';
+html+='<button onclick="setScore(\''+q.id+'\','+n+')" class="score-btn'+(sel?" selected":"")+'" style="height:42px">'+n+'</button>';
 });
 html+='</div></div>';
 });
@@ -294,11 +299,11 @@ return html;
 
 function renderSummary(){
 var html=renderDebuffs();
-html+='<div class="card" style="margin-top:16px"><div style="font-size:11px;color:#6b6a85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Вечерний опрос</div>';
+html+='<div class="card" style="margin-top:16px"><div style="font-size:11px;color:#8B8B85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Вечерний опрос</div>';
 html+=renderQuestionnaire();
 html+='</div>';
 if(state.history.length>0){
-html+='<div class="card" style="margin-top:12px"><div style="font-size:11px;color:#6b6a85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">История · '+state.history.length+' дн.</div>';
+html+='<div class="card" style="margin-top:12px"><div style="font-size:11px;color:#8B8B85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">История · '+state.history.length+' дн.</div>';
 html+=renderChart()+'</div>';
 }
 html+=renderBackup();
@@ -324,19 +329,19 @@ var debuffs=getDebuffs();
 var log=getDebuffLog();
 var total=getDebuffTotal();
 var html='<div class="card" style="margin-top:16px"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">';
-html+='<div style="font-size:11px;color:#6b6a85;text-transform:uppercase;letter-spacing:1px">Debuff</div>';
-html+='<div style="font-size:11px;color:#6b6a85">сегодня <span style="color:'+(total>0?"#f87171":"#e8e6ff")+';font-weight:700">'+total+'м</span></div></div>';
-html+='<div style="font-size:11px;color:#6b6a85;line-height:1.5;margin-bottom:12px">Что забирает ресурс CEN. Залогируй минуты — без оценок, просто факт.</div>';
+html+='<div style="font-size:10px;color:#8B8B85;text-transform:uppercase;letter-spacing:1.5px;font-weight:500">Debuff</div>';
+html+='<div style="font-size:11px;color:#8B8B85">сегодня <span style="color:'+(total>0?"#FB923C":"#1A1A1A")+';font-weight:600">'+total+'м</span></div></div>';
+html+='<div style="font-size:11px;color:#8B8B85;line-height:1.6;margin-bottom:14px">Что забирает ресурс CEN. Залогируй минуты — без оценок, просто факт.</div>';
 debuffs.forEach(function(d){
 var mins=log[d.id]||0;
-html+='<div style="display:flex;align-items:center;gap:10px;background:#0a0a0f;border:1px solid #2a2a3a;border-radius:12px;padding:10px;margin-bottom:8px">';
-html+='<div style="width:32px;height:32px;border-radius:8px;background:rgba(248,113,113,0.06);border:1px solid rgba(248,113,113,0.15);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">'+d.icon+'</div>';
-html+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600;color:#e8e6ff">'+d.label+'</div>';
-html+='<div style="font-size:10px;color:#6b6a85">'+d.tag+'</div></div>';
+html+='<div style="display:flex;align-items:center;gap:12px;background:#F9F9F7;border:1px solid #ECECEA;border-radius:18px;padding:12px;margin-bottom:8px">';
+html+='<div style="width:36px;height:36px;border-radius:12px;background:rgba(251,146,60,0.1);display:flex;align-items:center;justify-content:center;font-size:14px;color:#FB923C;flex-shrink:0;font-weight:300">'+d.icon+'</div>';
+html+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:#1A1A1A">'+d.label+'</div>';
+html+='<div style="font-size:10px;color:#8B8B85;margin-top:2px">'+d.tag+'</div></div>';
 html+='<div style="display:flex;align-items:center;gap:4px;flex-shrink:0">';
-html+='<button onclick="addDebuffMinutes(\''+d.id+'\',-5)" style="width:26px;height:26px;border-radius:6px;background:#13131a;border:1px solid #2a2a3a;color:#e8e6ff;font-size:14px;cursor:pointer;padding:0">−</button>';
-html+='<div onclick="editDebuffMinutes(\''+d.id+'\')" style="min-width:42px;text-align:center;font-size:13px;font-weight:600;color:'+(mins>0?"#f87171":"#6b6a85")+';cursor:pointer">'+mins+'м</div>';
-html+='<button onclick="addDebuffMinutes(\''+d.id+'\',5)" style="width:26px;height:26px;border-radius:6px;background:#13131a;border:1px solid #2a2a3a;color:#e8e6ff;font-size:14px;cursor:pointer;padding:0">+</button>';
+html+='<button onclick="addDebuffMinutes(\''+d.id+'\',-5)" style="width:30px;height:30px;border-radius:10px;background:#FFFFFF;border:1px solid #ECECEA;color:#1A1A1A;font-size:14px;cursor:pointer;padding:0;font-weight:500">−</button>';
+html+='<div onclick="editDebuffMinutes(\''+d.id+'\')" style="min-width:46px;text-align:center;font-size:13px;font-weight:600;color:'+(mins>0?"#FB923C":"#8B8B85")+';cursor:pointer">'+mins+'м</div>';
+html+='<button onclick="addDebuffMinutes(\''+d.id+'\',5)" style="width:30px;height:30px;border-radius:10px;background:#FFFFFF;border:1px solid #ECECEA;color:#1A1A1A;font-size:14px;cursor:pointer;padding:0;font-weight:500">+</button>';
 html+='</div></div>';
 });
 html+='</div>';
@@ -344,7 +349,7 @@ return html;
 }
 
 function renderChart(){
-if(!state.history.length)return '<div style="text-align:center;color:#6b6a85;font-size:12px;padding:20px 0">Данные появятся после первого чекина</div>';
+if(!state.history.length)return '<div style="text-align:center;color:#8B8B85;font-size:12px;padding:20px 0">Данные появятся после первого чекина</div>';
 var sorted=state.history.slice().sort(function(a,b){return a.date<b.date?-1:1;});
 var last=sorted.slice(-14);
 function score(d){return Math.round((d.focus+(6-d.phone)+d.clarity)/3);}
@@ -361,28 +366,28 @@ if(dateSet[key]){streak++;dt.setDate(dt.getDate()-1);}
 else break;
 }
 var days=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
-var html='<div style="display:flex;align-items:flex-end;gap:4px;height:72px;margin-bottom:6px">';
+var html='<div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:8px">';
 last.forEach(function(d){
 var s=score(d);
-var h=Math.max(6,s/5*60);
-html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">';
-html+='<span style="font-size:9px;color:#7c6aff;font-weight:700">'+s+'</span>';
+var h=Math.max(8,s/5*68);
+html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">';
+html+='<span style="font-size:9px;color:#1A1A1A;font-weight:600">'+s+'</span>';
 html+='<div class="chart-bar" style="width:100%;height:'+h+'px"></div></div>';
 });
-html+='</div><div style="display:flex;gap:4px;margin-bottom:12px">';
-last.forEach(function(d){html+='<div style="flex:1;text-align:center;font-size:8px;color:#6b6a85">'+days[new Date(d.date).getDay()]+'</div>';});
-html+='</div><div style="display:flex;gap:6px">';
-html+='<div style="flex:1;background:rgba(124,106,255,0.15);border:1px solid #3d3580;border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:#7c6aff">'+avg+'</div><div style="font-size:10px;color:#6b6a85">средний</div></div>';
-html+='<div style="flex:1;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.3);border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:#fbbf24">'+streak+'</div><div style="font-size:10px;color:#6b6a85">стрик</div></div>';
-html+='<div style="flex:1;background:'+(trend>=0?"rgba(74,222,128,0.08)":"rgba(248,113,113,0.08)")+';border:1px solid '+(trend>=0?"rgba(74,222,128,0.2)":"rgba(248,113,113,0.2)")+';border-radius:10px;padding:8px;text-align:center"><div style="font-size:18px;font-weight:700;color:'+(trend>=0?"#4ade80":"#f87171")+'">'+(trend>0?"+":"")+trend+'</div><div style="font-size:10px;color:#6b6a85">динамика</div></div>';
+html+='</div><div style="display:flex;gap:4px;margin-bottom:14px">';
+last.forEach(function(d){html+='<div style="flex:1;text-align:center;font-size:8px;color:#8B8B85">'+days[new Date(d.date).getDay()]+'</div>';});
+html+='</div><div style="display:flex;gap:8px">';
+html+='<div style="flex:1;background:#F9F9F7;border:1px solid #ECECEA;border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:20px;font-weight:600;color:#1A1A1A;letter-spacing:-0.3px">'+avg+'</div><div style="font-size:10px;color:#8B8B85;margin-top:2px">средний</div></div>';
+html+='<div style="flex:1;background:#F9F9F7;border:1px solid #ECECEA;border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:20px;font-weight:600;color:#FB923C;letter-spacing:-0.3px">'+streak+'</div><div style="font-size:10px;color:#8B8B85;margin-top:2px">стрик</div></div>';
+html+='<div style="flex:1;background:'+(trend>=0?"rgba(200,255,90,0.25)":"#F9F9F7")+';border:1px solid '+(trend>=0?"rgba(200,255,90,0.6)":"#ECECEA")+';border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:20px;font-weight:600;color:'+(trend>=0?"#1A1A1A":"#EC4899")+';letter-spacing:-0.3px">'+(trend>0?"+":"")+trend+'</div><div style="font-size:10px;color:#8B8B85;margin-top:2px">динамика</div></div>';
 html+='</div>';
 var todayDebuff=getDebuffTotal();
 var debuffSum=0,debuffCount=0;
 last.forEach(function(d){var t=getDebuffTotal(d.date);if(t>0){debuffSum+=t;debuffCount++;}});
 var avgDebuff=debuffCount?Math.round(debuffSum/debuffCount):0;
-html+='<div style="margin-top:8px;padding:9px 12px;background:#0a0a0f;border:1px solid #2a2a3a;border-radius:10px;display:flex;justify-content:space-between;align-items:center;font-size:11px">';
-html+='<span style="color:#6b6a85">Debuff сегодня</span>';
-html+='<span style="color:'+(todayDebuff>60?"#f87171":todayDebuff>0?"#fbbf24":"#6b6a85")+';font-weight:700">'+todayDebuff+'м<span style="color:#6b6a85;font-weight:400"> · среднее '+avgDebuff+'м</span></span>';
+html+='<div style="margin-top:10px;padding:11px 14px;background:#F9F9F7;border:1px solid #ECECEA;border-radius:14px;display:flex;justify-content:space-between;align-items:center;font-size:11px">';
+html+='<span style="color:#8B8B85">Debuff сегодня</span>';
+html+='<span style="color:'+(todayDebuff>60?"#EC4899":todayDebuff>0?"#FB923C":"#1A1A1A")+';font-weight:600">'+todayDebuff+'м<span style="color:#8B8B85;font-weight:400"> · среднее '+avgDebuff+'м</span></span>';
 html+='</div>';
 return html;
 }
@@ -430,11 +435,11 @@ input.click();
 }
 
 function renderBackup(){
-var html='<div class="card" style="margin-top:16px"><div style="font-size:11px;color:#6b6a85;margin-bottom:10px;text-transform:uppercase;letter-spacing:1px">Резервная копия</div>';
-html+='<div style="font-size:11px;color:#6b6a85;line-height:1.6;margin-bottom:10px">Данные хранятся только в этом браузере. Сохрани JSON, чтобы перенести на другое устройство.</div>';
+var html='<div class="card" style="margin-top:16px"><div style="font-size:10px;color:#8B8B85;margin-bottom:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:500">Резервная копия</div>';
+html+='<div style="font-size:11px;color:#8B8B85;line-height:1.6;margin-bottom:14px">Данные хранятся только в этом браузере. Сохрани JSON, чтобы перенести на другое устройство.</div>';
 html+='<div style="display:flex;gap:8px">';
-html+='<button onclick="exportData()" style="flex:1;background:rgba(124,106,255,0.15);border:1px solid #7c6aff;color:#7c6aff;border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer">Скачать JSON</button>';
-html+='<button onclick="importData()" style="flex:1;background:transparent;border:1px solid #2a2a3a;color:#a78bfa;border-radius:10px;padding:10px;font-size:12px;font-weight:600;cursor:pointer">Загрузить JSON</button>';
+html+='<button onclick="exportData()" style="flex:1;background:#1A1A1A;border:none;color:#FFFFFF;border-radius:14px;padding:12px;font-size:12px;font-weight:500;cursor:pointer">Скачать</button>';
+html+='<button onclick="importData()" style="flex:1;background:transparent;border:1px solid #ECECEA;color:#1A1A1A;border-radius:14px;padding:12px;font-size:12px;font-weight:500;cursor:pointer">Загрузить</button>';
 html+='</div></div>';
 return html;
 }
