@@ -56,14 +56,12 @@ var TASKS=[
    why:"Поставил чайник — пока кипит, 1 минута отжиманий и 1 минута приседаний. Резкая физическая нагрузка активирует SN и гасит утреннюю DMN. К моменту когда чайник готов — CEN уже работает."},
   {id:"lying",label:"Лежите без телефона",dur:3,icon:"☾",tag:"Мягкий запуск",color:"#94a3b8",
    why:"Первые минуты после пробуждения мозг ещё в дельта/тета. Не хватать телефон — значит не нагружать SN внешним стимулом. Просто полежать без экрана: дать дефолтной сети плавно перейти в рабочий режим."},
-  {id:"meditation",label:"Медитация",dur:20,icon:"◎",tag:"CEN напрямую",color:"#7c6aff",
-   why:"Каждый раз когда замечаете отвлечение и возвращаетесь -- dlPFC делает повторение. За 20 минут их 30--50. Силовая тренировка префронтальной коры."},
+  {id:"meditation",label:"Медитация",dur:9,icon:"◎",tag:"CEN напрямую",color:"#7c6aff",
+   why:"Каждый раз когда замечаете отвлечение и возвращаетесь -- dlPFC делает повторение. 9 минут — короткий блок без скатывания в расслабление. Силовая тренировка префронтальной коры."},
   {id:"washing",label:"Умывание",dur:15,icon:"◐",tag:"Закрытый цикл",color:"#38bdf8",
    why:"Утренний душ/умывание прохладной водой — мягкий стимул для SN. Завершённый цикл: начал — закончил. Ещё одна тренировка CEN на структуре."},
-  {id:"cooking",label:"Готовите завтрак",dur:20,icon:"◑",tag:"Закрытый цикл",color:"#fb923c",
-   why:"Готовка — серия маленьких решений и завершённых действий. 20 минут это десятки микро-циклов CEN. Ощутимый результат на тарелке = дофамин завершения."},
-  {id:"breakfast",label:"Завтрак",dur:20,icon:"●",tag:"Глюкоза для dlPFC",color:"#f59e0b",
-   why:"dlPFC потребляет глюкозу. Первый приём пищи задаёт ресурс на утро. Без телефона за столом — внимание остаётся на еде, без переключений."},
+  {id:"breakfast",label:"Завтрак",dur:40,icon:"●",tag:"Глюкоза для dlPFC",color:"#f59e0b",
+   why:"Готовка + еда без телефона. 40 минут на один процесс. Готовка — десятки маленьких завершённых циклов (взял-нарезал-готово), тренирует CEN на структуре. Сам завтрак даёт глюкозу для dlPFC. Без телефона за столом — внимание остаётся на еде."},
   {id:"writing",label:"Запись от руки",dur:5,icon:"✦",tag:"dlPFC активация",color:"#a78bfa",
    why:"Письмо от руки требует удержания мысли в рабочей памяти. Прямая нагрузка на CEN -- в отличие от печати, которая автоматична."},
   {id:"deep_work",label:"Экзистенциальная безопасность",dur:50,icon:"▣",tag:"Главная тренировка",color:"#60a5fa",
@@ -86,8 +84,7 @@ var VARIANTS=[
      {id:"calibration",dur:3},
      {id:"meditation",dur:9},
      {id:"washing",dur:15},
-     {id:"cooking",dur:20},
-     {id:"breakfast",dur:20},
+     {id:"breakfast",dur:40},
      {id:"walk",dur:40},
      {id:"cleaning",dur:30},
      {id:"deep_work",dur:50}
@@ -97,8 +94,7 @@ var VARIANTS=[
      {id:"calibration",dur:3},
      {id:"meditation",dur:9},
      {id:"washing",dur:15},
-     {id:"cooking",dur:20},
-     {id:"breakfast",dur:20},
+     {id:"breakfast",dur:40},
      {id:"walk",dur:35},
      {id:"cleaning",dur:30},
      {id:"deep_work",dur:50}
@@ -108,8 +104,7 @@ var VARIANTS=[
      {id:"calibration",dur:3},
      {id:"meditation",dur:9},
      {id:"washing",dur:15},
-     {id:"cooking",dur:20},
-     {id:"breakfast",dur:20},
+     {id:"breakfast",dur:40},
      {id:"walk",dur:30},
      {id:"cleaning",dur:30}
    ]},
@@ -118,8 +113,7 @@ var VARIANTS=[
      {id:"calibration",dur:3},
      {id:"meditation",dur:9},
      {id:"washing",dur:15},
-     {id:"cooking",dur:20},
-     {id:"breakfast",dur:20},
+     {id:"breakfast",dur:40},
      {id:"walk",dur:25},
      {id:"cleaning",dur:20}
    ]},
@@ -128,8 +122,7 @@ var VARIANTS=[
      {id:"calibration",dur:3},
      {id:"meditation",dur:9},
      {id:"washing",dur:15},
-     {id:"cooking",dur:20},
-     {id:"breakfast",dur:20},
+     {id:"breakfast",dur:40},
      {id:"walk",dur:20},
      {id:"cleaning",dur:20}
    ]},
@@ -137,8 +130,7 @@ var VARIANTS=[
    plan:[
      {id:"calibration",dur:3},
      {id:"washing",dur:15},
-     {id:"cooking",dur:20},
-     {id:"breakfast",dur:20},
+     {id:"breakfast",dur:40},
      {id:"walk",dur:15},
      {id:"onething",dur:15}
    ]}
