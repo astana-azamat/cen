@@ -159,8 +159,6 @@ render();
 function getAffirmations(){return load("cen:affirmations")||DEFAULT_AFFIRMATIONS;}
 
 function maybeStartIntro(){
-var hour=new Date().getHours();
-if(hour>=12)return;
 var saved=load("cen:intro:"+today());
 if(saved==="done"||saved==="skipped")return;
 var step=typeof saved==="number"?saved:0;
