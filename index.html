@@ -159,11 +159,7 @@ render();
 function getAffirmations(){return load("cen:affirmations")||DEFAULT_AFFIRMATIONS;}
 
 function maybeStartIntro(){
-var saved=load("cen:intro:"+today());
-if(saved==="done"||saved==="skipped")return;
-var step=typeof saved==="number"?saved:0;
-if(step>=getAffirmations().length)return;
-state.intro={step:step,exiting:false,final:false};
+state.intro={step:0,exiting:false,final:false};
 }
 
 function checkAffirmation(){
