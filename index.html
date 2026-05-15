@@ -82,6 +82,12 @@ var TASKS=[
    why:"50 минут на постоянных клиентов: ответы, поддержка, обновления. Без переключений. Удержание внимания на людях — отдельная тренировка CEN, отличная от работы над задачей."},
   {id:"empire",label:"Создаю империю",dur:50,icon:"◙",tag:"Новые проекты",color:"#84CC16",
    why:"50 минут на новые проекты — то что строит будущее. Без переключений. CEN тренируется на удержании сложного контекста и долгосрочного видения."},
+  {id:"sport",label:"Тренировка",dur:30,icon:"▶",tag:"Бокс или турник",color:"#84CC16",
+   why:"Бокс или турник, на выбор. Сила, координация, дыхание. Физическая нагрузка перезапускает CEN через дофамин усилия, а не дофамин стимула."},
+  {id:"english",label:"English",dur:30,icon:"◖",tag:"Язык миру",color:"#84CC16",
+   why:"30 минут английского каждый день. CEN держит двойной контекст: смысл + новый код. Свободно выражать мысли = свободно мыслить."},
+  {id:"book",label:"Книга",dur:30,icon:"▭",tag:"Развитие вечером",color:"#84CC16",
+   why:"30 минут чтения. Расширение картины мира перед сном. CEN восстанавливается через структурированную, но мягкую нагрузку."},
   {id:"walk",label:"Прогулка без телефона",dur:20,icon:"◇",tag:"DMN↔CEN синхронизация",color:"#84CC16",
    why:"Во время ходьбы без стимуляции DMN и CEN синхронизируются. Это не отдых -- интеграция. Поэтому лучшие идеи приходят на прогулке."},
   {id:"cleaning",label:"Порядок",dur:20,icon:"◈",tag:"И вещей, и мыслей",color:"#84CC16",
@@ -99,10 +105,11 @@ var TASKS=[
 ];
 
 var TASK_GROUPS={
-  morning:["calibration","meditation","washing","breakfast","walk","onething"],
-  day:["deep_work","clients","empire"],
-  evening:["food_plan","cleaning","bath","drink","lying","sleep"]
+  morning:["calibration","meditation","walk","onething","english"],
+  day:["deep_work","clients","empire","sport"],
+  evening:["food_plan","cleaning","bath","drink","lying","book","sleep"]
 };
+var MORNING_BASE=["washing","breakfast"];
 var CARDS=[
   {title:"Что такое CEN",sub:"Исполнительная сеть",icon:"◈",color:"#84CC16",
    body:"CEN -- CEO мозга. Дорсолатеральная префронтальная кора (dlPFC) и задняя теменная кора. Отвечает за рабочую память, планирование, решения, подавление импульсов. Самая энергозатратная сеть."},
@@ -304,8 +311,65 @@ ids.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 return html;
 }
 
-function renderMorning(){return renderTaskGroup(TASK_GROUPS.morning);}
-function renderDay(){return renderTaskGroup(TASK_GROUPS.day);}
+function formatDur(mins){
+if(mins<60)return mins+"м";
+var h=Math.floor(mins/60),m=mins%60;
+return h+"ч"+(m?" "+m+"м":"");
+}
+
+function ritualRow(t){
+var html='<div style="display:flex;align-items:center;gap:12px;padding:10px 4px">';
+html+='<div style="width:8px;height:8px;border-radius:3px;background:#84CC16;flex-shrink:0"></div>';
+html+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:#1A1A1A">'+t.label+'</div>';
+html+='<div style="font-size:11px;color:#84CC16;margin-top:2px">'+t.tag+'</div></div>';
+html+='<div style="display:flex;align-items:center;gap:4px;font-size:11px;color:#8B8B85"><span style="font-size:10px">◷</span>'+formatDur(t.dur)+'</div>';
+html+='</div>';
+return html;
+}
+
+function renderBaseRituals(baseIds,trackedIds,blockName){
+var rituals=baseIds.map(findTask).filter(Boolean);
+if(!rituals.length)return "";
+var baseTime=rituals.reduce(function(s,r){return s+r.dur;},0);
+var trackedTime=trackedIds.map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
+var total=baseTime+trackedTime;
+var html='<div class="card" style="margin-top:18px"><div style="font-size:11px;color:#8B8B85;margin-bottom:8px">Базовые ритуалы <span style="color:#C8C8C5">(без отметки)</span></div>';
+rituals.forEach(function(r){html+=ritualRow(r);});
+html+='<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(200,255,90,0.18);border-radius:14px;padding:11px 14px;margin-top:8px;font-size:12px">';
+html+='<span style="color:#1A1A1A;font-weight:500"><span style="color:#84CC16;margin-right:6px">◷</span>Время базовых ритуалов</span>';
+html+='<span style="color:#1A1A1A;font-weight:600">'+formatDur(baseTime)+'</span></div>';
+html+='</div>';
+html+='<div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #ECECEA;border-radius:22px;padding:14px 18px;margin-top:12px">';
+html+='<div style="width:40px;height:40px;border-radius:14px;background:#C8FF5A;display:flex;align-items:center;justify-content:center;font-size:14px;color:#1A1A1A;flex-shrink:0">◷</div>';
+html+='<div style="flex:1"><div style="font-size:13px;font-weight:500;color:#1A1A1A">Итого время блока</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:2px">План на '+blockName+'</div></div>';
+html+='<div style="font-size:18px;font-weight:600;color:#84CC16;letter-spacing:-0.3px">'+formatDur(total)+'</div>';
+html+='</div>';
+return html;
+}
+
+function renderMorning(){
+var ids=TASK_GROUPS.morning;
+var done=ids.filter(function(id){return !!state.checked[id];}).length;
+var html='<div style="font-size:12px;color:#8B8B85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
+ids.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
+html+=renderBaseRituals(MORNING_BASE,ids,"утро");
+return html;
+}
+
+function renderDay(){
+var ids=TASK_GROUPS.day;
+var done=ids.filter(function(id){return !!state.checked[id];}).length;
+var html='<div style="font-size:12px;color:#8B8B85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
+ids.slice(0,3).forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
+var sport=findTask("sport");
+if(sport){
+html+='<div style="display:flex;align-items:center;gap:10px;margin:20px 4px 10px"><div style="font-size:10px;color:#8B8B85;text-transform:uppercase;letter-spacing:1.5px;font-weight:500">Физическая</div><div style="flex:1;height:1px;background:#ECECEA"></div></div>';
+html+=taskCard(sport);
+}
+return html;
+}
+
 function renderEveningTasks(){return renderTaskGroup(TASK_GROUPS.evening);}
 
 function renderQuestionnaire(){
