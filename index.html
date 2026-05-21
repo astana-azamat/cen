@@ -94,14 +94,16 @@ var TASKS=[
    why:"30 минут чтения. Расширение картины мира перед сном. CEN восстанавливается через структурированную, но мягкую нагрузку."},
   {id:"walk",label:"Прогулка без телефона",dur:20,icon:"◇",tag:"DMN↔CEN синхронизация",color:"#84CC16",
    why:"Во время ходьбы без стимуляции DMN и CEN синхронизируются. Это не отдых -- интеграция. Поэтому лучшие идеи приходят на прогулке."},
-  {id:"cleaning",label:"Порядок",dur:20,icon:"◈",tag:"И вещей, и мыслей",color:"#84CC16",
-   why:"Порядок и в вещах, и в мыслях. 20 минут уборки = десятки завершённых циклов CEN. Убранное пространство снижает фоновую нагрузку на внимание — меньше мест где зацепится мысль."},
+  {id:"cleaning",label:"Порядок",dur:15,icon:"◈",tag:"И вещей, и мыслей",color:"#84CC16",
+   why:"Порядок и в вещах, и в мыслях. 15 минут уборки = десятки завершённых циклов CEN. Убранное пространство снижает фоновую нагрузку на внимание — меньше мест где зацепится мысль."},
   {id:"food_plan",label:"План на еду на завтра",dur:0,icon:"□",tag:"Снять решение",color:"#84CC16",
    why:"Решение что есть завтра принимается сегодня вечером. Утром CEN не тратится на выбор и не ловится на импульс к мусорной еде. Свежая CEN утром просто исполняет."},
-  {id:"drink",label:"Кефир и тёплая вода",dur:0,icon:"○",tag:"Подготовка ко сну",color:"#84CC16",
+  {id:"drink",label:"Кефир и тёплая вода",dur:15,icon:"○",tag:"Отдых и тепло",color:"#84CC16",
    why:"Кефир даёт триптофан — предшественник серотонина и мелатонина. Тёплая вода успокаивает ЖКТ и снижает кортизол. Оба сигнала телу что день закончен."},
-  {id:"bath",label:"Горячая ванна",dur:0,icon:"◑",tag:"Вечерний ритуал",color:"#84CC16",
-   why:"Горячая ванна за 1--2 часа до сна снижает температуру тела после выхода, что ускоряет засыпание и улучшает глубокий сон. Прямо влияет на восстановление prefrontal cortex за ночь."},
+  {id:"bath",label:"Горячая ванна / душ",dur:20,icon:"◑",tag:"Вечерний ритуал",color:"#84CC16",
+   why:"Горячая ванна или душ за 1--2 часа до сна снижает температуру тела после выхода, что ускоряет засыпание и улучшает глубокий сон. Прямо влияет на восстановление prefrontal cortex за ночь."},
+  {id:"tomorrow_focus",label:"Завтрашний фокус",dur:1,icon:"☀",tag:"Одно слово или фраза на завтра",color:"#84CC16",
+   why:"Одно слово или короткая фраза, задающая завтрашний день. Решение принято сегодня вечером — утром CEN не тратится на выбор направления."},
   {id:"sleep",label:"Фиксированный отбой",dur:0,icon:"☽",tag:"Базовое условие",color:"#84CC16",
    why:"Одна ночь недосыпа снижает производительность prefrontal cortex на 20--30%. Никакие практики это не компенсируют."},
   {id:"onething",label:"Одно дело дома",dur:15,icon:"⌂",tag:"Если есть ресурс",color:"#84CC16",
@@ -115,7 +117,7 @@ var TASKS=[
 var TASK_GROUPS={
   morning:["calibration","meditation","main_thought","walk","english"],
   day:["day_b1","day_b2","sport"],
-  evening:["food_plan","cleaning","bath","drink","lying","book","sleep"]
+  evening:["evening_note","cleaning","bath","drink","tomorrow_focus"]
 };
 var MORNING_BASE=["water_light","washing","breakfast"];
 var MORNING_FREE=["onething","desk","flowers"];
@@ -159,7 +161,7 @@ var DEFAULT_AFFIRMATIONS=[
   {id:"wealth",icon:"💵",title:"Я сказочно богат",text:"Я создаю ценность и изобилие."}
 ];
 
-var state={tab:"morning",checked:{},history:[],checkin:null,openTask:null,scores:{},celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"medium",sportChoice:null,editingFocus:false,themeSheet:false};
+var state={tab:"morning",checked:{},history:[],checkin:null,openTask:null,scores:{},celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"medium",sportChoice:null,editingFocus:false,themeSheet:false,eveningNote:"",editingNote:false};
 
 function today(){return new Date().toISOString().split("T")[0];}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -173,9 +175,11 @@ var fc=load("cen:focus:"+today());
 var th=load("cen:theme:"+today());
 var pr=load("cen:priority:"+today());
 var sp=load("cen:sport:"+today());
+var en=load("cen:evening_note:"+today());
 if(ch)state.checked=ch;
 if(hi)state.history=hi;
 if(ci)state.checkin=ci;
+if(en)state.eveningNote=en;
 if(fc)state.focusText=fc;
 if(th)state.themeOverride=th;
 if(pr)state.priority=pr;
@@ -298,18 +302,19 @@ document.getElementById("bottom-nav").innerHTML=html;
 
 function setTab(t){state.tab=t;render();}
 
+function checkGroupDone(id){
+Object.keys(TASK_GROUPS).forEach(function(g){
+var ids=TASK_GROUPS[g];
+if(ids.indexOf(id)===-1)return;
+if(ids.every(function(i){return !!state.checked[i];}))celebrate(g);
+});
+}
+
 function toggleTask(id){
 var wasChecked=!!state.checked[id];
 state.checked[id]=!wasChecked;
 save("cen:checked:"+today(),state.checked);
-if(!wasChecked){
-Object.keys(TASK_GROUPS).forEach(function(g){
-var ids=TASK_GROUPS[g];
-if(ids.indexOf(id)===-1)return;
-var allDone=ids.every(function(i){return !!state.checked[i];});
-if(allDone)celebrate(g);
-});
-}
+if(!wasChecked)checkGroupDone(id);
 render();
 }
 
@@ -317,6 +322,19 @@ function celebrate(group){
 try{if(navigator.vibrate)navigator.vibrate([60,40,80]);}catch(e){}
 state.celebrating=group;
 setTimeout(function(){state.celebrating=null;render();},800);
+}
+
+function toggleNoteEdit(){state.editingNote=!state.editingNote;render();if(state.editingNote)setTimeout(function(){var e=document.getElementById("note-input");if(e)e.focus();},60);}
+function saveEveningNote(){
+var e=document.getElementById("note-input");
+var wasFilled=!!state.checked.evening_note;
+if(e)state.eveningNote=e.value.trim();
+save("cen:evening_note:"+today(),state.eveningNote);
+state.checked.evening_note=!!state.eveningNote;
+save("cen:checked:"+today(),state.checked);
+state.editingNote=false;
+if(state.checked.evening_note&&!wasFilled)checkGroupDone("evening_note");
+render();
 }
 
 function openTask(id){
@@ -586,7 +604,33 @@ html+='</div></div></div>';
 return html;
 }
 
-function renderEveningTasks(){return renderTaskGroup(TASK_GROUPS.evening);}
+function renderEveningNote(){
+var txt=state.eveningNote;
+var html='<div style="background:rgba(200,255,90,0.22);border-radius:20px;padding:16px;margin-bottom:14px">';
+html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
+html+='<div style="flex:1;min-width:0">';
+html+='<div style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px">✎ Запись дня</div>';
+if(state.editingNote){
+html+='<textarea id="note-input" maxlength="200" rows="2" placeholder="Что было живым сегодня?" onblur="saveEveningNote()" style="width:100%;border:none;background:transparent;font-size:14px;color:#1A1A1A;font-family:inherit;outline:none;resize:none;line-height:1.5">'+escAttr(txt)+'</textarea>';
+}else{
+html+='<div onclick="toggleNoteEdit()" style="cursor:pointer;font-size:14px;line-height:1.5;color:'+(txt?"#1A1A1A":"#8B8B85")+';'+(txt?"":"font-style:italic")+'">'+(txt?escAttr(txt):"Что было живым сегодня?")+'</div>';
+}
+html+='</div>';
+html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-left:12px;flex-shrink:0">';
+html+='<span style="font-size:11px;color:#8B8B85">5м</span>';
+html+='<span onclick="toggleNoteEdit()" style="width:32px;height:32px;border-radius:11px;background:#FFFFFF;border:1px solid rgba(132,204,22,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#5C7A00;font-size:13px">✎</span>';
+html+='</div></div></div>';
+return html;
+}
+
+function renderEveningTasks(){
+var ids=TASK_GROUPS.evening;
+var done=ids.filter(function(id){return !!state.checked[id];}).length;
+var html='<div style="font-size:12px;color:#8B8B85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
+html+=renderEveningNote();
+["cleaning","bath","drink","tomorrow_focus"].forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
+return html;
+}
 
 function renderQuestionnaire(){
 if(state.checkin){
