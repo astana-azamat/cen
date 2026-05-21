@@ -72,6 +72,8 @@ var TASKS=[
    why:"Первые минуты после пробуждения мозг ещё в дельта/тета. Не хватать телефон — значит не нагружать SN внешним стимулом. Просто полежать без экрана: дать дефолтной сети плавно перейти в рабочий режим."},
   {id:"meditation",label:"Медитация",dur:9,icon:"◎",tag:"CEN напрямую",color:"#84CC16",
    why:"Каждый раз когда замечаете отвлечение и возвращаетесь -- dlPFC делает повторение. 9 минут — короткий блок без скатывания в расслабление. Силовая тренировка префронтальной коры."},
+  {id:"main_thought",label:"Одна главная мысль дня",dur:5,icon:"◉",tag:"Якорь дня",color:"#84CC16",
+   why:"Утром у ENFP активны десятки направлений сразу — клиенты, идеи, проекты. Всё кажется срочным. Без одного фокуса весь день реагируешь на входящее, вместо того чтобы создавать главное.\n\nНе список — список для ENFP это тревога в письменном виде. Одна мысль — это направление, не обязательство. «Сегодня я про клиентов» вместо «позвонить, дописать, разобрать, обновить». Первое давит, второе ориентирует.\n\nЭто якорь при турбулентности: когда в 14:00 ты потерялся и не знаешь за что взяться — возвращаешься к ней. Один из трёх несущих элементов дня вместе с медитацией и физической нагрузкой."},
   {id:"water_light",label:"Тёплая вода и свет",dur:5,icon:"◔",tag:"Запуск организма",color:"#84CC16",
    why:"Стакан тёплой воды запускает ЖКТ. Выйти на дневной свет — сигнал для циркадных часов: подавляет мелатонин, запускает кортизоловый пик бодрости."},
   {id:"washing",label:"Умывание",dur:15,icon:"◐",tag:"Закрытый цикл",color:"#84CC16",
@@ -101,15 +103,22 @@ var TASKS=[
   {id:"bath",label:"Горячая ванна",dur:0,icon:"◑",tag:"Вечерний ритуал",color:"#84CC16",
    why:"Горячая ванна за 1--2 часа до сна снижает температуру тела после выхода, что ускоряет засыпание и улучшает глубокий сон. Прямо влияет на восстановление prefrontal cortex за ночь."},
   {id:"sleep",label:"Фиксированный отбой",dur:0,icon:"☽",tag:"Базовое условие",color:"#84CC16",
-   why:"Одна ночь недосыпа снижает производительность prefrontal cortex на 20--30%. Никакие практики это не компенсируют."}
+   why:"Одна ночь недосыпа снижает производительность prefrontal cortex на 20--30%. Никакие практики это не компенсируют."},
+  {id:"onething",label:"Одно дело дома",dur:15,icon:"⌂",tag:"Если есть ресурс",color:"#84CC16",
+   why:"Одна задача, одно завершение. Есть ресурс — сделал. Нет — не насилуешь себя. Свободное действие, не обязательство."},
+  {id:"desk",label:"Разобрать стол",dur:10,icon:"▤",tag:"По потоку",color:"#84CC16",
+   why:"Разобрать стол когда руки сами тянутся навести порядок. Завершённый цикл без принуждения."},
+  {id:"flowers",label:"Полить цветы",dur:5,icon:"❀",tag:"Когда вспомнишь",color:"#84CC16",
+   why:"Полить цветы когда вспомнишь. Маленький завершённый цикл, который ни к чему не обязывает."}
 ];
 
 var TASK_GROUPS={
-  morning:["calibration","meditation","walk","english"],
+  morning:["calibration","meditation","main_thought","walk","english"],
   day:["deep_work","clients","empire","sport"],
   evening:["food_plan","cleaning","bath","drink","lying","book","sleep"]
 };
 var MORNING_BASE=["water_light","washing","breakfast"];
+var MORNING_FREE=["onething","desk","flowers"];
 var CARDS=[
   {title:"Что такое CEN",sub:"Исполнительная сеть",icon:"◈",color:"#84CC16",
    body:"CEN -- CEO мозга. Дорсолатеральная префронтальная кора (dlPFC) и задняя теменная кора. Отвечает за рабочую память, планирование, решения, подавление импульсов. Самая энергозатратная сеть."},
@@ -235,7 +244,7 @@ html+='<div style="font-size:10px;color:'+phase.color+';font-weight:600;text-tra
 html+='<div style="font-size:11px;color:#8B8B85;margin-top:4px">'+days+' дн</div></div></div>';
 html+='<div style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:baseline">';
 html+='<span style="font-size:11px;color:#8B8B85">'+labelText+'</span>';
-html+='<span style="font-size:11px;color:#1A1A1A;font-weight:600">'+done+'/'+total+'</span></div>';
+html+='<span style="font-size:11px;color:#1A1A1A;font-weight:600">'+done+'/'+total+(tab==="morning"?' <span style="color:#84CC16">core</span>':'')+'</span></div>';
 html+='<div style="display:flex;align-items:center;gap:10px">';
 html+='<div class="progress-bar" style="flex:1;margin-bottom:0"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
 if(emoji)html+='<span class="'+(celebrating?"emoji-pop":"")+'" style="font-size:'+emojiSize+'px;width:36px;text-align:center;line-height:1">'+emoji+'</span>';
@@ -348,11 +357,41 @@ html+='</div>';
 return html;
 }
 
+function renderFreeActions(ids){
+var html='<div style="border:1.5px dashed #D8D8D5;border-radius:24px;padding:6px 14px 12px;margin-top:18px">';
+html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px 4px 10px">';
+html+='<span style="font-size:13px;font-weight:600;color:#1A1A1A">Свободные действия</span>';
+html+='<div style="display:flex;align-items:center;gap:8px">';
+html+='<span style="font-size:9px;color:#8B8B85;background:rgba(200,255,90,0.3);border-radius:8px;padding:4px 9px">не влияют на прогресс</span>';
+html+='<span onclick="alert(\'Свободные действия — необязательные. Делай если есть ресурс и желание. Они не входят в прогресс дня и не создают давления.\')" style="width:20px;height:20px;border-radius:50%;border:1px solid #D8D8D5;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8B8B85;cursor:pointer;font-style:italic;flex-shrink:0">i</span>';
+html+='</div></div>';
+ids.forEach(function(id){var t=findTask(id);if(t)html+=freeActionRow(t);});
+html+='</div>';
+return html;
+}
+
+function freeActionRow(t){
+var ch=!!state.checked[t.id];
+var open=state.openTask===t.id;
+var html='<div style="border-top:1px solid #ECECEA">';
+html+='<div style="display:flex;align-items:center;gap:12px;padding:13px 4px;cursor:pointer" onclick="openTask(\''+t.id+'\')">';
+html+='<div style="width:36px;height:36px;border-radius:12px;background:#F0F0EE;display:flex;align-items:center;justify-content:center;font-size:14px;color:#8B8B85;flex-shrink:0;font-weight:300">'+t.icon+'</div>';
+html+='<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500;color:'+(ch?"#8B8B85":"#1A1A1A")+';text-decoration:'+(ch?"line-through":"none")+'">'+t.label+'</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:2px">'+t.tag+'</div></div>';
+if(t.dur>0)html+='<span style="font-size:11px;color:#8B8B85">'+t.dur+'м</span>';
+html+='<div onclick="event.stopPropagation();toggleTask(\''+t.id+'\')" style="width:24px;height:24px;border-radius:8px;border:'+(ch?"none":"1.5px solid #D8D8D5")+';background:'+(ch?"#C8FF5A":"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;color:#1A1A1A;font-size:12px;font-weight:600">'+(ch?"✓":"")+'</div>';
+html+='</div>';
+if(open)html+='<div style="padding:0 4px 14px"><div style="font-size:12px;color:#5A5A55;line-height:1.7;background:#F4F4F2;border-radius:14px;padding:12px 14px">'+t.why+'</div></div>';
+html+='</div>';
+return html;
+}
+
 function renderMorning(){
 var ids=TASK_GROUPS.morning;
 var done=ids.filter(function(id){return !!state.checked[id];}).length;
 var html='<div style="font-size:12px;color:#8B8B85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
 ids.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
+html+=renderFreeActions(MORNING_FREE);
 html+=renderBaseRituals(MORNING_BASE,ids,"утро");
 return html;
 }
