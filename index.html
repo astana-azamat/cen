@@ -114,11 +114,22 @@ var TASKS=[
 
 var TASK_GROUPS={
   morning:["calibration","meditation","main_thought","walk","english"],
-  day:["deep_work","clients","empire","sport"],
+  day:["day_b1","day_b2","sport"],
   evening:["food_plan","cleaning","bath","drink","lying","book","sleep"]
 };
 var MORNING_BASE=["water_light","washing","breakfast"];
 var MORNING_FREE=["onething","desk","flowers"];
+var THEMES=[
+  {id:"empire",label:"Создаю империю",days:[1,4],sub:"Пн / Чт",desc:"День действия, роста и новых проектов."},
+  {id:"clients",label:"Спокойствие души",days:[2,5],sub:"Вт / Пт",desc:"День внимания к постоянным клиентам."},
+  {id:"existential",label:"Экзистенциальная безопасность",days:[3,6],sub:"Ср / Сб",desc:"День глубокой работы над одним проектом."},
+  {id:"free",label:"Свободный день",days:[0],sub:"Вс",desc:"Восстановление — это тоже работа."}
+];
+var PRIORITIES=[
+  {id:"high",label:"Высокий",color:"#EF4444",b1:50,pause:20,b2:50},
+  {id:"medium",label:"Средний",color:"#FB923C",b1:35,pause:25,b2:35},
+  {id:"light",label:"Лёгкий",color:"#84CC16",b1:25,pause:30,b2:25}
+];
 var CARDS=[
   {title:"Что такое CEN",sub:"Исполнительная сеть",icon:"◈",color:"#84CC16",
    body:"CEN -- CEO мозга. Дорсолатеральная префронтальная кора (dlPFC) и задняя теменная кора. Отвечает за рабочую память, планирование, решения, подавление импульсов. Самая энергозатратная сеть."},
@@ -148,7 +159,7 @@ var DEFAULT_AFFIRMATIONS=[
   {id:"wealth",icon:"💵",title:"Я сказочно богат",text:"Я создаю ценность и изобилие."}
 ];
 
-var state={tab:"morning",checked:{},history:[],checkin:null,openTask:null,scores:{},celebrating:null,intro:null};
+var state={tab:"morning",checked:{},history:[],checkin:null,openTask:null,scores:{},celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"medium",sportChoice:null,editingFocus:false,themeSheet:false};
 
 function today(){return new Date().toISOString().split("T")[0];}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -158,12 +169,35 @@ function init(){
 var ch=load("cen:checked:"+today());
 var hi=load("cen:history");
 var ci=load("cen:checkin:"+today());
+var fc=load("cen:focus:"+today());
+var th=load("cen:theme:"+today());
+var pr=load("cen:priority:"+today());
+var sp=load("cen:sport:"+today());
 if(ch)state.checked=ch;
 if(hi)state.history=hi;
 if(ci)state.checkin=ci;
+if(fc)state.focusText=fc;
+if(th)state.themeOverride=th;
+if(pr)state.priority=pr;
+if(sp)state.sportChoice=sp;
 maybeStartIntro();
 render();
 }
+
+function findTheme(id){for(var i=0;i<THEMES.length;i++)if(THEMES[i].id===id)return THEMES[i];return null;}
+function getActiveTheme(){
+if(state.themeOverride){var t=findTheme(state.themeOverride);if(t)return t;}
+var dow=new Date().getDay();
+for(var i=0;i<THEMES.length;i++)if(THEMES[i].days.indexOf(dow)!==-1)return THEMES[i];
+return THEMES[0];
+}
+function getPriority(){for(var i=0;i<PRIORITIES.length;i++)if(PRIORITIES[i].id===state.priority)return PRIORITIES[i];return PRIORITIES[1];}
+function toggleFocusEdit(){state.editingFocus=!state.editingFocus;render();if(state.editingFocus)setTimeout(function(){var e=document.getElementById("focus-input");if(e)e.focus();},60);}
+function saveFocus(){var e=document.getElementById("focus-input");if(e){state.focusText=e.value.trim();save("cen:focus:"+today(),state.focusText);}state.editingFocus=false;render();}
+function setPriority(id){state.priority=id;save("cen:priority:"+today(),id);render();}
+function setTheme(id){state.themeOverride=id;save("cen:theme:"+today(),id);state.themeSheet=false;render();}
+function toggleThemeSheet(){state.themeSheet=!state.themeSheet;render();}
+function setSport(c){state.sportChoice=c;save("cen:sport:"+today(),c);render();}
 
 function getAffirmations(){return load("cen:affirmations")||DEFAULT_AFFIRMATIONS;}
 
@@ -323,7 +357,7 @@ return html;
 function formatDur(mins){
 if(mins<60)return mins+"м";
 var h=Math.floor(mins/60),m=mins%60;
-return h+"ч"+(m?" "+m+"м":"");
+return h+"ч"+(m?" "+(m<10?"0":"")+m+"м":"");
 }
 
 function ritualRow(t){
@@ -397,15 +431,158 @@ return html;
 }
 
 function renderDay(){
-var ids=TASK_GROUPS.day;
-var done=ids.filter(function(id){return !!state.checked[id];}).length;
-var html='<div style="font-size:12px;color:#8B8B85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
-ids.slice(0,3).forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
-var sport=findTask("sport");
-if(sport){
-html+='<div style="display:flex;align-items:center;gap:10px;margin:20px 4px 10px"><div style="font-size:10px;color:#8B8B85;text-transform:uppercase;letter-spacing:1.5px;font-weight:500">Физическая</div><div style="flex:1;height:1px;background:#ECECEA"></div></div>';
-html+=taskCard(sport);
+var theme=getActiveTheme();
+if(theme.id==="free")return renderFreeDay();
+var html=renderFocus();
+html+=renderThemeCard(theme);
+html+=renderPriority();
+html+=renderBlocks(theme);
+html+=renderTraining();
+html+=renderTimeTotal();
+return html;
 }
+
+function renderFreeDay(){
+var html='<div style="text-align:center;padding:80px 24px;color:#8B8B85">';
+html+='<div style="font-size:38px;margin-bottom:18px;color:#84CC16">◍</div>';
+html+='<div style="font-size:19px;font-weight:600;color:#1A1A1A;margin-bottom:10px">Свободный день</div>';
+html+='<div style="font-size:13px;line-height:1.7;max-width:250px;margin:0 auto">Сегодня без блоков и тем. Восстановление — это тоже работа.</div>';
+html+='</div>';
+return html;
+}
+
+function renderFocus(){
+var txt=state.focusText;
+var html='<div style="background:rgba(200,255,90,0.22);border-radius:20px;padding:16px;margin-bottom:14px">';
+html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+html+='<span style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px">Фокус дня</span>';
+html+='<span onclick="toggleFocusEdit()" style="cursor:pointer;color:#5C7A00;font-size:14px">✎</span>';
+html+='</div>';
+if(state.editingFocus){
+html+='<input id="focus-input" maxlength="80" value="'+escAttr(txt)+'" placeholder="Напиши одну мысль дня..." onkeydown="if(event.key===\'Enter\')this.blur()" onblur="saveFocus()" style="width:100%;border:none;background:transparent;font-size:15px;color:#1A1A1A;font-family:inherit;outline:none"/>';
+}else{
+html+='<div onclick="toggleFocusEdit()" style="cursor:pointer;font-size:15px;line-height:1.4;color:'+(txt?"#1A1A1A":"#8B8B85")+';'+(txt?"":"font-style:italic")+'">'+(txt?escAttr(txt):"Напиши одну мысль дня...")+'</div>';
+}
+html+='</div>';
+return html;
+}
+
+function renderThemeCard(theme){
+var html='<div class="card" style="padding:18px">';
+html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+html+='<span style="font-size:10px;font-weight:600;color:#8B8B85;text-transform:uppercase;letter-spacing:1.2px">Тема дня</span>';
+html+='<span style="font-size:9px;font-weight:600;color:#5C7A00;background:rgba(200,255,90,0.4);border-radius:8px;padding:4px 9px;text-transform:uppercase;letter-spacing:0.5px">Активная тема</span>';
+html+='</div>';
+html+='<div style="font-size:20px;font-weight:600;color:#1A1A1A;letter-spacing:-0.3px;line-height:1.2">'+theme.label+'</div>';
+html+='<div style="font-size:12px;color:#84CC16;font-weight:500;margin-top:3px">'+theme.sub+'</div>';
+html+='<div style="font-size:13px;color:#8B8B85;line-height:1.55;margin-top:10px">'+theme.desc+'</div>';
+html+='</div>';
+THEMES.forEach(function(t){
+if(t.id===theme.id||t.id==="free")return;
+html+='<div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #ECECEA;border-radius:18px;padding:14px 16px;margin-bottom:10px">';
+html+='<div style="width:36px;height:36px;border-radius:12px;background:#F0F0EE;flex-shrink:0"></div>';
+html+='<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:#8B8B85">'+t.label+'</div>';
+html+='<div style="font-size:11px;color:#C8C8C5">'+t.sub+'</div></div>';
+html+='<span style="font-size:9px;font-weight:600;color:#8B8B85;background:#F0F0EE;border-radius:8px;padding:4px 8px;text-transform:uppercase;letter-spacing:0.5px">Не сегодня</span>';
+html+='</div>';
+});
+html+='<div onclick="toggleThemeSheet()" style="border:1.5px dashed #D8D8D5;border-radius:16px;padding:13px;text-align:center;font-size:12px;font-weight:500;color:#8B8B85;cursor:pointer;margin-bottom:14px">↻ Сменить тему вручную</div>';
+if(state.themeSheet){
+html+='<div style="background:#F9F9F7;border:1px solid #ECECEA;border-radius:18px;padding:8px;margin-bottom:14px">';
+THEMES.forEach(function(t){
+if(t.id==="free")return;
+var act=t.id===theme.id;
+html+='<div onclick="setTheme(\''+t.id+'\')" style="padding:13px 14px;border-radius:12px;cursor:pointer;'+(act?"background:rgba(200,255,90,0.25)":"")+'">';
+html+='<div style="font-size:13px;font-weight:500;color:#1A1A1A">'+t.label+'</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:2px">'+t.desc+'</div></div>';
+});
+html+='</div>';
+}
+return html;
+}
+
+function renderPriority(){
+var html='<div class="card">';
+html+='<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px">';
+html+='<span style="font-size:10px;font-weight:600;color:#8B8B85;text-transform:uppercase;letter-spacing:1.2px">Приоритет дня</span>';
+html+='<span style="font-size:10px;color:#C8C8C5">влияет на длину блоков</span>';
+html+='</div><div style="display:flex;gap:8px">';
+PRIORITIES.forEach(function(p){
+var sel=state.priority===p.id;
+html+='<div onclick="setPriority(\''+p.id+'\')" style="flex:1;border:1.5px solid '+(sel?p.color:"#ECECEA")+';background:'+(sel?p.color+"14":"#FFFFFF")+';border-radius:16px;padding:12px 6px;cursor:pointer;text-align:center">';
+html+='<div style="display:flex;align-items:center;justify-content:center;gap:5px;margin-bottom:5px"><span style="width:8px;height:8px;border-radius:50%;background:'+p.color+'"></span><span style="font-size:12px;font-weight:600;color:#1A1A1A">'+p.label+'</span></div>';
+html+='<div style="font-size:10px;color:#8B8B85">'+p.b1+' / '+p.pause+' / '+p.b2+'</div>';
+html+='</div>';
+});
+html+='</div></div>';
+return html;
+}
+
+function dayBlockCard(label,id,themeLabel,dur){
+var ch=!!state.checked[id];
+var html='<div style="background:#FFFFFF;border:1px solid #ECECEA;border-radius:20px;padding:14px 16px;margin-bottom:10px">';
+html+='<div style="font-size:9px;font-weight:600;color:#8B8B85;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">'+label+'</div>';
+html+='<div style="display:flex;align-items:center;gap:12px">';
+html+='<div style="width:14px;height:14px;border-radius:5px;background:#84CC16;flex-shrink:0"></div>';
+html+='<div style="flex:1;min-width:0;font-size:15px;font-weight:500;color:'+(ch?"#8B8B85":"#1A1A1A")+';text-decoration:'+(ch?"line-through":"none")+'">'+themeLabel+'</div>';
+html+='<span style="font-size:13px;font-weight:600;color:#84CC16">'+dur+'м</span>';
+html+='<div onclick="toggleTask(\''+id+'\')" style="width:26px;height:26px;border-radius:9px;border:'+(ch?"none":"1.5px solid #D8D8D5")+';background:'+(ch?"#1A1A1A":"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;color:#C8FF5A;font-size:13px;font-weight:600;flex-shrink:0">'+(ch?"✓":"")+'</div>';
+html+='</div></div>';
+return html;
+}
+
+function renderBlocks(theme){
+var p=getPriority();
+var html=dayBlockCard("Блок 1","day_b1",theme.label,p.b1);
+html+='<div style="background:#F7F5EF;border:1px solid #ECE6D6;border-radius:20px;padding:14px 16px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center">';
+html+='<div><div style="font-size:14px;font-weight:500;color:#1A1A1A">Пауза — выйди из потока</div>';
+html+='<div style="font-size:11px;color:#A89B78;margin-top:2px">Еда / прогулка / лёжка</div></div>';
+html+='<span style="font-size:13px;font-weight:600;color:#C99A2E">'+p.pause+'м</span>';
+html+='</div>';
+html+=dayBlockCard("Блок 2","day_b2",theme.label,p.b2);
+return html;
+}
+
+function renderTraining(){
+var ch=!!state.checked.sport;
+var choice=state.sportChoice;
+var html='<div class="card" style="margin-top:4px">';
+html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
+html+='<span style="font-size:10px;font-weight:600;color:#8B8B85;text-transform:uppercase;letter-spacing:1.2px">Тренировка</span>';
+html+='<span style="font-size:13px;font-weight:600;color:#84CC16">30м</span>';
+html+='</div>';
+html+='<div style="display:flex;gap:8px;margin-bottom:12px">';
+[{id:"boxing",label:"Бокс"},{id:"pullup",label:"Турник"}].forEach(function(o){
+var sel=choice===o.id;
+html+='<div onclick="setSport(\''+o.id+'\')" style="flex:1;border:1.5px solid '+(sel?"#84CC16":"#ECECEA")+';background:'+(sel?"rgba(200,255,90,0.18)":"#FFFFFF")+';border-radius:14px;padding:13px;text-align:center;cursor:pointer;font-size:13px;font-weight:500;color:'+(sel?"#1A1A1A":"#8B8B85")+'">'+o.label+'</div>';
+});
+html+='</div>';
+html+='<div style="display:flex;align-items:center;justify-content:space-between">';
+html+='<span style="font-size:11px;color:#C8C8C5">'+(choice?"Можно отметить выполнение":"Выбери один вариант")+'</span>';
+if(choice){
+html+='<div onclick="toggleTask(\'sport\')" style="width:26px;height:26px;border-radius:9px;border:'+(ch?"none":"1.5px solid #D8D8D5")+';background:'+(ch?"#1A1A1A":"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;color:#C8FF5A;font-size:13px;font-weight:600">'+(ch?"✓":"")+'</div>';
+}else{
+html+='<div style="width:26px;height:26px;border-radius:9px;border:1.5px solid #ECECEA;background:#F4F4F2"></div>';
+}
+html+='</div></div>';
+return html;
+}
+
+function renderTimeTotal(){
+var p=getPriority();
+var work=p.b1+p.b2,total=work+p.pause+30;
+var html='<div class="card">';
+html+='<div style="font-size:10px;font-weight:600;color:#8B8B85;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px">Итого времени</div>';
+html+='<div style="display:flex;align-items:center">';
+html+='<div style="flex:1">';
+[["Работа",work],["Пауза",p.pause],["Тренировка",30]].forEach(function(r){
+html+='<div style="display:flex;justify-content:space-between;font-size:12px;color:#8B8B85;margin-bottom:7px;max-width:170px"><span>'+r[0]+'</span><span style="color:#1A1A1A;font-weight:500">'+formatDur(r[1])+'</span></div>';
+});
+html+='</div>';
+html+='<div style="border-left:1px solid #ECECEA;padding-left:18px;text-align:right">';
+html+='<div style="font-size:11px;color:#8B8B85;margin-bottom:2px">Всего</div>';
+html+='<div style="font-size:24px;font-weight:600;color:#84CC16;letter-spacing:-0.5px">'+formatDur(total)+'</div>';
+html+='</div></div></div>';
 return html;
 }
 
