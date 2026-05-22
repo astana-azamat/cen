@@ -256,7 +256,8 @@ var grp=tab==="morning"?TASK_GROUPS.morning:tab==="day"?getDayGroup():TASK_GROUP
 var labelText=tab==="morning"?"Прогресс утра":tab==="day"?"Прогресс дня":"Прогресс вечера";
 var emoji=tab==="morning"?"☀️":tab==="day"?"🔥":"💤";
 var done=grp.filter(function(id){return !!state.checked[id];}).length;
-var total=grp.length;
+var total=tab==="day"?getDayTarget():grp.length;
+if(done>total)done=total;
 var pct=total?Math.round(done/total*100):0;
 var emojiSize=total?Math.round(16+(done/total)*18):16;
 var celebrating=state.celebrating===tab;
@@ -284,15 +285,20 @@ document.getElementById("bottom-nav").innerHTML=html;
 function setTab(t){state.tab=t;render();}
 
 function getDayGroup(){
-return getActiveTheme().id==="free"?["wk_active","wk_rest"]:["day_b1","day_b2","sport"];
+return getActiveTheme().id==="free"?["wk_body","wk_rest","wk_create"]:["day_b1","day_b2","sport"];
+}
+function getDayTarget(){
+return getActiveTheme().id==="free"?2:3;
 }
 
 function checkGroupDone(id){
-[["morning",TASK_GROUPS.morning],["day",getDayGroup()],["evening",TASK_GROUPS.evening]].forEach(function(pair){
-var ids=pair[1];
-if(ids.indexOf(id)===-1)return;
-if(ids.every(function(i){return !!state.checked[i];}))celebrate(pair[0]);
-});
+if(TASK_GROUPS.morning.indexOf(id)!==-1&&TASK_GROUPS.morning.every(function(i){return !!state.checked[i];}))celebrate("morning");
+if(TASK_GROUPS.evening.indexOf(id)!==-1&&TASK_GROUPS.evening.every(function(i){return !!state.checked[i];}))celebrate("evening");
+var dg=getDayGroup();
+if(dg.indexOf(id)!==-1){
+var cnt=dg.filter(function(i){return !!state.checked[i];}).length;
+if(cnt===getDayTarget())celebrate("day");
+}
 }
 
 function toggleTask(id){
@@ -445,16 +451,11 @@ html+=renderTimeTotal();
 return html;
 }
 
-var WEEKEND={
-sat:[
-{id:"wk_active",label:"Тело",opts:"Бокс · прогулка · бассейн · турник",time:"1–1.5ч"},
-{id:"wk_rest",label:"Восстановление",opts:"Люди · кафе · природа · кино",time:"2–3ч"}
-],
-sun:[
-{id:"wk_active",label:"Творчество",opts:"Идеи · проект · рисовать · писать",time:"1.5–2ч"},
-{id:"wk_rest",label:"Тихое восстановление",opts:"Книга · кафе один · тихая прогулка",time:"1–2ч"}
-]
-};
+var WEEKEND=[
+{id:"wk_body",label:"Тело",opts:"Бокс · прогулка · бассейн · турник",time:"1–1.5ч"},
+{id:"wk_rest",label:"Восстановление",opts:"Люди · кафе · природа · кино",time:"2–3ч"},
+{id:"wk_create",label:"Творчество",opts:"Идеи · проект · рисовать · писать",time:"1.5–2ч"}
+];
 
 function weekendZoneCard(z){
 var ch=!!state.checked[z.id];
@@ -471,15 +472,15 @@ return html;
 
 function renderFreeDay(){
 var theme=getActiveTheme();
-var zones=new Date().getDay()===0?WEEKEND.sun:WEEKEND.sat;
-var done=zones.filter(function(z){return !!state.checked[z.id];}).length;
+var doneRaw=WEEKEND.filter(function(z){return !!state.checked[z.id];}).length;
+var done=Math.min(doneRaw,2);
 var html='<div style="text-align:center;padding:8px 8px 16px">';
 html+='<div style="font-size:34px;margin-bottom:12px;color:#84CC16">◍</div>';
 html+='<div style="font-size:22px;font-weight:600;color:#1A1A1A;margin-bottom:8px">'+theme.label+'</div>';
-html+='<div style="font-size:13px;color:#8B8B85;line-height:1.6;max-width:280px;margin:0 auto">Ядро — как утром. Дальше одна якорная активность, и день уже состоялся.</div>';
+html+='<div style="font-size:13px;color:#8B8B85;line-height:1.6;max-width:280px;margin:0 auto">Ядро — как утром. Дальше выбери две якорные активности из трёх — и день уже состоялся.</div>';
 html+='</div>';
-html+='<div style="font-size:12px;color:#8B8B85;margin-bottom:12px;line-height:1.6">'+done+' из '+zones.length+' — якорные активности дня</div>';
-zones.forEach(function(z){html+=weekendZoneCard(z);});
+html+='<div style="font-size:12px;color:#8B8B85;margin-bottom:12px;line-height:1.6">'+done+' из 2 — якорные активности дня</div>';
+WEEKEND.forEach(function(z){html+=weekendZoneCard(z);});
 html+='<div style="background:rgba(200,255,90,0.22);border-radius:18px;padding:16px;margin-top:6px;margin-bottom:14px">';
 html+='<div style="font-size:13px;color:#1A1A1A;line-height:1.65">Выходной удался, если вечером есть ощущение наполненности, а не пустоты. Единственный критерий — не количество сделанного, а качество состояния.</div>';
 html+='</div>';
@@ -679,9 +680,9 @@ var ch=(ds===today())?state.checked:(load("cen:checked:"+ds)||{});
 var m=TASK_GROUPS.morning.filter(function(id){return !!ch[id];}).length;
 var e=TASK_GROUPS.evening.filter(function(id){return !!ch[id];}).length;
 var wd=["day_b1","day_b2","sport"].filter(function(id){return !!ch[id];}).length;
-var we=["wk_active","wk_rest"].filter(function(id){return !!ch[id];}).length;
+var we=["wk_body","wk_rest","wk_create"].filter(function(id){return !!ch[id];}).length;
 var dd,dtotal;
-if(we>0&&wd===0){dd=we;dtotal=2;}else{dd=wd;dtotal=3;}
+if(we>0&&wd===0){dd=Math.min(we,2);dtotal=2;}else{dd=wd;dtotal=3;}
 var pct=0.75*(dd/dtotal)+0.25*((m+e)/(TASK_GROUPS.morning.length+TASK_GROUPS.evening.length));
 return Math.round(pct*100);
 }
@@ -751,8 +752,9 @@ html+='<span style="font-size:12px;color:#8B8B85">вложено ресурса<
 html+='</div>';
 html+='<div style="display:flex;align-items:flex-end;gap:'+(state.period==="month"?"2px":"6px")+';height:88px;margin-bottom:6px">';
 dates.forEach(function(ds){
-var pct=dayEnergy(ds),lvl=energyLevel(pct),h=Math.max(8,pct/100*76);
+var pct=dayEnergy(ds),lvl=energyLevel(pct),h=Math.max(8,pct/100*72);
 html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">';
+if(state.period!=="month")html+='<span style="font-size:9px;font-weight:600;color:'+(pct>0?lvl.color:"#C8C8C5")+';margin-bottom:3px">'+pct+'%</span>';
 html+='<div style="width:100%;max-width:'+(state.period==="day"?"64px":"100%")+';height:'+h+'px;background:'+lvl.color+';border-radius:7px 7px 3px 3px"></div>';
 html+='</div>';
 });
