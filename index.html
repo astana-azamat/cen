@@ -252,7 +252,7 @@ html+='<div style="font-size:10px;color:'+phase.color+';font-weight:600;text-tra
 }
 html+='<div style="font-size:11px;color:#8B8B85;margin-top:4px">'+days+' дн</div></div></div>';
 if(tab!=="summary"){
-var grp=tab==="morning"?TASK_GROUPS.morning:tab==="day"?TASK_GROUPS.day:TASK_GROUPS.evening;
+var grp=tab==="morning"?TASK_GROUPS.morning:tab==="day"?getDayGroup():TASK_GROUPS.evening;
 var labelText=tab==="morning"?"Прогресс утра":tab==="day"?"Прогресс дня":"Прогресс вечера";
 var emoji=tab==="morning"?"☀️":tab==="day"?"🔥":"💤";
 var done=grp.filter(function(id){return !!state.checked[id];}).length;
@@ -283,11 +283,15 @@ document.getElementById("bottom-nav").innerHTML=html;
 
 function setTab(t){state.tab=t;render();}
 
+function getDayGroup(){
+return getActiveTheme().id==="free"?["wk_active","wk_rest"]:["day_b1","day_b2","sport"];
+}
+
 function checkGroupDone(id){
-Object.keys(TASK_GROUPS).forEach(function(g){
-var ids=TASK_GROUPS[g];
+[["morning",TASK_GROUPS.morning],["day",getDayGroup()],["evening",TASK_GROUPS.evening]].forEach(function(pair){
+var ids=pair[1];
 if(ids.indexOf(id)===-1)return;
-if(ids.every(function(i){return !!state.checked[i];}))celebrate(g);
+if(ids.every(function(i){return !!state.checked[i];}))celebrate(pair[0]);
 });
 }
 
@@ -441,12 +445,43 @@ html+=renderTimeTotal();
 return html;
 }
 
+var WEEKEND={
+sat:[
+{id:"wk_active",label:"Тело",opts:"Бокс · прогулка · бассейн · турник",time:"1–1.5ч"},
+{id:"wk_rest",label:"Восстановление",opts:"Люди · кафе · природа · кино",time:"2–3ч"}
+],
+sun:[
+{id:"wk_active",label:"Творчество",opts:"Идеи · проект · рисовать · писать",time:"1.5–2ч"},
+{id:"wk_rest",label:"Тихое восстановление",opts:"Книга · кафе один · тихая прогулка",time:"1–2ч"}
+]
+};
+
+function weekendZoneCard(z){
+var ch=!!state.checked[z.id];
+var html='<div style="background:#FFFFFF;border:1px solid #ECECEA;border-radius:20px;padding:16px;margin-bottom:10px;display:flex;align-items:center;gap:14px">';
+html+='<div style="flex:1;min-width:0">';
+html+='<div style="font-size:15px;font-weight:600;color:'+(ch?"#8B8B85":"#1A1A1A")+';text-decoration:'+(ch?"line-through":"none")+'">'+z.label+'</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:4px">'+z.opts+'</div>';
+html+='</div>';
+html+='<span style="font-size:11px;color:#8B8B85;flex-shrink:0">'+z.time+'</span>';
+html+='<div onclick="toggleTask(\''+z.id+'\')" style="width:26px;height:26px;border-radius:9px;border:'+(ch?"none":"1.5px solid #D8D8D5")+';background:'+(ch?"#1A1A1A":"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;color:#C8FF5A;font-size:13px;font-weight:600;flex-shrink:0">'+(ch?"✓":"")+'</div>';
+html+='</div>';
+return html;
+}
+
 function renderFreeDay(){
 var theme=getActiveTheme();
-var html='<div style="text-align:center;padding:60px 24px 30px;color:#8B8B85">';
-html+='<div style="font-size:38px;margin-bottom:18px;color:#84CC16">◍</div>';
-html+='<div style="font-size:19px;font-weight:600;color:#1A1A1A;margin-bottom:10px">'+theme.label+'</div>';
-html+='<div style="font-size:13px;line-height:1.7;max-width:250px;margin:0 auto">Сегодня без блоков и тем. '+theme.desc+' Восстановление — это тоже работа.</div>';
+var zones=new Date().getDay()===0?WEEKEND.sun:WEEKEND.sat;
+var done=zones.filter(function(z){return !!state.checked[z.id];}).length;
+var html='<div style="text-align:center;padding:8px 8px 16px">';
+html+='<div style="font-size:34px;margin-bottom:12px;color:#84CC16">◍</div>';
+html+='<div style="font-size:22px;font-weight:600;color:#1A1A1A;margin-bottom:8px">'+theme.label+'</div>';
+html+='<div style="font-size:13px;color:#8B8B85;line-height:1.6;max-width:280px;margin:0 auto">Ядро — как утром. Дальше одна якорная активность, и день уже состоялся.</div>';
+html+='</div>';
+html+='<div style="font-size:12px;color:#8B8B85;margin-bottom:12px;line-height:1.6">'+done+' из '+zones.length+' — якорные активности дня</div>';
+zones.forEach(function(z){html+=weekendZoneCard(z);});
+html+='<div style="background:rgba(200,255,90,0.22);border-radius:18px;padding:16px;margin-top:6px;margin-bottom:14px">';
+html+='<div style="font-size:13px;color:#1A1A1A;line-height:1.65">Выходной удался, если вечером есть ощущение наполненности, а не пустоты. Единственный критерий — не количество сделанного, а качество состояния.</div>';
 html+='</div>';
 html+='<div onclick="toggleThemeSheet()" style="border:1.5px dashed #D8D8D5;border-radius:16px;padding:13px;text-align:center;font-size:12px;font-weight:500;color:#8B8B85;cursor:pointer;margin-bottom:14px">↻ Сменить тему</div>';
 html+=renderThemeSheet(theme);
@@ -642,9 +677,12 @@ return a;
 function dayEnergy(ds){
 var ch=(ds===today())?state.checked:(load("cen:checked:"+ds)||{});
 var m=TASK_GROUPS.morning.filter(function(id){return !!ch[id];}).length;
-var dd=TASK_GROUPS.day.filter(function(id){return !!ch[id];}).length;
 var e=TASK_GROUPS.evening.filter(function(id){return !!ch[id];}).length;
-var pct=0.75*(dd/TASK_GROUPS.day.length)+0.25*((m+e)/(TASK_GROUPS.morning.length+TASK_GROUPS.evening.length));
+var wd=["day_b1","day_b2","sport"].filter(function(id){return !!ch[id];}).length;
+var we=["wk_active","wk_rest"].filter(function(id){return !!ch[id];}).length;
+var dd,dtotal;
+if(we>0&&wd===0){dd=we;dtotal=2;}else{dd=wd;dtotal=3;}
+var pct=0.75*(dd/dtotal)+0.25*((m+e)/(TASK_GROUPS.morning.length+TASK_GROUPS.evening.length));
 return Math.round(pct*100);
 }
 function energyLevel(pct){
@@ -701,9 +739,16 @@ return html;
 function renderEnergyCard(){
 var dates=periodDates();
 var title=state.period==="day"?"Энергия дня":state.period==="month"?"Энергия месяца":"Энергия недели";
+var sum=0;dates.forEach(function(ds){sum+=dayEnergy(ds);});
+var avg=dates.length?Math.round(sum/dates.length):0;
+var avgLvl=energyLevel(avg);
 var html='<div class="card">';
 html+='<div style="font-size:13px;font-weight:600;color:#1A1A1A;margin-bottom:2px"><span style="color:#84CC16">⚡</span> '+title+'</div>';
-html+='<div style="font-size:11px;color:#8B8B85;margin-bottom:14px">Сколько ресурса ты вложил каждый день</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-bottom:14px">Сколько ресурса ты вложил'+(state.period==="day"?"":" в среднем")+'</div>';
+html+='<div style="display:flex;align-items:baseline;gap:8px;margin-bottom:16px">';
+html+='<span style="font-size:38px;font-weight:600;color:'+avgLvl.color+';letter-spacing:-1px;line-height:1">'+avg+'%</span>';
+html+='<span style="font-size:12px;color:#8B8B85">вложено ресурса</span>';
+html+='</div>';
 html+='<div style="display:flex;align-items:flex-end;gap:'+(state.period==="month"?"2px":"6px")+';height:88px;margin-bottom:6px">';
 dates.forEach(function(ds){
 var pct=dayEnergy(ds),lvl=energyLevel(pct),h=Math.max(8,pct/100*76);
