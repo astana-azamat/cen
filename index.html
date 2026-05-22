@@ -149,11 +149,6 @@ var CARDS=[
   {title:"Почему соцсети разрушают CEN",sub:"Механизм истощения",icon:"⚡",color:"#84CC16",
    body:"Соцсети требуют поверхностного переключения. CEN активируется без нагрузки -- как стоять с гантелями не поднимая. Каждое переключение -- микро-выброс дофамина, снижающий порог стимуляции."}
 ];
-var EQ=[
-  {id:"focus",label:"Легко ли удерживать фокус?",inv:false},
-  {id:"phone",label:"Тянулся к телефону бессознательно?",inv:true},
-  {id:"clarity",label:"Ясность мышления сейчас?",inv:false}
-];
 
 var DEFAULT_AFFIRMATIONS=[
   {id:"books",icon:"📚",title:"Читающий книги",text:"Я человек, который развивается каждый день."},
@@ -162,7 +157,7 @@ var DEFAULT_AFFIRMATIONS=[
   {id:"wealth",icon:"💵",title:"Я сказочно богат",text:"Я создаю ценность и изобилие."}
 ];
 
-var state={tab:"morning",checked:{},history:[],checkin:null,openTask:null,scores:{},celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"medium",sportChoice:null,editingFocus:false,themeSheet:false,eveningNote:"",editingNote:false};
+var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"medium",sportChoice:null,editingFocus:false,themeSheet:false,eveningNote:"",editingNote:false,period:"week"};
 
 function today(){return new Date().toISOString().split("T")[0];}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
@@ -170,16 +165,12 @@ function load(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}
 
 function init(){
 var ch=load("cen:checked:"+today());
-var hi=load("cen:history");
-var ci=load("cen:checkin:"+today());
 var fc=load("cen:focus:"+today());
 var th=load("cen:theme:"+today());
 var pr=load("cen:priority:"+today());
 var sp=load("cen:sport:"+today());
 var en=load("cen:evening_note:"+today());
 if(ch)state.checked=ch;
-if(hi)state.history=hi;
-if(ci)state.checkin=ci;
 if(en)state.eveningNote=en;
 if(fc)state.focusText=fc;
 if(th)state.themeOverride=th;
@@ -263,31 +254,35 @@ return Object.keys(dates).length;
 }
 
 function renderHeader(){
-var days=Math.max(getActiveDays(),state.history.length);
+var days=getActiveDays();
 var phase=days<14?{n:1,label:"Стабилизация",color:"#8B8B85"}:days<42?{n:2,label:"Строим",color:"#1A1A1A"}:{n:3,label:"Закрепление",color:"#84CC16"};
 var tab=state.tab;
-var ids,labelText,emoji;
-if(tab==="morning"){ids=TASK_GROUPS.morning;labelText="Прогресс утра";emoji="☀️";}
-else if(tab==="day"){ids=TASK_GROUPS.day;labelText="Прогресс дня";emoji="🔥";}
-else if(tab==="evening"){ids=TASK_GROUPS.evening;labelText="Прогресс вечера";emoji="💤";}
-else{ids=TASK_GROUPS.morning.concat(TASK_GROUPS.day,TASK_GROUPS.evening);labelText="Прогресс за день";emoji="";}
-var done=ids.filter(function(id){return !!state.checked[id];}).length;
-var total=ids.length;
+var html='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:'+(tab==="summary"?"20px":"26px")+';gap:12px">';
+html+='<div style="font-size:28px;font-weight:600;color:#1A1A1A;letter-spacing:1px;line-height:1.1;text-transform:uppercase">CEN Trainer</div>';
+html+='<div style="text-align:right;flex-shrink:0;padding-top:6px">';
+if(tab==="summary"){
+html+='<div style="font-size:10px;color:#84CC16;font-weight:600;text-transform:uppercase;letter-spacing:1.2px">Сводка</div>';
+}else{
+html+='<div style="font-size:10px;color:'+phase.color+';font-weight:600;text-transform:uppercase;letter-spacing:1.2px">'+phase.label+'</div>';
+}
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:4px">'+days+' дн</div></div></div>';
+if(tab!=="summary"){
+var grp=tab==="morning"?TASK_GROUPS.morning:tab==="day"?TASK_GROUPS.day:TASK_GROUPS.evening;
+var labelText=tab==="morning"?"Прогресс утра":tab==="day"?"Прогресс дня":"Прогресс вечера";
+var emoji=tab==="morning"?"☀️":tab==="day"?"🔥":"💤";
+var done=grp.filter(function(id){return !!state.checked[id];}).length;
+var total=grp.length;
 var pct=total?Math.round(done/total*100):0;
 var emojiSize=total?Math.round(16+(done/total)*18):16;
 var celebrating=state.celebrating===tab;
-var html='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:26px;gap:12px">';
-html+='<div style="font-size:28px;font-weight:600;color:#1A1A1A;letter-spacing:1px;line-height:1.1;text-transform:uppercase">CEN Trainer</div>';
-html+='<div style="text-align:right;flex-shrink:0;padding-top:6px">';
-html+='<div style="font-size:10px;color:'+phase.color+';font-weight:600;text-transform:uppercase;letter-spacing:1.2px">'+phase.label+'</div>';
-html+='<div style="font-size:11px;color:#8B8B85;margin-top:4px">'+days+' дн</div></div></div>';
 html+='<div style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:baseline">';
 html+='<span style="font-size:11px;color:#8B8B85">'+labelText+'</span>';
 html+='<span style="font-size:11px;color:#1A1A1A;font-weight:600">'+done+'/'+total+(tab==="morning"?' <span style="color:#84CC16">core</span>':'')+'</span></div>';
 html+='<div style="display:flex;align-items:center;gap:10px">';
 html+='<div class="progress-bar" style="flex:1;margin-bottom:0"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
-if(emoji)html+='<span class="'+(celebrating?"emoji-pop":"")+'" style="font-size:'+emojiSize+'px;width:36px;text-align:center;line-height:1">'+emoji+'</span>';
+html+='<span class="'+(celebrating?"emoji-pop":"")+'" style="font-size:'+emojiSize+'px;width:36px;text-align:center;line-height:1">'+emoji+'</span>';
 html+='</div></div>';
+}
 document.getElementById("header").innerHTML=html;
 }
 
@@ -646,94 +641,150 @@ html+=renderBlockTotal(evTotal,"вечер");
 return html;
 }
 
-function renderQuestionnaire(){
-if(state.checkin){
-var html='<div style="display:flex;gap:8px;margin-bottom:14px">';
-EQ.forEach(function(q){
-var v=state.checkin[q.id];
-var disp=q.inv?6-v:v;
-html+='<div style="flex:1;background:#F9F9F7;border:1px solid #ECECEA;border-radius:16px;padding:14px 6px;text-align:center">';
-html+='<div style="font-size:24px;font-weight:600;color:#1A1A1A;letter-spacing:-0.5px">'+disp+'</div>';
-html+='<div style="font-size:10px;color:#8B8B85;margin-top:4px">'+(q.id==="focus"?"фокус":q.id==="phone"?"без тел.":"ясность")+'</div></div>';
+var MONTHS=["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+var DOW=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
+
+function setPeriod(p){state.period=p;render();}
+function dateAgo(n){var d=new Date();d.setDate(d.getDate()-n);return d.toISOString().split("T")[0];}
+function fmtDate(ds){var d=new Date(ds);return d.getDate()+" "+MONTHS[d.getMonth()];}
+function plural(n,a,b,cc){var m=n%10,d=n%100;if(m===1&&d!==11)return a;if(m>=2&&m<=4&&(d<10||d>=20))return b;return cc;}
+
+function periodDates(){
+if(state.period==="day")return [today()];
+if(state.period==="month"){var a=[];for(var i=29;i>=0;i--)a.push(dateAgo(i));return a;}
+var now=new Date(),dow=now.getDay(),off=(dow===0?-6:1-dow),a=[];
+for(var i=0;i<7;i++){var d=new Date(now);d.setDate(now.getDate()+off+i);a.push(d.toISOString().split("T")[0]);}
+return a;
+}
+
+function dayEnergy(ds){
+var ch=(ds===today())?state.checked:(load("cen:checked:"+ds)||{});
+var m=TASK_GROUPS.morning.filter(function(id){return !!ch[id];}).length;
+var dd=TASK_GROUPS.day.filter(function(id){return !!ch[id];}).length;
+var e=TASK_GROUPS.evening.filter(function(id){return !!ch[id];}).length;
+var pct=0.75*(dd/TASK_GROUPS.day.length)+0.25*((m+e)/(TASK_GROUPS.morning.length+TASK_GROUPS.evening.length));
+return Math.round(pct*100);
+}
+function energyLevel(pct){
+if(pct>=67)return {label:"Высокая",color:"#84CC16",face:"🙂"};
+if(pct>=34)return {label:"Средняя",color:"#FACC15",face:"😐"};
+if(pct>0)return {label:"Низкая",color:"#F97316",face:"🙁"};
+return {label:"—",color:"#ECECEA",face:"·"};
+}
+
+function collectMoments(dates){
+var ds={};dates.forEach(function(d){ds[d]=1;});
+var out=[];
+for(var i=0;i<localStorage.length;i++){
+var k=localStorage.key(i);if(!k)continue;
+var date=null,src=null;
+if(k.indexOf("cen:evening_note:")===0){date=k.substring(17);src="вечер";}
+else if(k.indexOf("cen:focus:")===0){date=k.substring(10);src="день";}
+else continue;
+if(!ds[date])continue;
+var txt=load(k);
+if(txt&&typeof txt==="string"&&txt.trim())out.push({date:date,text:txt,src:src});
+}
+out.sort(function(a,b){return a.date<b.date?1:-1;});
+return out;
+}
+
+function renderPeriodTabs(){
+var tabs=[{id:"day",label:"День"},{id:"week",label:"Неделя"},{id:"month",label:"Месяц"}];
+var html='<div style="display:flex;gap:4px;background:#FFFFFF;border:1px solid #ECECEA;border-radius:18px;padding:5px;margin-bottom:14px">';
+tabs.forEach(function(t){
+var sel=state.period===t.id;
+html+='<button onclick="setPeriod(\''+t.id+'\')" style="flex:1;padding:9px 4px;border-radius:14px;border:none;background:'+(sel?"#C8FF5A":"transparent")+';color:'+(sel?"#1A1A1A":"#8B8B85")+';font-size:12px;font-weight:'+(sel?"600":"500")+';cursor:pointer">'+t.label+'</button>';
 });
 html+='</div>';
-html+='<button onclick="resetCheckin()" style="width:100%;background:transparent;border:1px solid #ECECEA;color:#8B8B85;border-radius:14px;padding:10px;font-size:11px;cursor:pointer">Изменить ответы</button>';
 return html;
 }
-var html='';
-EQ.forEach(function(q){
-html+='<div style="margin-bottom:18px"><div style="font-size:13px;color:#1A1A1A;margin-bottom:10px;font-weight:500">'+q.label+'</div><div style="display:flex;gap:6px">';
-[1,2,3,4,5].forEach(function(n){
-var sel=state.scores[q.id]===n;
-html+='<button onclick="setScore(\''+q.id+'\','+n+')" class="score-btn'+(sel?" selected":"")+'" style="height:42px">'+n+'</button>';
+
+function renderSummaryTheme(){
+var theme=getActiveTheme(),dates=periodDates(),title;
+if(state.period==="day")title="Сегодня, "+fmtDate(today());
+else if(state.period==="month")title="Последние 30 дней";
+else title="Неделя: "+fmtDate(dates[0])+" — "+fmtDate(dates[6]);
+var tl=state.period==="day"?"Тема дня":state.period==="month"?"Тема месяца":"Тема недели";
+var html='<div class="card" style="display:flex;align-items:center;gap:14px">';
+html+='<div style="width:48px;height:48px;border-radius:16px;background:rgba(200,255,90,0.3);display:flex;align-items:center;justify-content:center;font-size:18px;color:#5C7A00;flex-shrink:0">▲</div>';
+html+='<div style="flex:1;min-width:0">';
+html+='<div style="font-size:14px;font-weight:600;color:#1A1A1A">'+title+'</div>';
+html+='<div style="font-size:12px;color:#8B8B85;margin-top:3px">'+tl+': <span style="color:#84CC16;font-weight:600">'+theme.label+'</span></div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:4px;line-height:1.4">'+theme.desc+'</div>';
+html+='</div></div>';
+return html;
+}
+
+function renderEnergyCard(){
+var dates=periodDates();
+var title=state.period==="day"?"Энергия дня":state.period==="month"?"Энергия месяца":"Энергия недели";
+var html='<div class="card">';
+html+='<div style="font-size:13px;font-weight:600;color:#1A1A1A;margin-bottom:2px"><span style="color:#84CC16">⚡</span> '+title+'</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-bottom:14px">Сколько ресурса ты вложил каждый день</div>';
+html+='<div style="display:flex;align-items:flex-end;gap:'+(state.period==="month"?"2px":"6px")+';height:88px;margin-bottom:6px">';
+dates.forEach(function(ds){
+var pct=dayEnergy(ds),lvl=energyLevel(pct),h=Math.max(8,pct/100*76);
+html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">';
+html+='<div style="width:100%;max-width:'+(state.period==="day"?"64px":"100%")+';height:'+h+'px;background:'+lvl.color+';border-radius:7px 7px 3px 3px"></div>';
+html+='</div>';
+});
+html+='</div>';
+if(state.period!=="month"){
+html+='<div style="display:flex;gap:6px;margin-bottom:6px">';
+dates.forEach(function(ds){var d=new Date(ds);html+='<div style="flex:1;text-align:center;font-size:9px;color:#8B8B85">'+DOW[d.getDay()]+' <span style="color:#C8C8C5">'+d.getDate()+'</span></div>';});
+html+='</div>';
+html+='<div style="display:flex;gap:6px;margin-bottom:12px">';
+dates.forEach(function(ds){html+='<div style="flex:1;text-align:center;font-size:14px">'+energyLevel(dayEnergy(ds)).face+'</div>';});
+html+='</div>';
+}else{html+='<div style="height:12px"></div>';}
+html+='<div style="display:flex;justify-content:center;gap:14px;font-size:10px;color:#8B8B85">';
+[["Высокая","#84CC16"],["Средняя","#FACC15"],["Низкая","#F97316"]].forEach(function(l){
+html+='<span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:'+l[1]+'"></span>'+l[0]+'</span>';
 });
 html+='</div></div>';
+return html;
+}
+
+function renderMoments(){
+var moments=collectMoments(periodDates());
+var html='<div class="card">';
+html+='<div style="font-size:13px;font-weight:600;color:#1A1A1A;margin-bottom:2px"><span style="color:#84CC16">♥</span> Живые моменты</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-bottom:14px">Твои записи из «Запись дня» и «Фокус дня»</div>';
+if(!moments.length){
+html+='<div style="font-size:12px;color:#C8C8C5;text-align:center;padding:14px 0;line-height:1.5">Пока нет записей.<br>Заполни «Запись дня» вечером.</div>';
+}else{
+moments.slice(0,6).forEach(function(m){
+html+='<div style="background:#F9F9F7;border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;gap:12px">';
+html+='<div style="font-size:13px;color:#1A1A1A;line-height:1.5;flex:1">«'+escAttr(m.text)+'»</div>';
+html+='<div style="text-align:right;flex-shrink:0"><div style="font-size:10px;color:#8B8B85">'+m.src+'</div><div style="font-size:10px;color:#C8C8C5;margin-top:2px">'+fmtDate(m.date)+'</div></div>';
+html+='</div>';
 });
-var ready=EQ.every(function(q){return state.scores[q.id]!==undefined;});
-if(ready)html+='<button class="save-btn" onclick="saveDay()">Сохранить день</button>';
+if(moments.length>6)html+='<div style="text-align:center;font-size:11px;color:#84CC16;font-weight:600;margin-top:4px">+'+(moments.length-6)+' '+plural(moments.length-6,"запись","записи","записей")+' ещё</div>';
+}
+html+='</div>';
+return html;
+}
+
+function renderPraise(){
+var dates=periodDates(),total=dates.length,conscious=0;
+dates.forEach(function(ds){var n=load("cen:evening_note:"+ds);if(n&&typeof n==="string"&&n.trim())conscious++;});
+var html='<div class="card" style="background:rgba(200,255,90,0.18);border-color:rgba(200,255,90,0.5)">';
+html+='<div style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px">Одна похвала</div>';
+html+='<div style="font-size:18px;font-weight:600;color:#1A1A1A;line-height:1.4;text-align:center">'+conscious+' '+plural(conscious,"вечер","вечера","вечеров")+' из '+total+'<br>ты закончил день осознанно</div>';
+html+='<div style="font-size:12px;color:#5C7A00;line-height:1.5;text-align:center;margin-top:12px">Ты строишь стабильность, и это уже твоя сила.</div>';
+html+='</div>';
 return html;
 }
 
 function renderSummary(){
-var html='<div class="card"><div style="font-size:11px;color:#8B8B85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">Вечерний опрос</div>';
-html+=renderQuestionnaire();
-html+='</div>';
-if(state.history.length>0){
-html+='<div class="card" style="margin-top:12px"><div style="font-size:11px;color:#8B8B85;margin-bottom:12px;text-transform:uppercase;letter-spacing:1px">История · '+state.history.length+' дн.</div>';
-html+=renderChart()+'</div>';
-}
+var html=renderPeriodTabs();
+html+=renderSummaryTheme();
+html+=renderEnergyCard();
+html+=renderMoments();
+html+=renderPraise();
 html+=renderAffirmationsEditor();
 html+=renderBackup();
-return html;
-}
-
-function setScore(id,n){state.scores[id]=n;render();}
-
-function saveDay(){
-var entry={date:today(),focus:state.scores.focus,phone:state.scores.phone,clarity:state.scores.clarity};
-state.history=state.history.filter(function(h){return h.date!==today();});
-state.history.push(entry);
-state.checkin=state.scores;
-save("cen:history",state.history);
-save("cen:checkin:"+today(),state.scores);
-render();
-}
-
-function resetCheckin(){state.checkin=null;render();}
-
-function renderChart(){
-if(!state.history.length)return '<div style="text-align:center;color:#8B8B85;font-size:12px;padding:20px 0">Данные появятся после первого чекина</div>';
-var sorted=state.history.slice().sort(function(a,b){return a.date<b.date?-1:1;});
-var last=sorted.slice(-14);
-function score(d){return Math.round((d.focus+(6-d.phone)+d.clarity)/3);}
-var avg=(sorted.reduce(function(a,d){return a+score(d);},0)/sorted.length).toFixed(1);
-var trend=last.length>=2?score(last[last.length-1])-score(last[0]):0;
-var dateSet={};
-sorted.forEach(function(d){dateSet[d.date]=true;});
-var streak=0;
-var dt=new Date();
-if(!dateSet[dt.toISOString().split("T")[0]])dt.setDate(dt.getDate()-1);
-for(var i=0;i<400;i++){
-var key=dt.toISOString().split("T")[0];
-if(dateSet[key]){streak++;dt.setDate(dt.getDate()-1);}
-else break;
-}
-var days=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
-var html='<div style="display:flex;align-items:flex-end;gap:4px;height:80px;margin-bottom:8px">';
-last.forEach(function(d){
-var s=score(d);
-var h=Math.max(8,s/5*68);
-html+='<div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px">';
-html+='<span style="font-size:9px;color:#1A1A1A;font-weight:600">'+s+'</span>';
-html+='<div class="chart-bar" style="width:100%;height:'+h+'px"></div></div>';
-});
-html+='</div><div style="display:flex;gap:4px;margin-bottom:14px">';
-last.forEach(function(d){html+='<div style="flex:1;text-align:center;font-size:8px;color:#8B8B85">'+days[new Date(d.date).getDay()]+'</div>';});
-html+='</div><div style="display:flex;gap:8px">';
-html+='<div style="flex:1;background:#F9F9F7;border:1px solid #ECECEA;border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:20px;font-weight:600;color:#1A1A1A;letter-spacing:-0.3px">'+avg+'</div><div style="font-size:10px;color:#8B8B85;margin-top:2px">средний</div></div>';
-html+='<div style="flex:1;background:#F9F9F7;border:1px solid #ECECEA;border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:20px;font-weight:600;color:#1A1A1A;letter-spacing:-0.3px">'+streak+'</div><div style="font-size:10px;color:#8B8B85;margin-top:2px">стрик</div></div>';
-html+='<div style="flex:1;background:'+(trend>=0?"rgba(200,255,90,0.25)":"#F9F9F7")+';border:1px solid '+(trend>=0?"rgba(200,255,90,0.6)":"#ECECEA")+';border-radius:14px;padding:12px 8px;text-align:center"><div style="font-size:20px;font-weight:600;color:'+(trend>=0?"#1A1A1A":"#EC4899")+';letter-spacing:-0.3px">'+(trend>0?"+":"")+trend+'</div><div style="font-size:10px;color:#8B8B85;margin-top:2px">динамика</div></div>';
-html+='</div>';
 return html;
 }
 
@@ -767,9 +818,9 @@ var count=0;
 Object.keys(data).forEach(function(k){
 if(k.indexOf("cen:")===0){localStorage.setItem(k,JSON.stringify(data[k]));count++;}
 });
-state.history=load("cen:history")||[];
 state.checked=load("cen:checked:"+today())||{};
-state.checkin=load("cen:checkin:"+today());
+state.eveningNote=load("cen:evening_note:"+today())||"";
+state.focusText=load("cen:focus:"+today())||"";
 render();
 alert("Импортировано: "+count+" записей");
 }catch(err){alert("Ошибка импорта: "+err.message);}
