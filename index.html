@@ -90,8 +90,8 @@ var TASKS=[
    why:"Бокс или турник, на выбор. Сила, координация, дыхание. Физическая нагрузка перезапускает CEN через дофамин усилия, а не дофамин стимула."},
   {id:"english",label:"English",dur:15,icon:"◖",tag:"Язык миру",color:"#84CC16",
    why:"15 минут английского каждый день. CEN держит двойной контекст: смысл + новый код. Свободно выражать мысли = свободно мыслить."},
-  {id:"book",label:"Книга",dur:30,icon:"▭",tag:"Развитие вечером",color:"#84CC16",
-   why:"30 минут чтения. Расширение картины мира перед сном. CEN восстанавливается через структурированную, но мягкую нагрузку."},
+  {id:"book",label:"Чтение книг",dur:20,icon:"▭",tag:"Только чтение",color:"#84CC16",
+   why:"Чтение без цели и конспектов. Только чтение — мягкая нагрузка, восстановление через структурированный, но ненапряжный ввод."},
   {id:"walk",label:"Прогулка без телефона",dur:20,icon:"◇",tag:"DMN↔CEN синхронизация",color:"#84CC16",
    why:"Во время ходьбы без стимуляции DMN и CEN синхронизируются. Это не отдых -- интеграция. Поэтому лучшие идеи приходят на прогулке."},
   {id:"cleaning",label:"Порядок",dur:15,icon:"◈",tag:"И вещей, и мыслей",color:"#84CC16",
@@ -121,6 +121,7 @@ var TASK_GROUPS={
 };
 var MORNING_BASE=["water_light","washing","breakfast"];
 var MORNING_FREE=["onething","desk","flowers"];
+var EVENING_FREE=["book"];
 var THEMES=[
   {id:"empire",label:"Создаю империю",days:[1,4],sub:"Пн / Чт",desc:"День действия, роста и новых проектов."},
   {id:"clients",label:"Спокойствие души",days:[2,5],sub:"Вт / Пт",desc:"День внимания к постоянным клиентам."},
@@ -623,12 +624,25 @@ html+='</div></div></div>';
 return html;
 }
 
+function renderBlockTotal(mins,planName){
+var html='<div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #ECECEA;border-radius:22px;padding:14px 18px;margin-top:12px">';
+html+='<div style="width:40px;height:40px;border-radius:14px;background:#C8FF5A;display:flex;align-items:center;justify-content:center;font-size:14px;color:#1A1A1A;flex-shrink:0">◷</div>';
+html+='<div style="flex:1"><div style="font-size:13px;font-weight:500;color:#1A1A1A">Итого время блока</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:2px">План на '+planName+'</div></div>';
+html+='<div style="font-size:18px;font-weight:600;color:#84CC16;letter-spacing:-0.3px">'+formatDur(mins)+'</div>';
+html+='</div>';
+return html;
+}
+
 function renderEveningTasks(){
 var ids=TASK_GROUPS.evening;
 var done=ids.filter(function(id){return !!state.checked[id];}).length;
 var html='<div style="font-size:12px;color:#8B8B85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
 html+=renderEveningNote();
-["cleaning","bath","drink","tomorrow_focus"].forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
+var evTotal=5;
+["cleaning","bath","drink","tomorrow_focus"].forEach(function(id){var t=findTask(id);if(t){html+=taskCard(t);evTotal+=t.dur;}});
+html+=renderFreeActions(EVENING_FREE);
+html+=renderBlockTotal(evTotal,"вечер");
 return html;
 }
 
