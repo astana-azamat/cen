@@ -110,8 +110,8 @@ var TASKS=[
    why:"Одна задача, одно завершение. Есть ресурс — сделал. Нет — не насилуешь себя. Свободное действие, не обязательство."},
   {id:"desk",label:"Разобрать стол",dur:10,icon:"▤",tag:"По потоку",color:"#84CC16",
    why:"Разобрать стол когда руки сами тянутся навести порядок. Завершённый цикл без принуждения."},
-  {id:"flowers",label:"Полить цветы",dur:5,icon:"❀",tag:"Когда вспомнишь",color:"#84CC16",
-   why:"Полить цветы когда вспомнишь. Маленький завершённый цикл, который ни к чему не обязывает."}
+  {id:"wildcard",label:"Дикая карта",dur:30,icon:"✦",tag:"Свободный выбор",color:"#84CC16",
+   why:"Свободный слот на 30 минут. Что угодно: идея, эксперимент, проект, отдых. Без плана — по желанию."}
 ];
 
 var TASK_GROUPS={
@@ -119,8 +119,8 @@ var TASK_GROUPS={
   day:["day_b1","day_b2","sport"],
   evening:["evening_note","cleaning","bath","drink","tomorrow_focus"]
 };
-var MORNING_BASE=["water_light","washing","breakfast"];
-var MORNING_FREE=["onething","desk","flowers"];
+var MORNING_BASE=["washing","breakfast"];
+var MORNING_FREE=["onething","desk","wildcard"];
 var EVENING_FREE=["book"];
 var THEMES=[
   {id:"empire",label:"Создаю империю",days:[1,4],sub:"Пн / Чт",desc:"День действия, роста и новых проектов."},
@@ -488,18 +488,8 @@ html+='<span style="font-size:10px;font-weight:600;color:#8B8B85;text-transform:
 html+='<span style="font-size:9px;font-weight:600;color:#5C7A00;background:rgba(200,255,90,0.4);border-radius:8px;padding:4px 9px;text-transform:uppercase;letter-spacing:0.5px">Активная тема</span>';
 html+='</div>';
 html+='<div style="font-size:20px;font-weight:600;color:#1A1A1A;letter-spacing:-0.3px;line-height:1.2">'+theme.label+'</div>';
-html+='<div style="font-size:12px;color:#84CC16;font-weight:500;margin-top:3px">'+theme.sub+'</div>';
-html+='<div style="font-size:13px;color:#8B8B85;line-height:1.55;margin-top:10px">'+theme.desc+'</div>';
+html+='<div style="font-size:13px;color:#8B8B85;line-height:1.55;margin-top:8px">'+theme.desc+'</div>';
 html+='</div>';
-THEMES.forEach(function(t){
-if(t.id===theme.id||t.id==="free")return;
-html+='<div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #ECECEA;border-radius:18px;padding:14px 16px;margin-bottom:10px">';
-html+='<div style="width:36px;height:36px;border-radius:12px;background:#F0F0EE;flex-shrink:0"></div>';
-html+='<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:500;color:#8B8B85">'+t.label+'</div>';
-html+='<div style="font-size:11px;color:#C8C8C5">'+t.sub+'</div></div>';
-html+='<span style="font-size:9px;font-weight:600;color:#8B8B85;background:#F0F0EE;border-radius:8px;padding:4px 8px;text-transform:uppercase;letter-spacing:0.5px">Не сегодня</span>';
-html+='</div>';
-});
 html+='<div onclick="toggleThemeSheet()" style="border:1.5px dashed #D8D8D5;border-radius:16px;padding:13px;text-align:center;font-size:12px;font-weight:500;color:#8B8B85;cursor:pointer;margin-bottom:14px">↻ Сменить тему вручную</div>';
 if(state.themeSheet){
 html+='<div style="background:#F9F9F7;border:1px solid #ECECEA;border-radius:18px;padding:8px;margin-bottom:14px">';
