@@ -198,31 +198,14 @@ function setSport(c){state.sportChoice=c;save("cen:sport:"+today(),c);render();}
 function getAffirmations(){return load("cen:affirmations")||DEFAULT_AFFIRMATIONS;}
 
 function maybeStartIntro(){
-state.intro={step:0,exiting:false,final:false};
+var hour=new Date().getHours();
+if(hour>=11)return;
+if(load("cen:intro:"+today())==="done")return;
+state.intro=true;
 }
 
-function checkAffirmation(){
-if(!state.intro||state.intro.exiting||state.intro.final)return;
-state.intro.exiting=true;
-render();
-setTimeout(function(){
-state.intro.step++;
-state.intro.exiting=false;
-var total=getAffirmations().length;
-if(state.intro.step>=total){
-state.intro.final=true;
+function finishIntro(){
 save("cen:intro:"+today(),"done");
-render();
-setTimeout(function(){state.intro=null;render();},2400);
-}else{
-save("cen:intro:"+today(),state.intro.step);
-render();
-}
-},600);
-}
-
-function skipIntro(){
-save("cen:intro:"+today(),"skipped");
 state.intro=null;
 render();
 }
@@ -860,30 +843,35 @@ return html;
 
 function renderIntro(){
 var affs=getAffirmations();
-var html='<div style="position:fixed;inset:0;background:#F4F4F2;z-index:300;display:flex;flex-direction:column;padding:24px 24px 32px;padding-top:calc(24px + env(safe-area-inset-top,0px));padding-bottom:calc(32px + env(safe-area-inset-bottom,0px))">';
-html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:60px">';
-html+='<div style="display:flex;gap:6px">';
-for(var i=0;i<affs.length;i++){
-var done=i<state.intro.step||state.intro.final;
-html+='<div style="width:28px;height:3px;border-radius:3px;background:'+(done?"#84CC16":"#ECECEA")+';transition:background 0.3s ease"></div>';
-}
+var dt=new Date();
+var aff=affs[(dt.getDate()+dt.getMonth())%affs.length];
+var html='<div style="position:fixed;inset:0;background:#F4F4F2;z-index:300;overflow-y:auto;padding:24px 24px 36px;padding-top:calc(20px + env(safe-area-inset-top,0px));padding-bottom:calc(36px + env(safe-area-inset-bottom,0px))">';
+html+='<div style="display:flex;justify-content:flex-end;margin-bottom:20px">';
+html+='<button onclick="finishIntro()" aria-label="Закрыть" style="background:none;border:none;color:#8B8B85;font-size:26px;cursor:pointer;line-height:1;padding:4px 8px;font-weight:300">×</button>';
 html+='</div>';
-html+='<button onclick="skipIntro()" aria-label="Закрыть" style="background:none;border:none;color:#8B8B85;font-size:24px;cursor:pointer;line-height:1;padding:4px 8px;font-weight:300">×</button>';
+html+='<div class="aff-card">';
+html+='<div style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:18px">Аффирмация утра</div>';
+html+='<div style="font-size:26px;font-weight:600;color:#1A1A1A;line-height:1.3;letter-spacing:-0.3px;margin-bottom:14px">'+aff.title+'</div>';
+html+='<div style="font-size:15px;color:#8B8B85;line-height:1.7;margin-bottom:28px">'+aff.text+'</div>';
+html+='<div style="font-size:10px;font-weight:600;color:#8B8B85;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px">Как с этим работать</div>';
+var levels=[
+{n:"1",t:"Произнести вслух",d:"Не читать глазами. Говорить вслух, медленно, с паузой после. Одно предложение. Пауза 5 секунд. Почувствовать резонанс — верит тело или нет."},
+{n:"2",t:"Добавить воспоминание",d:"После произнесения вспомни конкретный момент когда это было правдой. Аффирмация цепляется за реальный опыт и становится убеждением, а не wishful thinking."},
+{n:"3",t:"Телесное ощущение",d:"Произнёс → вспомнил момент → теперь где это в теле? Грудь расширяется? Спина выпрямляется? Дыхание меняется? Когда аффирмация доходит до тела — она становится настоящей."}
+];
+levels.forEach(function(l){
+html+='<div style="display:flex;gap:12px;margin-bottom:16px">';
+html+='<div style="width:26px;height:26px;border-radius:9px;background:#C8FF5A;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#1A1A1A;flex-shrink:0">'+l.n+'</div>';
+html+='<div style="flex:1"><div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:4px">'+l.t+'</div>';
+html+='<div style="font-size:13px;color:#8B8B85;line-height:1.6">'+l.d+'</div></div>';
 html+='</div>';
-if(state.intro.final){
-html+='<div class="aff-final" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">';
-html+='<div style="font-size:24px;font-weight:600;color:#1A1A1A;line-height:1.4;letter-spacing:-0.3px;max-width:300px">У меня есть выбор,<br>я выбрал это</div>';
+});
+html+='<div style="background:rgba(200,255,90,0.22);border-radius:16px;padding:14px 16px;margin-top:6px;margin-bottom:24px">';
+html+='<div style="font-size:11px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">Практически</div>';
+html+='<div style="font-size:13px;color:#1A1A1A;line-height:1.7">Утро, после медитации. Одна аффирмация. Вслух, медленно. Вспомнил момент когда это было правдой. Почувствовал в теле. Всё. 60 секунд.</div>';
 html+='</div>';
-}else{
-var aff=affs[state.intro.step];
-var cls=state.intro.exiting?"aff-exit":"aff-card";
-html+='<div class="'+cls+'" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">';
-html+='<div style="font-size:26px;font-weight:600;color:#1A1A1A;line-height:1.3;letter-spacing:-0.3px;margin-bottom:22px;max-width:320px">'+aff.title+'</div>';
-html+='<div style="font-size:15px;color:#8B8B85;line-height:1.7;max-width:300px">'+aff.text+'</div>';
-html+='</div>';
-html+='<button onclick="checkAffirmation()" '+(state.intro.exiting?"disabled":"")+' style="width:100%;padding:18px;border-radius:18px;background:#C8FF5A;border:none;color:#1A1A1A;font-size:15px;font-weight:600;cursor:pointer;'+(state.intro.exiting?"opacity:0.5":"")+'">Я выбираю это</button>';
-}
-html+='</div>';
+html+='<button onclick="finishIntro()" style="width:100%;padding:18px;border-radius:18px;background:#C8FF5A;border:none;color:#1A1A1A;font-size:15px;font-weight:600;cursor:pointer">Начать день</button>';
+html+='</div></div>';
 return html;
 }
 
