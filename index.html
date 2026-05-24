@@ -68,8 +68,8 @@ button{font-family:inherit;cursor:pointer;border:none;font-weight:500}
 <div class="bottom-nav"><div class="tabs" id="bottom-nav"></div></div>
 <script>
 var TASKS=[
-  {id:"calibration",label:"Калибровка · дыхание",dur:3,icon:"▲",tag:"Гашение DMN",color:"#84CC16",
-   why:"Несколько минут осознанного дыхания после пробуждения. Медленный вдох-выдох активирует парасимпатику и гасит утреннюю тревожную DMN. Чёткий сигнал телу: день начался — CEN включается спокойно."},
+  {id:"calibration",label:"Калибровка",dur:9,icon:"▲",tag:"Гашение DMN",color:"#84CC16",
+   why:"9 минут тишины — первое, что делаешь как проснулся. Без телефона. Просто посидеть/полежать в тишине, не убегая в стимул. Парасимпатика гасит утреннюю тревожную DMN, и CEN включается спокойно."},
   {id:"lying",label:"Лежите без телефона",dur:3,icon:"⌒",tag:"Мягкий запуск",color:"#84CC16",
    why:"Первые минуты после пробуждения мозг ещё в дельта/тета. Не хватать телефон — значит не нагружать SN внешним стимулом. Просто полежать без экрана: дать дефолтной сети плавно перейти в рабочий режим."},
   {id:"meditation",label:"Медитация",dur:9,icon:"◎",tag:"CEN напрямую",color:"#84CC16",
@@ -161,7 +161,8 @@ var DEFAULT_AFFIRMATIONS=[
 
 var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"medium",sportChoice:null,editingFocus:false,themeSheet:false,eveningNote:"",editingNote:false,period:"week"};
 
-function today(){return new Date().toISOString().split("T")[0];}
+function dateKey(d){var m=d.getMonth()+1,day=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(day<10?"0":"")+day;}
+function today(){return dateKey(new Date());}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 function load(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}catch(e){return null;}}
 
@@ -663,7 +664,7 @@ var MONTHS=["января","февраля","марта","апреля","мая"
 var DOW=["Вс","Пн","Вт","Ср","Чт","Пт","Сб"];
 
 function setPeriod(p){state.period=p;render();}
-function dateAgo(n){var d=new Date();d.setDate(d.getDate()-n);return d.toISOString().split("T")[0];}
+function dateAgo(n){var d=new Date();d.setDate(d.getDate()-n);return dateKey(d);}
 function fmtDate(ds){var d=new Date(ds);return d.getDate()+" "+MONTHS[d.getMonth()];}
 function plural(n,a,b,cc){var m=n%10,d=n%100;if(m===1&&d!==11)return a;if(m>=2&&m<=4&&(d<10||d>=20))return b;return cc;}
 
@@ -671,7 +672,7 @@ function periodDates(){
 if(state.period==="day")return [today()];
 if(state.period==="month"){var a=[];for(var i=29;i>=0;i--)a.push(dateAgo(i));return a;}
 var now=new Date(),dow=now.getDay(),off=(dow===0?-6:1-dow),a=[];
-for(var i=0;i<7;i++){var d=new Date(now);d.setDate(now.getDate()+off+i);a.push(d.toISOString().split("T")[0]);}
+for(var i=0;i<7;i++){var d=new Date(now);d.setDate(now.getDate()+off+i);a.push(dateKey(d));}
 return a;
 }
 
