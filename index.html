@@ -117,7 +117,7 @@ var TASKS=[
 ];
 
 var TASK_GROUPS={
-  morning:["calibration","meditation","main_thought","walk","english"],
+  morning:["calibration","meditation","walk","english"],
   day:["day_b1","day_b2","sport"],
   evening:["evening_note","cleaning","bath","drink","tomorrow_focus"]
 };
@@ -159,7 +159,8 @@ var DEFAULT_AFFIRMATIONS=[
   {id:"wealth",icon:"💵",title:"Я сказочно богат",text:"Я создаю ценность и изобилие."}
 ];
 
-var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"medium",sportChoice:null,editingFocus:false,themeSheet:false,eveningNote:"",editingNote:false,period:"week"};
+var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"medium",sportChoice:null,editingFocus:false,themeSheet:false,eveningNote:"",editingNote:false,period:"week",collapsed:{base:true,morningFree:true,eveningFree:true}};
+function toggleCollapse(k){state.collapsed[k]=!state.collapsed[k];render();}
 
 function dateKey(d){var m=d.getMonth()+1,day=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(day<10?"0":"")+day;}
 function today(){return dateKey(new Date());}
@@ -241,36 +242,58 @@ return Object.keys(dates).length;
 
 function renderHeader(){
 var days=getActiveDays();
-var phase=days<14?{n:1,label:"Стабилизация",color:"#8B8B85"}:days<42?{n:2,label:"Строим",color:"#1A1A1A"}:{n:3,label:"Закрепление",color:"#84CC16"};
 var tab=state.tab;
-var html='<div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:'+(tab==="summary"?"20px":"26px")+';gap:12px">';
-html+='<div style="font-size:28px;font-weight:600;color:#1A1A1A;letter-spacing:1px;line-height:1.1;text-transform:uppercase">CEN Trainer</div>';
-html+='<div style="text-align:right;flex-shrink:0;padding-top:6px">';
+var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px">';
+html+='<div style="font-size:26px;font-weight:600;color:#1A1A1A;letter-spacing:1px;line-height:1.1;text-transform:uppercase">CEN Trainer</div>';
 if(tab==="summary"){
-html+='<div style="font-size:10px;color:#84CC16;font-weight:600;text-transform:uppercase;letter-spacing:1.2px">Сводка</div>';
-}else{
-html+='<div style="font-size:10px;color:'+phase.color+';font-weight:600;text-transform:uppercase;letter-spacing:1.2px">'+phase.label+'</div>';
+html+='<div style="text-align:right"><div style="font-size:10px;color:#84CC16;font-weight:600;text-transform:uppercase;letter-spacing:1.2px">Сводка</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:3px">'+days+' дн</div></div>';
 }
-html+='<div style="font-size:11px;color:#8B8B85;margin-top:4px">'+days+' дн</div></div></div>';
-if(tab!=="summary"){
-var grp=tab==="morning"?TASK_GROUPS.morning:tab==="day"?getDayGroup():TASK_GROUPS.evening;
-var labelText=tab==="morning"?"Прогресс утра":tab==="day"?"Прогресс дня":"Прогресс вечера";
-var emoji=tab==="morning"?"☀️":tab==="day"?"🔥":"💤";
-var done=grp.filter(function(id){return !!state.checked[id];}).length;
-var total=tab==="day"?getDayTarget():grp.length;
-if(done>total)done=total;
-var pct=total?Math.round(done/total*100):0;
-var emojiSize=total?Math.round(16+(done/total)*18):16;
-var celebrating=state.celebrating===tab;
-html+='<div style="margin-bottom:18px"><div style="display:flex;justify-content:space-between;margin-bottom:8px;align-items:baseline">';
-html+='<span style="font-size:11px;color:#8B8B85">'+labelText+'</span>';
-html+='<span style="font-size:11px;color:#1A1A1A;font-weight:600">'+done+'/'+total+(tab==="morning"?' <span style="color:#84CC16">core</span>':'')+'</span></div>';
-html+='<div style="display:flex;align-items:center;gap:10px">';
-html+='<div class="progress-bar" style="flex:1;margin-bottom:0"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
-html+='<span class="'+(celebrating?"emoji-pop":"")+'" style="font-size:'+emojiSize+'px;width:36px;text-align:center;line-height:1">'+emoji+'</span>';
-html+='</div></div>';
-}
+html+='</div>';
 document.getElementById("header").innerHTML=html;
+}
+
+function renderSectionSummary(){
+var tab=state.tab;
+var days=getActiveDays();
+var phase=days<14?{n:1,label:"Стабилизация",color:"#8B8B85"}:days<42?{n:2,label:"Строим",color:"#1A1A1A"}:{n:3,label:"Закрепление",color:"#84CC16"};
+var sec,grp,target,totalMins,emoji;
+var isFree=tab==="day"&&getActiveTheme().id==="free";
+if(tab==="morning"){
+sec={icon:"☀",label:"Утро"};emoji="☀️";
+grp=TASK_GROUPS.morning;target=grp.length;
+totalMins=grp.map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0)+MORNING_BASE.map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
+}else if(tab==="day"){
+sec={icon:"▣",label:"День"};emoji="🔥";
+grp=getDayGroup();target=getDayTarget();
+if(isFree){totalMins=null;}else{var p=getPriority();totalMins=p.b1+p.pause+p.b2+30;}
+}else{
+sec={icon:"◐",label:"Вечер"};emoji="💤";
+grp=TASK_GROUPS.evening;target=grp.length;
+totalMins=5+["cleaning","bath","drink","tomorrow_focus"].map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
+}
+var doneRaw=grp.filter(function(id){return !!state.checked[id];}).length;
+var done=Math.min(doneRaw,target);
+var pct=target?Math.round(done/target*100):0;
+var celebrating=state.celebrating===tab;
+var coreLabel=tab==="morning"?' <span style="color:#84CC16;font-weight:600;font-size:14px;letter-spacing:0">core</span>':'';
+var html='<div class="card" style="display:flex;gap:14px;align-items:stretch;padding:16px;margin-bottom:14px">';
+html+='<div style="flex:1;min-width:0;display:flex;flex-direction:column;justify-content:space-between;gap:10px">';
+html+='<div style="display:flex;align-items:center;gap:5px"><span style="color:#84CC16;font-size:12px">'+sec.icon+'</span><span style="font-size:10px;font-weight:600;color:#84CC16;text-transform:uppercase;letter-spacing:1.2px">'+sec.label+'</span></div>';
+html+='<div style="font-size:30px;font-weight:600;color:#1A1A1A;letter-spacing:-0.5px;line-height:1">'+done+'/'+target+coreLabel+'</div>';
+html+='<div class="progress-bar" style="margin-bottom:0"><div class="progress-fill" style="width:'+pct+'%"></div></div>';
+html+='</div>';
+html+='<div style="width:1px;background:#ECECEA;flex-shrink:0"></div>';
+html+='<div style="display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;flex-shrink:0;gap:6px;min-width:0">';
+if(totalMins!==null){
+html+='<div style="display:flex;align-items:center;gap:5px"><span style="color:#84CC16;font-size:13px">◷</span><span style="font-size:19px;font-weight:600;color:#1A1A1A;letter-spacing:-0.3px">'+formatDur(totalMins)+'</span></div>';
+}else{
+html+='<div style="display:flex;align-items:center;gap:5px"><span style="color:#84CC16;font-size:13px">◷</span><span style="font-size:13px;font-weight:600;color:#84CC16">гибко</span></div>';
+}
+html+='<div style="font-size:10px;color:'+phase.color+';font-weight:500;text-align:right;line-height:1.4">'+phase.label+' '+days+' дн</div>';
+html+='<span class="'+(celebrating?"emoji-pop":"")+'" style="font-size:22px;line-height:1">'+emoji+'</span>';
+html+='</div></div>';
+return html;
 }
 
 function renderBottomNav(){
@@ -380,36 +403,45 @@ html+='</div>';
 return html;
 }
 
-function renderBaseRituals(baseIds,trackedIds,blockName){
+function renderBaseRituals(baseIds){
 var rituals=baseIds.map(findTask).filter(Boolean);
 if(!rituals.length)return "";
 var baseTime=rituals.reduce(function(s,r){return s+r.dur;},0);
-var trackedTime=trackedIds.map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
-var total=baseTime+trackedTime;
-var html='<div class="card" style="margin-top:18px"><div style="font-size:11px;color:#8B8B85;margin-bottom:8px">Базовые ритуалы <span style="color:#C8C8C5">(без отметки)</span></div>';
-rituals.forEach(function(r){html+=ritualRow(r);});
-html+='<div style="display:flex;align-items:center;justify-content:space-between;background:rgba(200,255,90,0.18);border-radius:14px;padding:11px 14px;margin-top:8px;font-size:12px">';
-html+='<span style="color:#1A1A1A;font-weight:500"><span style="color:#84CC16;margin-right:6px">◷</span>Время базовых ритуалов</span>';
-html+='<span style="color:#1A1A1A;font-weight:600">'+formatDur(baseTime)+'</span></div>';
+var collapsed=state.collapsed.base;
+var html='<div class="card" style="padding:14px 18px;margin-bottom:10px;cursor:pointer" onclick="toggleCollapse(\'base\')">';
+html+='<div style="display:flex;align-items:center;gap:12px">';
+html+='<span style="width:10px;height:10px;border-radius:50%;background:#84CC16;flex-shrink:0"></span>';
+html+='<div style="flex:1;min-width:0">';
+html+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:14px;font-weight:600;color:#1A1A1A">Базовые ритуалы</span><span style="font-size:12px;color:#8B8B85">'+formatDur(baseTime)+'</span></div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:2px">'+rituals.length+' '+plural(rituals.length,"действие","действия","действий")+'</div>';
 html+='</div>';
-html+='<div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #ECECEA;border-radius:22px;padding:14px 18px;margin-top:12px">';
-html+='<div style="width:40px;height:40px;border-radius:14px;background:#C8FF5A;display:flex;align-items:center;justify-content:center;font-size:14px;color:#1A1A1A;flex-shrink:0">◷</div>';
-html+='<div style="flex:1"><div style="font-size:13px;font-weight:500;color:#1A1A1A">Итого время блока</div>';
-html+='<div style="font-size:11px;color:#8B8B85;margin-top:2px">План на '+blockName+'</div></div>';
-html+='<div style="font-size:18px;font-weight:600;color:#84CC16;letter-spacing:-0.3px">'+formatDur(total)+'</div>';
+html+='<span style="font-size:11px;color:#C8C8C5;flex-shrink:0">'+(collapsed?"▼":"▲")+'</span>';
+html+='</div>';
+if(!collapsed){
+html+='<div onclick="event.stopPropagation()" style="margin-top:8px">';
+rituals.forEach(function(r){html+=ritualRow(r);});
+html+='</div>';
+}
 html+='</div>';
 return html;
 }
 
-function renderFreeActions(ids){
-var html='<div style="border:1.5px dashed #D8D8D5;border-radius:24px;padding:6px 14px 12px;margin-top:18px">';
-html+='<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:12px 4px 10px">';
-html+='<span style="font-size:13px;font-weight:600;color:#1A1A1A">Свободные действия</span>';
-html+='<div style="display:flex;align-items:center;gap:8px">';
-html+='<span style="font-size:9px;color:#8B8B85;background:rgba(200,255,90,0.3);border-radius:8px;padding:4px 9px">не влияют на прогресс</span>';
-html+='<span onclick="alert(\'Свободные действия — необязательные. Делай если есть ресурс и желание. Они не входят в прогресс дня и не создают давления.\')" style="width:20px;height:20px;border-radius:50%;border:1px solid #D8D8D5;display:flex;align-items:center;justify-content:center;font-size:11px;color:#8B8B85;cursor:pointer;font-style:italic;flex-shrink:0">i</span>';
-html+='</div></div>';
+function renderFreeActions(ids,key){
+var collapsed=state.collapsed[key];
+var html='<div style="border:1.5px dashed #D8D8D5;border-radius:24px;padding:14px 18px;margin-bottom:10px;cursor:pointer" onclick="toggleCollapse(\''+key+'\')">';
+html+='<div style="display:flex;align-items:center;gap:12px">';
+html+='<span style="width:10px;height:10px;border-radius:50%;background:#84CC16;flex-shrink:0"></span>';
+html+='<div style="flex:1;min-width:0">';
+html+='<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-size:14px;font-weight:600;color:#1A1A1A">Свободные действия</span><span style="font-size:11px;color:#8B8B85">'+ids.length+' optional</span></div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-top:2px">не влияют на прогресс</div>';
+html+='</div>';
+html+='<span style="font-size:11px;color:#C8C8C5;flex-shrink:0">'+(collapsed?"▼":"▲")+'</span>';
+html+='</div>';
+if(!collapsed){
+html+='<div onclick="event.stopPropagation()" style="margin-top:4px">';
 ids.forEach(function(id){var t=findTask(id);if(t)html+=freeActionRow(t);});
+html+='</div>';
+}
 html+='</div>';
 return html;
 }
@@ -432,23 +464,22 @@ return html;
 
 function renderMorning(){
 var ids=TASK_GROUPS.morning;
-var done=ids.filter(function(id){return !!state.checked[id];}).length;
-var html='<div style="font-size:12px;color:#8B8B85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
+var html=renderSectionSummary();
 ids.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
-html+=renderFreeActions(MORNING_FREE);
-html+=renderBaseRituals(MORNING_BASE,ids,"утро");
+html+=renderBaseRituals(MORNING_BASE);
+html+=renderFreeActions(MORNING_FREE,"morningFree");
 return html;
 }
 
 function renderDay(){
 var theme=getActiveTheme();
 if(theme.id==="free")return renderFreeDay();
-var html=renderFocus();
+var html=renderSectionSummary();
+html+=renderFocus();
 html+=renderThemeCard(theme);
 html+=renderPriority();
 html+=renderBlocks(theme);
 html+=renderTraining();
-html+=renderTimeTotal();
 return html;
 }
 
@@ -473,14 +504,8 @@ return html;
 
 function renderFreeDay(){
 var theme=getActiveTheme();
-var doneRaw=WEEKEND.filter(function(z){return !!state.checked[z.id];}).length;
-var done=Math.min(doneRaw,2);
-var html='<div style="text-align:center;padding:8px 8px 16px">';
-html+='<div style="font-size:34px;margin-bottom:12px;color:#84CC16">◍</div>';
-html+='<div style="font-size:22px;font-weight:600;color:#1A1A1A;margin-bottom:8px">'+theme.label+'</div>';
-html+='<div style="font-size:13px;color:#8B8B85;line-height:1.6;max-width:280px;margin:0 auto">Ядро — как утром. Дальше выбери две якорные активности из трёх — и день уже состоялся.</div>';
-html+='</div>';
-html+='<div style="font-size:12px;color:#8B8B85;margin-bottom:12px;line-height:1.6">'+done+' из 2 — якорные активности дня</div>';
+var html=renderSectionSummary();
+html+='<div style="font-size:12px;color:#8B8B85;margin-bottom:12px;line-height:1.6">Ядро как утром. Дальше выбери две якорные активности из трёх — и день уже состоялся.</div>';
 WEEKEND.forEach(function(z){html+=weekendZoneCard(z);});
 html+='<div style="background:rgba(200,255,90,0.22);border-radius:18px;padding:16px;margin-top:6px;margin-bottom:14px">';
 html+='<div style="font-size:13px;color:#1A1A1A;line-height:1.65">Выходной удался, если вечером есть ощущение наполненности, а не пустоты. Единственный критерий — не количество сделанного, а качество состояния.</div>';
@@ -649,14 +674,10 @@ return html;
 }
 
 function renderEveningTasks(){
-var ids=TASK_GROUPS.evening;
-var done=ids.filter(function(id){return !!state.checked[id];}).length;
-var html='<div style="font-size:12px;color:#8B8B85;margin-bottom:14px;line-height:1.6">'+done+' из '+ids.length+' выполнено.</div>';
+var html=renderSectionSummary();
 html+=renderEveningNote();
-var evTotal=5;
-["cleaning","bath","drink","tomorrow_focus"].forEach(function(id){var t=findTask(id);if(t){html+=taskCard(t);evTotal+=t.dur;}});
-html+=renderFreeActions(EVENING_FREE);
-html+=renderBlockTotal(evTotal,"вечер");
+["cleaning","bath","drink","tomorrow_focus"].forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
+html+=renderFreeActions(EVENING_FREE,"eveningFree");
 return html;
 }
 
