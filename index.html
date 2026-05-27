@@ -117,12 +117,12 @@ var TASKS=[
 ];
 
 var TASK_GROUPS={
-  morning:["calibration","meditation","walk","english"],
+  morning:["calibration","walk","english"],
   day:["day_b1","day_b2","sport"],
   evening:["tomorrow_focus","cleaning","bath","drink"]
 };
 var MORNING_BASE=["washing","breakfast"];
-var MORNING_FREE=["onething","desk","wildcard"];
+var MORNING_FREE=["meditation","onething","desk","wildcard"];
 var EVENING_FREE=["book"];
 var THEMES=[
   {id:"empire",label:"Создаю империю",days:[1,4],sub:"Пн / Чт",desc:"День действия, роста и новых проектов."},
@@ -407,7 +407,7 @@ var rituals=baseIds.map(findTask).filter(Boolean);
 if(!rituals.length)return "";
 var baseTime=rituals.reduce(function(s,r){return s+r.dur;},0);
 var collapsed=state.collapsed.base;
-var html='<div class="card" style="padding:14px 18px;margin-bottom:10px;cursor:pointer" onclick="toggleCollapse(\'base\')">';
+var html='<div style="border:1.5px dashed #D8D8D5;border-radius:24px;padding:14px 18px;margin-bottom:10px;cursor:pointer" onclick="toggleCollapse(\'base\')">';
 html+='<div style="display:flex;align-items:center;gap:12px">';
 html+='<span style="width:10px;height:10px;border-radius:50%;background:#84CC16;flex-shrink:0"></span>';
 html+='<div style="flex:1;min-width:0">';
