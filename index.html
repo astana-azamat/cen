@@ -119,7 +119,7 @@ var TASKS=[
 var TASK_GROUPS={
   morning:["calibration","meditation","walk","english"],
   day:["day_b1","day_b2","sport"],
-  evening:["evening_note","cleaning","bath","drink","tomorrow_focus"]
+  evening:["tomorrow_focus","cleaning","bath","drink"]
 };
 var MORNING_BASE=["washing","breakfast"];
 var MORNING_FREE=["onething","desk","wildcard"];
@@ -159,7 +159,7 @@ var DEFAULT_AFFIRMATIONS=[
   {id:"wealth",icon:"💵",title:"Я сказочно богат",text:"Я создаю ценность и изобилие."}
 ];
 
-var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"medium",sportChoice:null,editingFocus:false,themeSheet:false,eveningNote:"",editingNote:false,period:"week",collapsed:{base:true,morningFree:true,eveningFree:true}};
+var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",themeOverride:null,priority:"high",sportChoice:null,editingFocus:false,themeSheet:false,tomorrowFocus:"",editingNote:false,period:"week",collapsed:{base:true,morningFree:true,eveningFree:true}};
 function toggleCollapse(k){state.collapsed[k]=!state.collapsed[k];render();}
 
 function dateKey(d){var m=d.getMonth()+1,day=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(day<10?"0":"")+day;}
@@ -171,14 +171,12 @@ function init(){
 var ch=load("cen:checked:"+today());
 var fc=load("cen:focus:"+today());
 var th=load("cen:theme:"+today());
-var pr=load("cen:priority:"+today());
 var sp=load("cen:sport:"+today());
-var en=load("cen:evening_note:"+today());
+var tf=load("cen:focus:"+tomorrow());
 if(ch)state.checked=ch;
-if(en)state.eveningNote=en;
+if(tf)state.tomorrowFocus=tf;
 if(fc)state.focusText=fc;
 if(th)state.themeOverride=th;
-if(pr)state.priority=pr;
 if(sp)state.sportChoice=sp;
 maybeStartIntro();
 render();
@@ -270,7 +268,7 @@ if(isFree){totalMins=null;}else{var p=getPriority();totalMins=p.b1+p.pause+p.b2+
 }else{
 sec={icon:"◐",label:"Вечер"};emoji="💤";
 grp=TASK_GROUPS.evening;target=grp.length;
-totalMins=5+["cleaning","bath","drink","tomorrow_focus"].map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
+totalMins=["tomorrow_focus","cleaning","bath","drink"].map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
 }
 var doneRaw=grp.filter(function(id){return !!state.checked[id];}).length;
 var done=Math.min(doneRaw,target);
@@ -339,16 +337,17 @@ state.celebrating=group;
 setTimeout(function(){state.celebrating=null;render();},800);
 }
 
+function tomorrow(){var d=new Date();d.setDate(d.getDate()+1);return dateKey(d);}
 function toggleNoteEdit(){state.editingNote=!state.editingNote;render();if(state.editingNote)setTimeout(function(){var e=document.getElementById("note-input");if(e)e.focus();},60);}
-function saveEveningNote(){
+function saveTomorrowFocus(){
 var e=document.getElementById("note-input");
-var wasFilled=!!state.checked.evening_note;
-if(e)state.eveningNote=e.value.trim();
-save("cen:evening_note:"+today(),state.eveningNote);
-state.checked.evening_note=!!state.eveningNote;
+var wasFilled=!!state.checked.tomorrow_focus;
+if(e)state.tomorrowFocus=e.value.trim();
+save("cen:focus:"+tomorrow(),state.tomorrowFocus);
+state.checked.tomorrow_focus=!!state.tomorrowFocus;
 save("cen:checked:"+today(),state.checked);
 state.editingNote=false;
-if(state.checked.evening_note&&!wasFilled)checkGroupDone("evening_note");
+if(state.checked.tomorrow_focus&&!wasFilled)checkGroupDone("tomorrow_focus");
 render();
 }
 
@@ -477,7 +476,6 @@ if(theme.id==="free")return renderFreeDay();
 var html=renderSectionSummary();
 html+=renderFocus();
 html+=renderThemeCard(theme);
-html+=renderPriority();
 html+=renderBlocks(theme);
 html+=renderTraining();
 return html;
@@ -644,25 +642,6 @@ html+='</div></div></div>';
 return html;
 }
 
-function renderEveningNote(){
-var txt=state.eveningNote;
-var html='<div style="background:rgba(200,255,90,0.22);border-radius:20px;padding:16px;margin-bottom:14px">';
-html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
-html+='<div style="flex:1;min-width:0">';
-html+='<div style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px">✎ Запись дня</div>';
-if(state.editingNote){
-html+='<textarea id="note-input" maxlength="200" rows="2" placeholder="Что было живым сегодня?" onblur="saveEveningNote()" style="width:100%;border:none;background:transparent;font-size:14px;color:#1A1A1A;font-family:inherit;outline:none;resize:none;line-height:1.5">'+escAttr(txt)+'</textarea>';
-}else{
-html+='<div onclick="toggleNoteEdit()" style="cursor:pointer;font-size:14px;line-height:1.5;color:'+(txt?"#1A1A1A":"#8B8B85")+';'+(txt?"":"font-style:italic")+'">'+(txt?escAttr(txt):"Что было живым сегодня?")+'</div>';
-}
-html+='</div>';
-html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-left:12px;flex-shrink:0">';
-html+='<span style="font-size:11px;color:#8B8B85">5м</span>';
-html+='<span onclick="toggleNoteEdit()" style="width:32px;height:32px;border-radius:11px;background:#FFFFFF;border:1px solid rgba(132,204,22,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#5C7A00;font-size:13px">✎</span>';
-html+='</div></div></div>';
-return html;
-}
-
 function renderBlockTotal(mins,planName){
 var html='<div style="display:flex;align-items:center;gap:12px;background:#FFFFFF;border:1px solid #ECECEA;border-radius:22px;padding:14px 18px;margin-top:12px">';
 html+='<div style="width:40px;height:40px;border-radius:14px;background:#C8FF5A;display:flex;align-items:center;justify-content:center;font-size:14px;color:#1A1A1A;flex-shrink:0">◷</div>';
@@ -673,10 +652,29 @@ html+='</div>';
 return html;
 }
 
+function renderTomorrowFocusPlaque(){
+var txt=state.tomorrowFocus||"";
+var html='<div style="background:rgba(200,255,90,0.22);border-radius:20px;padding:16px;margin-bottom:14px">';
+html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
+html+='<div style="flex:1;min-width:0">';
+html+='<div style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px">✎ Фокус дня на завтра</div>';
+if(state.editingNote){
+html+='<textarea id="note-input" maxlength="120" rows="2" placeholder="Одно слово или фраза на завтра" onblur="saveTomorrowFocus()" style="width:100%;border:none;background:transparent;font-size:14px;color:#1A1A1A;font-family:inherit;outline:none;resize:none;line-height:1.5">'+escAttr(txt)+'</textarea>';
+}else{
+html+='<div onclick="toggleNoteEdit()" style="cursor:pointer;font-size:14px;line-height:1.5;color:'+(txt?"#1A1A1A":"#8B8B85")+';'+(txt?"":"font-style:italic")+'">'+(txt?escAttr(txt):"Одно слово или фраза на завтра")+'</div>';
+}
+html+='</div>';
+html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-left:12px;flex-shrink:0">';
+html+='<span style="font-size:11px;color:#8B8B85">завтра</span>';
+html+='<span onclick="toggleNoteEdit()" style="width:32px;height:32px;border-radius:11px;background:#FFFFFF;border:1px solid rgba(132,204,22,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#5C7A00;font-size:13px">✎</span>';
+html+='</div></div></div>';
+return html;
+}
+
 function renderEveningTasks(){
 var html=renderSectionSummary();
-html+=renderEveningNote();
-["cleaning","bath","drink","tomorrow_focus"].forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
+html+=renderTomorrowFocusPlaque();
+["cleaning","bath","drink"].forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 html+=renderFreeActions(EVENING_FREE,"eveningFree");
 return html;
 }
@@ -819,7 +817,7 @@ return html;
 
 function renderPraise(){
 var dates=periodDates(),total=dates.length,conscious=0;
-dates.forEach(function(ds){var n=load("cen:evening_note:"+ds);if(n&&typeof n==="string"&&n.trim())conscious++;});
+dates.forEach(function(ds){var d=new Date(ds);d.setDate(d.getDate()+1);var n=load("cen:focus:"+dateKey(d));if(n&&typeof n==="string"&&n.trim())conscious++;});
 var html='<div class="card" style="background:rgba(200,255,90,0.18);border-color:rgba(200,255,90,0.5)">';
 html+='<div style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px">Одна похвала</div>';
 html+='<div style="font-size:18px;font-weight:600;color:#1A1A1A;line-height:1.4;text-align:center">'+conscious+' '+plural(conscious,"вечер","вечера","вечеров")+' из '+total+'<br>ты закончил день осознанно</div>';
@@ -870,7 +868,7 @@ Object.keys(data).forEach(function(k){
 if(k.indexOf("cen:")===0){localStorage.setItem(k,JSON.stringify(data[k]));count++;}
 });
 state.checked=load("cen:checked:"+today())||{};
-state.eveningNote=load("cen:evening_note:"+today())||"";
+state.tomorrowFocus=load("cen:focus:"+tomorrow())||"";
 state.focusText=load("cen:focus:"+today())||"";
 render();
 alert("Импортировано: "+count+" записей");
