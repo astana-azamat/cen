@@ -117,7 +117,8 @@ var TASKS=[
 ];
 
 var TASK_GROUPS={
-  morning:["calibration","walk","english"],
+  morning:["calibration","english"],
+  rhythm:["deep_work","walk"],
   day:["day_b1","day_b2","sport"],
   evening:["tomorrow_focus","cleaning","bath","drink"]
 };
@@ -125,10 +126,9 @@ var MORNING_BASE=["washing","breakfast"];
 var MORNING_FREE=["meditation","onething","desk","wildcard"];
 var EVENING_FREE=["book"];
 var THEMES=[
-  {id:"empire",label:"Создаю империю",days:[1,4],sub:"Пн / Чт",desc:"День действия, роста и новых проектов."},
-  {id:"clients",label:"Спокойствие души",days:[2,5],sub:"Вт / Пт",desc:"День внимания к постоянным клиентам."},
-  {id:"existential",label:"Экзистенциальная безопасность",days:[3,6],sub:"Ср / Сб",desc:"День глубокой работы над одним проектом."},
-  {id:"free",label:"Выходной",days:[0],sub:"Вс",desc:"Возврат к себе."}
+  {id:"empire",label:"Создаю империю",days:[1,3,4,6],sub:"",desc:"День действия, роста и новых проектов."},
+  {id:"clients",label:"Спокойствие души",days:[2,5],sub:"",desc:"День внимания к постоянным клиентам."},
+  {id:"free",label:"Выходной",days:[0],sub:"",desc:"Возврат к себе."}
 ];
 var PRIORITIES=[
   {id:"high",label:"Высокий",color:"#EF4444",b1:50,pause:20,b2:50},
@@ -239,14 +239,10 @@ return Object.keys(dates).length;
 }
 
 function renderHeader(){
-var days=getActiveDays();
-var tab=state.tab;
+var sel=state.tab==="summary";
 var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px">';
 html+='<div style="font-size:26px;font-weight:600;color:#1A1A1A;letter-spacing:1px;line-height:1.1;text-transform:uppercase">CEN Trainer</div>';
-if(tab==="summary"){
-html+='<div style="text-align:right"><div style="font-size:10px;color:#84CC16;font-weight:600;text-transform:uppercase;letter-spacing:1.2px">Сводка</div>';
-html+='<div style="font-size:11px;color:#8B8B85;margin-top:3px">'+days+' дн</div></div>';
-}
+html+='<button onclick="setTab(\'summary\')" aria-label="Сводка" style="width:42px;height:42px;border-radius:14px;background:'+(sel?"#C8FF5A":"transparent")+';border:1px solid '+(sel?"#C8FF5A":"#ECECEA")+';display:flex;align-items:center;justify-content:center;font-size:16px;color:#1A1A1A;cursor:pointer;font-weight:300;flex-shrink:0">◈</button>';
 html+='</div>';
 document.getElementById("header").innerHTML=html;
 }
@@ -261,8 +257,12 @@ if(tab==="morning"){
 sec={icon:"☀",label:"Утро"};emoji="☀️";
 grp=TASK_GROUPS.morning;target=grp.length;
 totalMins=grp.map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0)+MORNING_BASE.map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
+}else if(tab==="rhythm"){
+sec={icon:"⊙",label:"Ритм"};emoji="⚡";
+grp=TASK_GROUPS.rhythm;target=grp.length;
+totalMins=grp.map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
 }else if(tab==="day"){
-sec={icon:"▣",label:"День"};emoji="🔥";
+sec={icon:"▣",label:"Фокус"};emoji="🔥";
 grp=getDayGroup();target=getDayTarget();
 if(isFree){totalMins=null;}else{var p=getPriority();totalMins=p.b1+p.pause+p.b2+30;}
 }else{
@@ -295,7 +295,7 @@ return html;
 }
 
 function renderBottomNav(){
-var tabs=[{id:"morning",label:"Утро",icon:"◎"},{id:"day",label:"День",icon:"▣"},{id:"evening",label:"Вечер",icon:"◐"},{id:"summary",label:"Сводка",icon:"◈"}];
+var tabs=[{id:"morning",label:"Утро",icon:"◎"},{id:"rhythm",label:"Ритм",icon:"⊙"},{id:"day",label:"Фокус",icon:"▣"},{id:"evening",label:"Вечер",icon:"◐"}];
 var html='';
 tabs.forEach(function(t){
 html+='<button class="tab'+(state.tab===t.id?' active':'')+'" onclick="setTab(\''+t.id+'\')">';
@@ -315,6 +315,7 @@ return getActiveTheme().id==="free"?2:3;
 
 function checkGroupDone(id){
 if(TASK_GROUPS.morning.indexOf(id)!==-1&&TASK_GROUPS.morning.every(function(i){return !!state.checked[i];}))celebrate("morning");
+if(TASK_GROUPS.rhythm.indexOf(id)!==-1&&TASK_GROUPS.rhythm.every(function(i){return !!state.checked[i];}))celebrate("rhythm");
 if(TASK_GROUPS.evening.indexOf(id)!==-1&&TASK_GROUPS.evening.every(function(i){return !!state.checked[i];}))celebrate("evening");
 var dg=getDayGroup();
 if(dg.indexOf(id)!==-1){
@@ -467,6 +468,12 @@ var html=renderSectionSummary();
 ids.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 html+=renderBaseRituals(MORNING_BASE);
 html+=renderFreeActions(MORNING_FREE,"morningFree");
+return html;
+}
+
+function renderRhythm(){
+var html=renderSectionSummary();
+TASK_GROUPS.rhythm.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 return html;
 }
 
@@ -699,11 +706,13 @@ function dayEnergy(ds){
 var ch=(ds===today())?state.checked:(load("cen:checked:"+ds)||{});
 var m=TASK_GROUPS.morning.filter(function(id){return !!ch[id];}).length;
 var e=TASK_GROUPS.evening.filter(function(id){return !!ch[id];}).length;
+var r=TASK_GROUPS.rhythm.filter(function(id){return !!ch[id];}).length;
 var wd=["day_b1","day_b2","sport"].filter(function(id){return !!ch[id];}).length;
 var we=["wk_body","wk_rest","wk_create"].filter(function(id){return !!ch[id];}).length;
 var dd,dtotal;
 if(we>0&&wd===0){dd=Math.min(we,2);dtotal=2;}else{dd=wd;dtotal=3;}
-var pct=0.75*(dd/dtotal)+0.25*((m+e)/(TASK_GROUPS.morning.length+TASK_GROUPS.evening.length));
+var activeDone=dd+r,activeTotal=dtotal+TASK_GROUPS.rhythm.length;
+var pct=0.75*(activeDone/activeTotal)+0.25*((m+e)/(TASK_GROUPS.morning.length+TASK_GROUPS.evening.length));
 return Math.round(pct*100);
 }
 function energyLevel(pct){
@@ -964,6 +973,7 @@ renderHeader();
 renderBottomNav();
 var html="";
 if(state.tab==="morning")html=renderMorning();
+else if(state.tab==="rhythm")html=renderRhythm();
 else if(state.tab==="day")html=renderDay();
 else if(state.tab==="evening")html=renderEveningTasks();
 else html=renderSummary();
