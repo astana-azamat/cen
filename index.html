@@ -84,8 +84,6 @@ var TASKS=[
    why:"Завтрак без телефона. 20 минут — внимание остаётся на еде, без переключений. Первый приём пищи даёт глюкозу для dlPFC."},
   {id:"deep_work",label:"Экзистенциальная безопасность",dur:50,icon:"■",tag:"Главная тренировка",color:"#84CC16",
    why:"Блок, где каждое утро работаю не отвлекаясь над проектом 50 минут. Телефон в другой комнате. Это и есть силовая тренировка dlPFC: каждый момент удержания внимания — повторение."},
-  {id:"sport",label:"Тренировка",dur:30,icon:"▶",tag:"Бокс или турник",color:"#84CC16",
-   why:"Бокс или турник, на выбор. Сила, координация, дыхание. Физическая нагрузка перезапускает CEN через дофамин усилия, а не дофамин стимула."},
   {id:"english",label:"English",dur:15,icon:"◖",tag:"Язык миру",color:"#84CC16",
    why:"15 минут английского каждый день. CEN держит двойной контекст: смысл + новый код. Свободно выражать мысли = свободно мыслить."},
   {id:"book",label:"Чтение книг",dur:20,icon:"▭",tag:"Только чтение",color:"#84CC16",
@@ -115,7 +113,7 @@ var TASKS=[
 var TASK_GROUPS={
   morning:["calibration","english"],
   rhythm:["deep_work","walk"],
-  day:["day_b1","day_b2","sport"],
+  day:["day_b1","day_b2"],
   evening:["tomorrow_focus","bath","drink"]
 };
 var MORNING_BASE=["washing","breakfast"];
@@ -149,7 +147,7 @@ var DEFAULT_AFFIRMATIONS=[
   {id:"wealth",icon:"💵",title:"Я сказочно богат",text:"Я создаю ценность и изобилие."}
 ];
 
-var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",sportChoice:null,editingFocus:false,tomorrowFocus:"",editingNote:false,period:"week",collapsed:{base:true,morningFree:true,eveningFree:true}};
+var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",editingFocus:false,tomorrowFocus:"",editingNote:false,period:"week",collapsed:{base:true,morningFree:true,eveningFree:true}};
 function toggleCollapse(k){state.collapsed[k]=!state.collapsed[k];render();}
 
 function dateKey(d){var m=d.getMonth()+1,day=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(day<10?"0":"")+day;}
@@ -160,19 +158,16 @@ function load(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}
 function init(){
 var ch=load("cen:checked:"+today());
 var fc=load("cen:focus:"+today());
-var sp=load("cen:sport:"+today());
 var tf=load("cen:focus:"+tomorrow());
 if(ch)state.checked=ch;
 if(tf)state.tomorrowFocus=tf;
 if(fc)state.focusText=fc;
-if(sp)state.sportChoice=sp;
 maybeStartIntro();
 render();
 }
 
 function toggleFocusEdit(){state.editingFocus=!state.editingFocus;render();if(state.editingFocus)setTimeout(function(){var e=document.getElementById("focus-input");if(e)e.focus();},60);}
 function saveFocus(){var e=document.getElementById("focus-input");if(e){state.focusText=e.value.trim();save("cen:focus:"+today(),state.focusText);}state.editingFocus=false;render();}
-function setSport(c){state.sportChoice=c;save("cen:sport:"+today(),c);render();}
 
 function getAffirmations(){return load("cen:affirmations")||DEFAULT_AFFIRMATIONS;}
 
@@ -240,7 +235,7 @@ totalMins=grp.map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
 }else if(tab==="day"){
 sec={icon:"▣",label:"Фокус"};emoji="🔥";
 grp=TASK_GROUPS.day;target=grp.length;
-totalMins=DAY_BLOCKS.reduce(function(s,b){return s+b.dur;},0)+30;
+totalMins=DAY_BLOCKS.reduce(function(s,b){return s+b.dur;},0);
 }else{
 sec={icon:"◐",label:"Вечер"};emoji="💤";
 grp=TASK_GROUPS.evening;target=grp.length;
@@ -446,7 +441,6 @@ function renderDay(){
 var html=renderSectionSummary();
 html+=renderFocus();
 html+=renderBlocks();
-html+=renderTraining();
 return html;
 }
 
@@ -482,31 +476,6 @@ return html;
 function renderBlocks(){
 var html="";
 DAY_BLOCKS.forEach(function(b,i){html+=dayBlockCard("Блок "+(i+1),b.id,b.label,b.dur);});
-return html;
-}
-
-function renderTraining(){
-var ch=!!state.checked.sport;
-var choice=state.sportChoice;
-var html='<div class="card" style="margin-top:4px">';
-html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">';
-html+='<span style="font-size:10px;font-weight:600;color:#8B8B85;text-transform:uppercase;letter-spacing:1.2px">Тренировка</span>';
-html+='<span style="font-size:13px;font-weight:600;color:#84CC16">30м</span>';
-html+='</div>';
-html+='<div style="display:flex;gap:8px;margin-bottom:12px">';
-[{id:"boxing",label:"Бокс"},{id:"pullup",label:"Турник"}].forEach(function(o){
-var sel=choice===o.id;
-html+='<div onclick="setSport(\''+o.id+'\')" style="flex:1;border:1.5px solid '+(sel?"#84CC16":"#ECECEA")+';background:'+(sel?"rgba(200,255,90,0.18)":"#FFFFFF")+';border-radius:14px;padding:13px;text-align:center;cursor:pointer;font-size:13px;font-weight:500;color:'+(sel?"#1A1A1A":"#8B8B85")+'">'+o.label+'</div>';
-});
-html+='</div>';
-html+='<div style="display:flex;align-items:center;justify-content:space-between">';
-html+='<span style="font-size:11px;color:#C8C8C5">'+(choice?"Можно отметить выполнение":"Выбери один вариант")+'</span>';
-if(choice){
-html+='<div onclick="toggleTask(\'sport\')" style="width:26px;height:26px;border-radius:9px;border:'+(ch?"none":"1.5px solid #D8D8D5")+';background:'+(ch?"#1A1A1A":"transparent")+';display:flex;align-items:center;justify-content:center;cursor:pointer;color:#C8FF5A;font-size:13px;font-weight:600">'+(ch?"✓":"")+'</div>';
-}else{
-html+='<div style="width:26px;height:26px;border-radius:9px;border:1.5px solid #ECECEA;background:#F4F4F2"></div>';
-}
-html+='</div></div>';
 return html;
 }
 
