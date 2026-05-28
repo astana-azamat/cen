@@ -115,16 +115,15 @@ var TASKS=[
 var TASK_GROUPS={
   morning:["calibration","english"],
   rhythm:["deep_work","walk"],
-  day:["day_b1","day_b2","day_b3","sport"],
-  evening:["tomorrow_focus","cleaning","bath","drink"]
+  day:["day_b1","day_b2","sport"],
+  evening:["tomorrow_focus","bath","drink"]
 };
 var MORNING_BASE=["washing","breakfast"];
 var MORNING_FREE=["meditation","onething","desk","wildcard"];
-var EVENING_FREE=["book"];
+var EVENING_FREE=["cleaning","book"];
 var DAY_BLOCKS=[
   {id:"day_b1",label:"Спокойствие души",dur:25},
-  {id:"day_b2",label:"Создаю империю",dur:50},
-  {id:"day_b3",label:"Создаю империю",dur:25}
+  {id:"day_b2",label:"Создаю империю",dur:50}
 ];
 var CARDS=[
   {title:"Что такое CEN",sub:"Исполнительная сеть",icon:"◈",color:"#84CC16",
@@ -220,7 +219,7 @@ function renderHeader(){
 var sel=state.tab==="summary";
 var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px">';
 html+='<div style="font-size:26px;font-weight:600;color:#1A1A1A;letter-spacing:1px;line-height:1.1;text-transform:uppercase">CEN Trainer</div>';
-html+='<button onclick="setTab(\'summary\')" aria-label="Сводка" style="width:42px;height:42px;border-radius:14px;background:'+(sel?"#C8FF5A":"transparent")+';border:1px solid '+(sel?"#C8FF5A":"#ECECEA")+';display:flex;align-items:center;justify-content:center;font-size:16px;color:#1A1A1A;cursor:pointer;font-weight:300;flex-shrink:0">◈</button>';
+html+='<button onclick="setTab(\'summary\')" aria-label="Сводка" style="display:flex;align-items:center;gap:7px;height:42px;padding:0 14px;border-radius:14px;background:'+(sel?"#C8FF5A":"transparent")+';border:1px solid '+(sel?"#C8FF5A":"#ECECEA")+';color:#1A1A1A;cursor:pointer;flex-shrink:0"><span style="font-size:16px;font-weight:300">◈</span><span style="font-size:11px;font-weight:500">Сводка</span></button>';
 html+='</div>';
 document.getElementById("header").innerHTML=html;
 }
@@ -245,7 +244,7 @@ totalMins=DAY_BLOCKS.reduce(function(s,b){return s+b.dur;},0)+30;
 }else{
 sec={icon:"◐",label:"Вечер"};emoji="💤";
 grp=TASK_GROUPS.evening;target=grp.length;
-totalMins=["tomorrow_focus","cleaning","bath","drink"].map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
+totalMins=["tomorrow_focus","bath","drink"].map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
 }
 var doneRaw=grp.filter(function(id){return !!state.checked[id];}).length;
 var done=Math.min(doneRaw,target);
@@ -533,7 +532,7 @@ return html;
 function renderEveningTasks(){
 var html=renderSectionSummary();
 html+=renderTomorrowFocusPlaque();
-["cleaning","bath","drink"].forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
+["bath","drink"].forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 html+=renderFreeActions(EVENING_FREE,"eveningFree");
 return html;
 }
