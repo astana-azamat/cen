@@ -98,8 +98,6 @@ var TASKS=[
    why:"Кефир даёт триптофан — предшественник серотонина и мелатонина. Тёплая вода успокаивает ЖКТ и снижает кортизол. Оба сигнала телу что день закончен."},
   {id:"bath",label:"Горячая ванна / душ",dur:20,icon:"◑",tag:"Вечерний ритуал",color:"#84CC16",
    why:"Горячая ванна или душ за 1--2 часа до сна снижает температуру тела после выхода, что ускоряет засыпание и улучшает глубокий сон. Прямо влияет на восстановление prefrontal cortex за ночь."},
-  {id:"tomorrow_focus",label:"Завтрашний фокус",dur:1,icon:"☀",tag:"Одно слово или фраза на завтра",color:"#84CC16",
-   why:"Одно слово или короткая фраза, задающая завтрашний день. Решение принято сегодня вечером — утром CEN не тратится на выбор направления."},
   {id:"sleep",label:"Фиксированный отбой",dur:0,icon:"☽",tag:"Базовое условие",color:"#84CC16",
    why:"Одна ночь недосыпа снижает производительность prefrontal cortex на 20--30%. Никакие практики это не компенсируют."},
   {id:"onething",label:"Одно дело дома",dur:15,icon:"⌂",tag:"Если есть ресурс",color:"#84CC16",
@@ -114,7 +112,7 @@ var TASK_GROUPS={
   morning:["calibration","english"],
   rhythm:["deep_work","walk"],
   day:["day_b1","day_b2"],
-  evening:["tomorrow_focus","bath","drink"]
+  evening:["bath","drink"]
 };
 var MORNING_BASE=["washing","breakfast"];
 var MORNING_FREE=["meditation","onething","desk","wildcard"];
@@ -147,7 +145,7 @@ var DEFAULT_AFFIRMATIONS=[
   {id:"wealth",icon:"💵",title:"Я сказочно богат",text:"Я создаю ценность и изобилие."}
 ];
 
-var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",rhythmText:"",focusStep:"",rhythmStep:"",editingFocus:false,editingRhythm:false,editingFocusStep:false,editingRhythmStep:false,tomorrowFocus:"",editingNote:false,period:"week",selectedDay:null,collapsed:{base:true,morningFree:true,eveningFree:true}};
+var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",rhythmText:"",focusStep:"",rhythmStep:"",editingFocus:false,editingRhythm:false,editingFocusStep:false,editingRhythmStep:false,period:"week",selectedDay:null,courseFocusItems:[],courseRhythmItems:[],collapsed:{base:true,morningFree:true,eveningFree:true}};
 function toggleCollapse(k){state.collapsed[k]=!state.collapsed[k];render();}
 
 function dateKey(d){var m=d.getMonth()+1,day=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(day<10?"0":"")+day;}
@@ -161,13 +159,15 @@ var fc=load("cen:focus:"+today());
 var rh=load("cen:rhythm:"+today());
 var fs=load("cen:focus_step:"+today());
 var rs=load("cen:rhythm_step:"+today());
-var tf=load("cen:focus:"+tomorrow());
+var cf=load("cen:course:focus");
+var cr=load("cen:course:rhythm");
 if(ch)state.checked=ch;
-if(tf)state.tomorrowFocus=tf;
 if(fc)state.focusText=fc;
 if(rh)state.rhythmText=rh;
 if(fs)state.focusStep=fs;
 if(rs)state.rhythmStep=rs;
+if(Array.isArray(cf))state.courseFocusItems=cf;
+if(Array.isArray(cr))state.courseRhythmItems=cr;
 maybeStartIntro();
 render();
 }
@@ -223,11 +223,14 @@ return Object.keys(dates).length;
 }
 
 function renderHeader(){
-var sel=state.tab==="summary";
-var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:12px">';
-html+='<div style="font-size:26px;font-weight:600;color:#1A1A1A;letter-spacing:1px;line-height:1.1;text-transform:uppercase">CEN Trainer</div>';
-html+='<button onclick="setTab(\'summary\')" aria-label="Сводка" style="display:flex;align-items:center;gap:7px;height:42px;padding:0 14px;border-radius:14px;background:'+(sel?"#C8FF5A":"transparent")+';border:1px solid '+(sel?"#C8FF5A":"#ECECEA")+';color:#1A1A1A;cursor:pointer;flex-shrink:0"><span style="font-size:16px;font-weight:300">◈</span><span style="font-size:11px;font-weight:500">Сводка</span></button>';
-html+='</div>';
+var selS=state.tab==="summary",selC=state.tab==="course";
+var btn=function(tab,icon,label,sel){return '<button onclick="setTab(\''+tab+'\')" aria-label="'+label+'" style="display:flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:12px;background:'+(sel?"#C8FF5A":"transparent")+';border:1px solid '+(sel?"#C8FF5A":"#ECECEA")+';color:#1A1A1A;cursor:pointer;flex-shrink:0"><span style="font-size:14px;font-weight:300">'+icon+'</span><span style="font-size:11px;font-weight:500">'+label+'</span></button>';};
+var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:8px">';
+html+='<div style="font-size:19px;font-weight:600;color:#1A1A1A;letter-spacing:0.6px;line-height:1.1;text-transform:uppercase;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">CEN Trainer</div>';
+html+='<div style="display:flex;gap:6px;flex-shrink:0">';
+html+=btn("course","▦","Курс",selC);
+html+=btn("summary","◈","Сводка",selS);
+html+='</div></div>';
 document.getElementById("header").innerHTML=html;
 }
 
@@ -251,7 +254,7 @@ totalMins=DAY_BLOCKS.reduce(function(s,b){return s+b.dur;},0);
 }else{
 sec={icon:"◐",label:"Вечер"};emoji="💤";
 grp=TASK_GROUPS.evening;target=grp.length;
-totalMins=["tomorrow_focus","bath","drink"].map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
+totalMins=["bath","drink"].map(findTask).reduce(function(s,t){return s+(t?t.dur:0);},0);
 }
 var doneRaw=grp.filter(function(id){return !!state.checked[id];}).length;
 var done=Math.min(doneRaw,target);
@@ -310,17 +313,30 @@ state.celebrating=group;
 setTimeout(function(){state.celebrating=null;render();},800);
 }
 
-function tomorrow(){var d=new Date();d.setDate(d.getDate()+1);return dateKey(d);}
-function toggleNoteEdit(){state.editingNote=!state.editingNote;render();if(state.editingNote)setTimeout(function(){var e=document.getElementById("note-input");if(e)e.focus();},60);}
-function saveTomorrowFocus(){
-var e=document.getElementById("note-input");
-var wasFilled=!!state.checked.tomorrow_focus;
-if(e)state.tomorrowFocus=e.value.trim();
-save("cen:focus:"+tomorrow(),state.tomorrowFocus);
-state.checked.tomorrow_focus=!!state.tomorrowFocus;
-save("cen:checked:"+today(),state.checked);
-state.editingNote=false;
-if(state.checked.tomorrow_focus&&!wasFilled)checkGroupDone("tomorrow_focus");
+function addCourseItem(kind){
+var inputId=kind==="focus"?"course-focus-input":"course-rhythm-input";
+var e=document.getElementById(inputId);
+if(!e)return;
+var v=e.value.trim();
+if(!v)return;
+var key=kind==="focus"?"courseFocusItems":"courseRhythmItems";
+state[key].push(v);
+save("cen:course:"+kind,state[key]);
+e.value="";
+render();
+}
+function removeCourseItem(kind,i){
+var key=kind==="focus"?"courseFocusItems":"courseRhythmItems";
+state[key].splice(i,1);
+save("cen:course:"+kind,state[key]);
+render();
+}
+function pushCourseItem(kind,i){
+var key=kind==="focus"?"courseFocusItems":"courseRhythmItems";
+var v=state[key][i];
+if(!v)return;
+if(kind==="focus"){state.focusText=v;save("cen:focus:"+today(),v);state.tab="day";}
+else{state.rhythmText=v;save("cen:rhythm:"+today(),v);state.tab="rhythm";}
 render();
 }
 
@@ -528,28 +544,8 @@ DAY_BLOCKS.forEach(function(b,i){html+=dayBlockCard("Блок "+(i+1),b.id,b.lab
 return html;
 }
 
-function renderTomorrowFocusPlaque(){
-var txt=state.tomorrowFocus||"";
-var html='<div style="background:rgba(200,255,90,0.22);border-radius:20px;padding:16px;margin-bottom:14px">';
-html+='<div style="display:flex;justify-content:space-between;align-items:flex-start">';
-html+='<div style="flex:1;min-width:0">';
-html+='<div style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:8px">✎ Фокус дня на завтра</div>';
-if(state.editingNote){
-html+='<textarea id="note-input" maxlength="120" rows="2" placeholder="Одно слово или фраза на завтра" onblur="saveTomorrowFocus()" style="width:100%;border:none;background:transparent;font-size:14px;color:#1A1A1A;font-family:inherit;outline:none;resize:none;line-height:1.5">'+escAttr(txt)+'</textarea>';
-}else{
-html+='<div onclick="toggleNoteEdit()" style="cursor:pointer;font-size:14px;line-height:1.5;color:'+(txt?"#1A1A1A":"#8B8B85")+';'+(txt?"":"font-style:italic")+'">'+(txt?escAttr(txt):"Одно слово или фраза на завтра")+'</div>';
-}
-html+='</div>';
-html+='<div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;margin-left:12px;flex-shrink:0">';
-html+='<span style="font-size:11px;color:#8B8B85">завтра</span>';
-html+='<span onclick="toggleNoteEdit()" style="width:32px;height:32px;border-radius:11px;background:#FFFFFF;border:1px solid rgba(132,204,22,0.4);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#5C7A00;font-size:13px">✎</span>';
-html+='</div></div></div>';
-return html;
-}
-
 function renderEveningTasks(){
 var html=renderSectionSummary();
-html+=renderTomorrowFocusPlaque();
 ["bath","drink"].forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 html+=renderFreeActions(EVENING_FREE,"eveningFree");
 return html;
@@ -689,10 +685,10 @@ return html;
 
 function renderPraise(){
 var dates=periodDates(),total=dates.length,conscious=0;
-dates.forEach(function(ds){var d=new Date(ds);d.setDate(d.getDate()+1);var n=load("cen:focus:"+dateKey(d));if(n&&typeof n==="string"&&n.trim())conscious++;});
+dates.forEach(function(ds){var n=load("cen:focus:"+ds);if(n&&typeof n==="string"&&n.trim())conscious++;});
 var html='<div class="card" style="background:rgba(200,255,90,0.18);border-color:rgba(200,255,90,0.5)">';
 html+='<div style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px;margin-bottom:12px">Одна похвала</div>';
-html+='<div style="font-size:18px;font-weight:600;color:#1A1A1A;line-height:1.4;text-align:center">'+conscious+' '+plural(conscious,"вечер","вечера","вечеров")+' из '+total+'<br>ты закончил день осознанно</div>';
+html+='<div style="font-size:18px;font-weight:600;color:#1A1A1A;line-height:1.4;text-align:center">'+conscious+' '+plural(conscious,"день","дня","дней")+' из '+total+'<br>у тебя был фокус дня</div>';
 html+='<div style="font-size:12px;color:#5C7A00;line-height:1.5;text-align:center;margin-top:12px">Ты строишь стабильность, и это уже твоя сила.</div>';
 html+='</div>';
 return html;
@@ -719,6 +715,40 @@ html+='<button onclick="saveReflect()" style="flex:1;background:#C8FF5A;border:n
 html+='<button onclick="deleteReflect()" aria-label="Удалить" style="width:52px;border:1px solid #ECECEA;background:#FFFFFF;border-radius:16px;display:flex;align-items:center;justify-content:center;cursor:pointer">';
 html+='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B8B85" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>';
 html+='</div></div>';
+return html;
+}
+
+function renderCourseSection(kind,title,sub,placeholder){
+var items=kind==="focus"?state.courseFocusItems:state.courseRhythmItems;
+var inputId=kind==="focus"?"course-focus-input":"course-rhythm-input";
+var todayVal=kind==="focus"?state.focusText:state.rhythmText;
+var html='<div class="card">';
+html+='<div style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:2px">'+title+'</div>';
+html+='<div style="font-size:11px;color:#8B8B85;margin-bottom:14px;line-height:1.5">'+sub+'</div>';
+if(!items.length){
+html+='<div style="font-size:12px;color:#C8C8C5;text-align:center;padding:14px 0;line-height:1.5">Пусто. Добавь первый ниже.</div>';
+}else{
+items.forEach(function(t,i){
+var active=todayVal&&t===todayVal;
+html+='<div style="display:flex;align-items:center;gap:8px;background:'+(active?"rgba(200,255,90,0.22)":"#F9F9F7")+';border:1px solid '+(active?"rgba(132,204,22,0.4)":"transparent")+';border-radius:14px;padding:11px 12px;margin-bottom:8px">';
+html+='<div style="flex:1;min-width:0;font-size:13px;line-height:1.4;color:#1A1A1A;word-break:break-word">'+escAttr(t)+(active?' <span style="font-size:10px;color:#5C7A00;font-weight:600;background:rgba(200,255,90,0.5);border-radius:8px;padding:2px 7px;margin-left:4px;white-space:nowrap">сегодня</span>':"")+'</div>';
+html+='<button onclick="pushCourseItem(\''+kind+'\','+i+')" aria-label="На сегодня" title="На сегодня" style="width:32px;height:32px;border-radius:11px;background:#C8FF5A;border:none;color:#1A1A1A;font-size:15px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">→</button>';
+html+='<button onclick="removeCourseItem(\''+kind+'\','+i+')" aria-label="Удалить" title="Удалить" style="width:32px;height:32px;border-radius:11px;background:transparent;border:1px solid #ECECEA;color:#8B8B85;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0">✕</button>';
+html+='</div>';
+});
+}
+html+='<div style="display:flex;gap:8px;margin-top:12px">';
+html+='<input id="'+inputId+'" maxlength="120" placeholder="'+placeholder+'" onkeydown="if(event.key===\'Enter\')addCourseItem(\''+kind+'\')" style="flex:1;padding:12px 14px;border-radius:14px;border:1px solid #ECECEA;background:#F9F9F7;color:#1A1A1A;font-size:13px;font-family:inherit;outline:none"/>';
+html+='<button onclick="addCourseItem(\''+kind+'\')" aria-label="Добавить" style="background:#1A1A1A;border:none;color:#FFFFFF;border-radius:14px;padding:0 18px;font-size:18px;font-weight:500;cursor:pointer">+</button>';
+html+='</div>';
+html+='</div>';
+return html;
+}
+
+function renderCourse(){
+var html='<div style="font-size:11px;color:#8B8B85;margin-bottom:14px;line-height:1.5">Копилка идей и задач. Тап <span style="color:#5C7A00;font-weight:600">→</span> — переносит в сегодняшний день.</div>';
+html+=renderCourseSection("focus","Фокус дня","Записи отсюда становятся «Фокусом дня». Можно копить несколько и выбирать на день.","Добавить фокус...");
+html+=renderCourseSection("rhythm","Задача по экз. безопасности","Записи отсюда становятся «Задачей» в Ритме на день.","Добавить задачу...");
 return html;
 }
 
@@ -764,7 +794,6 @@ Object.keys(data).forEach(function(k){
 if(k.indexOf("cen:")===0){localStorage.setItem(k,JSON.stringify(data[k]));count++;}
 });
 state.checked=load("cen:checked:"+today())||{};
-state.tomorrowFocus=load("cen:focus:"+tomorrow())||"";
 state.focusText=load("cen:focus:"+today())||"";
 state.rhythmText=load("cen:rhythm:"+today())||"";
 state.focusStep=load("cen:focus_step:"+today())||"";
@@ -866,6 +895,7 @@ if(state.tab==="morning")html=renderMorning();
 else if(state.tab==="rhythm")html=renderRhythm();
 else if(state.tab==="day")html=renderDay();
 else if(state.tab==="evening")html=renderEveningTasks();
+else if(state.tab==="course")html=renderCourse();
 else html=renderSummary();
 document.getElementById("content").innerHTML=html;
 }
