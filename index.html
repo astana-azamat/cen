@@ -147,7 +147,7 @@ var DEFAULT_AFFIRMATIONS=[
   {id:"wealth",icon:"💵",title:"Я сказочно богат",text:"Я создаю ценность и изобилие."}
 ];
 
-var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",editingFocus:false,tomorrowFocus:"",editingNote:false,period:"week",selectedDay:null,collapsed:{base:true,morningFree:true,eveningFree:true}};
+var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",rhythmText:"",editingFocus:false,editingRhythm:false,tomorrowFocus:"",editingNote:false,period:"week",selectedDay:null,collapsed:{base:true,morningFree:true,eveningFree:true}};
 function toggleCollapse(k){state.collapsed[k]=!state.collapsed[k];render();}
 
 function dateKey(d){var m=d.getMonth()+1,day=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(day<10?"0":"")+day;}
@@ -158,16 +158,20 @@ function load(k){try{var v=localStorage.getItem(k);return v?JSON.parse(v):null;}
 function init(){
 var ch=load("cen:checked:"+today());
 var fc=load("cen:focus:"+today());
+var rh=load("cen:rhythm:"+today());
 var tf=load("cen:focus:"+tomorrow());
 if(ch)state.checked=ch;
 if(tf)state.tomorrowFocus=tf;
 if(fc)state.focusText=fc;
+if(rh)state.rhythmText=rh;
 maybeStartIntro();
 render();
 }
 
 function toggleFocusEdit(){state.editingFocus=!state.editingFocus;render();if(state.editingFocus)setTimeout(function(){var e=document.getElementById("focus-input");if(e)e.focus();},60);}
 function saveFocus(){var e=document.getElementById("focus-input");if(e){state.focusText=e.value.trim();save("cen:focus:"+today(),state.focusText);}state.editingFocus=false;render();}
+function toggleRhythmEdit(){state.editingRhythm=!state.editingRhythm;render();if(state.editingRhythm)setTimeout(function(){var e=document.getElementById("rhythm-input");if(e)e.focus();},60);}
+function saveRhythmFocus(){var e=document.getElementById("rhythm-input");if(e){state.rhythmText=e.value.trim();save("cen:rhythm:"+today(),state.rhythmText);}state.editingRhythm=false;render();}
 
 function getAffirmations(){return load("cen:affirmations")||DEFAULT_AFFIRMATIONS;}
 
@@ -431,8 +435,25 @@ html+=renderFreeActions(MORNING_FREE,"morningFree");
 return html;
 }
 
+function renderRhythmFocus(){
+var txt=state.rhythmText;
+var html='<div style="background:rgba(200,255,90,0.22);border-radius:20px;padding:16px;margin-bottom:14px">';
+html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+html+='<span style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px">Задача по экз. безопасности</span>';
+html+='<span onclick="toggleRhythmEdit()" style="cursor:pointer;color:#5C7A00;font-size:14px">✎</span>';
+html+='</div>';
+if(state.editingRhythm){
+html+='<input id="rhythm-input" maxlength="100" value="'+escAttr(txt)+'" placeholder="Над какой задачей работаешь?" onkeydown="if(event.key===\'Enter\')this.blur()" onblur="saveRhythmFocus()" style="width:100%;border:none;background:transparent;font-size:15px;color:#1A1A1A;font-family:inherit;outline:none"/>';
+}else{
+html+='<div onclick="toggleRhythmEdit()" style="cursor:pointer;font-size:15px;line-height:1.4;color:'+(txt?"#1A1A1A":"#8B8B85")+';'+(txt?"":"font-style:italic")+'">'+(txt?escAttr(txt):"Над какой задачей работаешь?")+'</div>';
+}
+html+='</div>';
+return html;
+}
+
 function renderRhythm(){
 var html=renderSectionSummary();
+html+=renderRhythmFocus();
 TASK_GROUPS.rhythm.forEach(function(id){var t=findTask(id);if(t)html+=taskCard(t);});
 return html;
 }
@@ -558,23 +579,6 @@ if(pct>0)return {label:"Низкая",color:"#F97316",face:"🙁"};
 return {label:"—",color:"#ECECEA",face:"·"};
 }
 
-function collectMoments(dates){
-var ds={};dates.forEach(function(d){ds[d]=1;});
-var out=[];
-for(var i=0;i<localStorage.length;i++){
-var k=localStorage.key(i);if(!k)continue;
-var date=null,src=null;
-if(k.indexOf("cen:evening_note:")===0){date=k.substring(17);src="вечер";}
-else if(k.indexOf("cen:focus:")===0){date=k.substring(10);src="день";}
-else continue;
-if(!ds[date])continue;
-var txt=load(k);
-if(txt&&typeof txt==="string"&&txt.trim())out.push({date:date,text:txt,src:src});
-}
-out.sort(function(a,b){return a.date<b.date?1:-1;});
-return out;
-}
-
 function renderPeriodTabs(){
 var tabs=[{id:"day",label:"День"},{id:"week",label:"Неделя"},{id:"month",label:"Месяц"}];
 var html='<div style="display:flex;gap:4px;background:#FFFFFF;border:1px solid #ECECEA;border-radius:18px;padding:5px;margin-bottom:14px">';
@@ -632,6 +636,7 @@ dates.forEach(function(ds){
 var pct=dayEnergy(ds),lvl=energyLevel(pct),h=Math.max(8,pct/100*72);
 var sel=ds===state.selectedDay;
 html+='<div onclick="selectDay(\''+ds+'\')" style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;cursor:pointer">';
+if(hasReflect(ds))html+='<span style="width:6px;height:6px;border-radius:50%;background:#84CC16;margin-bottom:4px;flex-shrink:0"></span>';
 if(state.period!=="month")html+='<span style="font-size:9px;font-weight:600;color:'+(pct>0?lvl.color:"#C8C8C5")+';margin-bottom:3px">'+pct+'%</span>';
 html+='<div style="width:100%;max-width:'+(state.period==="day"?"64px":"100%")+';height:'+h+'px;background:'+lvl.color+';border-radius:7px 7px 3px 3px;'+(sel?"box-shadow:0 0 0 3px #FFFFFF,0 0 0 5px "+lvl.color+";":"")+'"></div>';
 html+='</div>';
@@ -651,26 +656,6 @@ html+='<div style="display:flex;justify-content:center;gap:14px;font-size:10px;c
 html+='<span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:'+l[1]+'"></span>'+l[0]+'</span>';
 });
 html+='</div></div>';
-return html;
-}
-
-function renderMoments(){
-var moments=collectMoments(periodDates());
-var html='<div class="card">';
-html+='<div style="font-size:13px;font-weight:600;color:#1A1A1A;margin-bottom:2px"><span style="color:#84CC16">♥</span> Живые моменты</div>';
-html+='<div style="font-size:11px;color:#8B8B85;margin-bottom:14px">Твои записи из «Запись дня» и «Фокус дня»</div>';
-if(!moments.length){
-html+='<div style="font-size:12px;color:#C8C8C5;text-align:center;padding:14px 0;line-height:1.5">Пока нет записей.<br>Заполни «Запись дня» вечером.</div>';
-}else{
-moments.slice(0,6).forEach(function(m){
-html+='<div style="background:#F9F9F7;border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;gap:12px">';
-html+='<div style="font-size:13px;color:#1A1A1A;line-height:1.5;flex:1">«'+escAttr(m.text)+'»</div>';
-html+='<div style="text-align:right;flex-shrink:0"><div style="font-size:10px;color:#8B8B85">'+m.src+'</div><div style="font-size:10px;color:#C8C8C5;margin-top:2px">'+fmtDate(m.date)+'</div></div>';
-html+='</div>';
-});
-if(moments.length>6)html+='<div style="text-align:center;font-size:11px;color:#84CC16;font-weight:600;margin-top:4px">+'+(moments.length-6)+' '+plural(moments.length-6,"запись","записи","записей")+' ещё</div>';
-}
-html+='</div>';
 return html;
 }
 
@@ -714,7 +699,6 @@ var html=renderPeriodTabs();
 html+=renderSummaryTheme();
 html+=renderEnergyCard();
 html+=renderReflectEditor();
-html+=renderMoments();
 html+=renderPraise();
 html+=renderAffirmationsEditor();
 html+=renderBackup();
@@ -754,6 +738,7 @@ if(k.indexOf("cen:")===0){localStorage.setItem(k,JSON.stringify(data[k]));count+
 state.checked=load("cen:checked:"+today())||{};
 state.tomorrowFocus=load("cen:focus:"+tomorrow())||"";
 state.focusText=load("cen:focus:"+today())||"";
+state.rhythmText=load("cen:rhythm:"+today())||"";
 render();
 alert("Импортировано: "+count+" записей");
 }catch(err){alert("Ошибка импорта: "+err.message);}
