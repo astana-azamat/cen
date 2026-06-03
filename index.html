@@ -147,7 +147,7 @@ var DEFAULT_AFFIRMATIONS=[
   {id:"wealth",icon:"💵",title:"Я сказочно богат",text:"Я создаю ценность и изобилие."}
 ];
 
-var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",rhythmText:"",editingFocus:false,editingRhythm:false,tomorrowFocus:"",editingNote:false,period:"week",selectedDay:null,collapsed:{base:true,morningFree:true,eveningFree:true}};
+var state={tab:"morning",checked:{},openTask:null,celebrating:null,intro:null,focusText:"",rhythmText:"",focusStep:"",rhythmStep:"",editingFocus:false,editingRhythm:false,editingFocusStep:false,editingRhythmStep:false,tomorrowFocus:"",editingNote:false,period:"week",selectedDay:null,collapsed:{base:true,morningFree:true,eveningFree:true}};
 function toggleCollapse(k){state.collapsed[k]=!state.collapsed[k];render();}
 
 function dateKey(d){var m=d.getMonth()+1,day=d.getDate();return d.getFullYear()+"-"+(m<10?"0":"")+m+"-"+(day<10?"0":"")+day;}
@@ -159,11 +159,15 @@ function init(){
 var ch=load("cen:checked:"+today());
 var fc=load("cen:focus:"+today());
 var rh=load("cen:rhythm:"+today());
+var fs=load("cen:focus_step:"+today());
+var rs=load("cen:rhythm_step:"+today());
 var tf=load("cen:focus:"+tomorrow());
 if(ch)state.checked=ch;
 if(tf)state.tomorrowFocus=tf;
 if(fc)state.focusText=fc;
 if(rh)state.rhythmText=rh;
+if(fs)state.focusStep=fs;
+if(rs)state.rhythmStep=rs;
 maybeStartIntro();
 render();
 }
@@ -172,6 +176,10 @@ function toggleFocusEdit(){state.editingFocus=!state.editingFocus;render();if(st
 function saveFocus(){var e=document.getElementById("focus-input");if(e){state.focusText=e.value.trim();save("cen:focus:"+today(),state.focusText);}state.editingFocus=false;render();}
 function toggleRhythmEdit(){state.editingRhythm=!state.editingRhythm;render();if(state.editingRhythm)setTimeout(function(){var e=document.getElementById("rhythm-input");if(e)e.focus();},60);}
 function saveRhythmFocus(){var e=document.getElementById("rhythm-input");if(e){state.rhythmText=e.value.trim();save("cen:rhythm:"+today(),state.rhythmText);}state.editingRhythm=false;render();}
+function toggleFocusStepEdit(){state.editingFocusStep=!state.editingFocusStep;render();if(state.editingFocusStep)setTimeout(function(){var e=document.getElementById("focus-step-input");if(e)e.focus();},60);}
+function saveFocusStep(){var e=document.getElementById("focus-step-input");if(e){state.focusStep=e.value.trim();save("cen:focus_step:"+today(),state.focusStep);}state.editingFocusStep=false;render();}
+function toggleRhythmStepEdit(){state.editingRhythmStep=!state.editingRhythmStep;render();if(state.editingRhythmStep)setTimeout(function(){var e=document.getElementById("rhythm-step-input");if(e)e.focus();},60);}
+function saveRhythmStep(){var e=document.getElementById("rhythm-step-input");if(e){state.rhythmStep=e.value.trim();save("cen:rhythm_step:"+today(),state.rhythmStep);}state.editingRhythmStep=false;render();}
 
 function getAffirmations(){return load("cen:affirmations")||DEFAULT_AFFIRMATIONS;}
 
@@ -435,6 +443,24 @@ html+=renderFreeActions(MORNING_FREE,"morningFree");
 return html;
 }
 
+function renderFirstStep(value,editing,inputId,toggleFn,saveFn){
+var html='<div style="background:rgba(255,255,255,0.55);border:1.5px dashed rgba(132,204,22,0.45);border-radius:16px;padding:13px 14px;margin-top:14px">';
+html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px">';
+html+='<div style="display:flex;align-items:center;gap:8px;min-width:0">';
+html+='<span style="font-size:13px;color:#5C7A00;line-height:1">◌</span>';
+html+='<span style="font-size:10px;font-weight:600;color:#5C7A00;text-transform:uppercase;letter-spacing:1.2px">Первый шаг</span>';
+html+='</div>';
+html+='<span style="font-size:10px;font-weight:600;color:#5C7A00;background:rgba(200,255,90,0.5);border-radius:10px;padding:4px 10px;flex-shrink:0">5–15 мин</span>';
+html+='</div>';
+if(editing){
+html+='<input id="'+inputId+'" maxlength="100" value="'+escAttr(value)+'" placeholder="Какой первый шаг сделаешь?" onkeydown="if(event.key===\'Enter\')this.blur()" onblur="'+saveFn+'()" style="width:100%;border:none;background:transparent;font-size:14px;color:#1A1A1A;font-family:inherit;outline:none"/>';
+}else{
+html+='<div onclick="'+toggleFn+'()" style="cursor:pointer;font-size:14px;line-height:1.4;color:'+(value?"#1A1A1A":"#8B8B85")+';'+(value?"":"font-style:italic")+'">'+(value?escAttr(value):"Какой первый шаг сделаешь?")+'</div>';
+}
+html+='</div>';
+return html;
+}
+
 function renderRhythmFocus(){
 var txt=state.rhythmText;
 var html='<div style="background:rgba(200,255,90,0.22);border-radius:20px;padding:16px;margin-bottom:14px">';
@@ -447,6 +473,7 @@ html+='<input id="rhythm-input" maxlength="100" value="'+escAttr(txt)+'" placeho
 }else{
 html+='<div onclick="toggleRhythmEdit()" style="cursor:pointer;font-size:15px;line-height:1.4;color:'+(txt?"#1A1A1A":"#8B8B85")+';'+(txt?"":"font-style:italic")+'">'+(txt?escAttr(txt):"Над какой задачей работаешь?")+'</div>';
 }
+html+=renderFirstStep(state.rhythmStep,state.editingRhythmStep,"rhythm-step-input","toggleRhythmStepEdit","saveRhythmStep");
 html+='</div>';
 return html;
 }
@@ -477,6 +504,7 @@ html+='<input id="focus-input" maxlength="80" value="'+escAttr(txt)+'" placehold
 }else{
 html+='<div onclick="toggleFocusEdit()" style="cursor:pointer;font-size:15px;line-height:1.4;color:'+(txt?"#1A1A1A":"#8B8B85")+';'+(txt?"":"font-style:italic")+'">'+(txt?escAttr(txt):"Напиши одну мысль дня...")+'</div>';
 }
+html+=renderFirstStep(state.focusStep,state.editingFocusStep,"focus-step-input","toggleFocusStepEdit","saveFocusStep");
 html+='</div>';
 return html;
 }
@@ -739,6 +767,8 @@ state.checked=load("cen:checked:"+today())||{};
 state.tomorrowFocus=load("cen:focus:"+tomorrow())||"";
 state.focusText=load("cen:focus:"+today())||"";
 state.rhythmText=load("cen:rhythm:"+today())||"";
+state.focusStep=load("cen:focus_step:"+today())||"";
+state.rhythmStep=load("cen:rhythm_step:"+today())||"";
 render();
 alert("Импортировано: "+count+" записей");
 }catch(err){alert("Ошибка импорта: "+err.message);}
